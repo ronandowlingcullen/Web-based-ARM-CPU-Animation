@@ -1,0 +1,61 @@
+//
+// default.vin
+//
+// Default values for the built-in Vivio functions
+// Written by Edsko de Vries, Summer 2003
+//
+// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software Foundation;
+// either version 2 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+//
+// pen widths
+//
+const num THIN = 1;
+const num MEDIUM = 3;
+const num THICK = 5;
+
+//
+//colours (NB: web-safe)
+//
+const num DARK_BLUE = rgba(0.0, 0.0, 0.625);
+const num LIGHT_BLUE = rgba(0.75, 1.0, 1.0);
+const num PURPLE = rgba(0.75, 0.625, 0.75);
+const num BORDEAU = rgba(0.375, 0.0, 0.0);
+const num MARINE = rgba(0.375, 0.625, 0.375);
+const num LIGHT_YELLOW = rgba(1.0, 1.0, 0.75);
+const num ORANGE = 0xffa500;
+
+//
+// Pens
+//
+Pen blackPen = SolidPen(0, 1, BLACK);				// {joj 2/10/16}
+Pen darkGrayPen = SolidPen(0, 0, GRAY64);			// {joj 25/7/10}
+Pen redPen = SolidPen(0, 0, RED);					// {joj 2/10/16}
+Pen whitePen = SolidPen(0, 0, WHITE);				// {joj 2/10/16}
+
+//
+// Brushes
+//
+Brush blackBrush = SolidBrush(BLACK);				// {joj 2/10/16}
+Brush darkGrayBrush = SolidBrush(GRAY64);
+Brush lightBlueBrush = SolidBrush(LIGHT_BLUE);
+Brush gray192Brush = SolidBrush(GRAY192);			// {joj 17/10/16}
+Brush gray224Brush = SolidBrush(GRAY224);			// {joj 17/10/16}
+Brush marineBrush = SolidBrush(MARINE);
+Brush redBrush = SolidBrush(RED);					// {joj 2/10/16}
+Brush whiteBrush = SolidBrush(WHITE);				// {joj 2/10/16}
+Brush yellowBrush = SolidBrush(YELLOW);				// {joj 2/10/16}
+
+// eof

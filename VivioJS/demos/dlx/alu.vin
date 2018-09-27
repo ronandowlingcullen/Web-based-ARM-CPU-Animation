@@ -1,0 +1,88 @@
+//
+// alu.vin
+//
+// Simulation of the DLX
+// Written by Edsko de Vries, Summer 2003
+//
+// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software Foundation;
+// either version 2 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+class ALU(num x, num y, num w, num h) {
+
+    Polygon alu = Polygon(0, ABSOLUTE, blackPen, componentBrush,
+            x, y,
+            0, 0,
+            w, h / 4,
+            w, 3 * h / 4,
+            0, h,
+            0, 5 * h / 8,
+            w / 2, h / 2,
+            0, 3 * h / 8);
+
+    Rectangle2(0, 0, 0, 0, x, y-10, w, 10, 0, componentFont, "ALU");
+
+    string op = "";
+    Rectangle txtOp = Rectangle(valuesLayer, 0, 0, redBrush, x, y+h/2, 0, -h/12, 2*w/3, h/6, whitePen, componentFont, op);		// {joj 16/10/16}
+    txtOp.setOpacity(0);
+	txtOp.setRounded(2, 2); // {joj 17/10/16}
+
+    Rectangle txtResult = Rectangle(activePipesLayer, 0, blackPen, yellowBrush, x+3*w/4, y+h/2, 0, -h/12, w/2, h/6, blackPen, componentFont);	// {joj 16/10/16}
+    txtResult.setOpacity(0);
+	txtResult.setRounded(2, 2); // {joj 17/10/16}
+
+    //
+    // setTxtOp
+    //
+    function setTxtOp(num vIns) {                   // {joj 29/10/06}
+
+        //debug("setTxtOp\n", op);
+        op = "";
+        if (vIns == ADD || vIns == ADDi)
+            op = "ADD"
+        else if (vIns == SUB || vIns == SUBi)
+            op = "SUB"
+        else if (vIns == AND || vIns == ANDi)
+            op = "AND"
+        else if (vIns == OR || vIns == ORi)
+            op = "OR"
+        else if (vIns == XOR || vIns == XORi)
+            op = "XOR"
+        else if (vIns == SLL || vIns == SLLi)
+            op = "SLL"
+        else if (vIns == SRL || vIns == SRLi)
+            op = "SRL"
+        else if (vIns == SLT || vIns == SLTi)
+            op = "LT"
+        else if (vIns == SGT || vIns == SGTi)
+            op = "GT"
+        else if (vIns == SLE || vIns == SLEi)
+            op = "LE"
+        else if (vIns == SGE || vIns == SGEi)
+            op = "GE"
+        else if (vIns == LD || vIns == ST)          // joj
+            op = "ADD"
+        else if (vIns == JAL || vIns == JALR)
+            op = "ADD"
+
+        //debug("op = %s\n", op);
+
+        txtOp.setTxt(op);
+        txtOp.setOpacity(1);
+
+    }
+
+}
+
+// eof

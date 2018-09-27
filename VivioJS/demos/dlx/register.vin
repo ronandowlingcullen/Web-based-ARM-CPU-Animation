@@ -1,0 +1,256 @@
+//
+// register.vin
+//
+// Simulation of the DLX
+// Written by Edsko de Vries, Summer 2003
+//
+// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software Foundation;
+// either version 2 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+const num HORIZONTAL = 0;
+const num VERTICAL = 1;
+
+const num LEFT = 0;
+const num RIGHT = 1;
+const num TOP = 2;
+const num BOTTOM = 3;
+
+Brush regBrush = SolidBrush(PURPLE);
+Brush regValueBrush = SolidBrush(WHITE);
+
+class Register(num x, num y, num w, num h, num labelPos, string caption) {
+
+    num vx, vy, vw, vh;
+    num value = 0, newValue = 0;
+    num tag = 0, newTag = 0;
+    num useTag = 0, invalid = 0;
+    num fixed = 0;                      // for r0 {joj 29/10/06}
+    Rectangle label;
+
+    Rectangle r1 = Rectangle2(0, 0, blackPen, regBrush, x, y, w, h);
+	r1.setRounded(2, 2);	// {joj 16/10/16}
+    Rectangle bg1 = Rectangle2(valuesLayer, 0, 0, whiteBrush, vx, vy, vw / 2, vh);           	// joj
+    Rectangle bg2 = Rectangle2(valuesLayer, 0, 0, whiteBrush, vx + vw / 2, vy, vw / 2, vh);  	// joj
+
+    if (w >= h) {
+
+        //
+        // horizontal
+        //
+        vy = y + 2;
+        vw = w - 14;
+        vh = h - 4;
+
+        if (labelPos == LEFT) {
+			Rectangle r2 = Rectangle(0, 0, 0, 0, x + 7 - 1, y + h/2, -7, -h/2, 14, h, 0, font, caption);	// {joj 7/10/16}
+			r2.rotate(-90);	// {joj 7/10/16}
+            vx = x + 12;
+        } else if (labelPos == RIGHT) {
+          r2 = Rectangle(0, 0, 0, 0, x + w - 7, y + h/2, -7, -h/2, 14, h, 0, font, caption);
+            r2.rotate(-90);
+           	vx = x + 2;
+        }
+
+    } else {
+
+        //
+        // vertical
+        //
+        vx = x + 2;
+        vw = w - 4;
+        vh = h - 14;
+
+        if (labelPos == TOP) {
+            r2 = Rectangle2(0, 0, 0, 0, x,y, w,14, 0, font, caption);
+            vy = y + 12;
+        } else if (labelPos == BOTTOM) {
+            r2 = Rectangle2(0, 0, 0, 0, x,y+h-10, w,10, 0, font, caption);
+            vy = y + 2;
+        }
+
+    }
+
+    //
+    // register value (horizontal or vertical)
+    //
+    if (w >= h) {
+        label = Rectangle2(valuesLayer, 0, 0, yellowBrush, vx, vy, vw, vh, 0, font, "%02X", value);
+    } else {
+        label = Rectangle(valuesLayer, 0, 0, yellowBrush, vx + vw/2, vy + vh/2, -vw/2, -vh/2, vw, vh, 0, font, "%02X", value);
+    }
+	label.setRounded(2, 2); 	// {joj 16/10/16}
+
+    //
+    // setFixed
+    //
+    function setFixed() {                    // {joj 29/10/06}
+        fixed = 1;
+    }
+
+    //
+    // setOpacity
+    //
+    function setOpacity(num opacity) {
+        r1.setOpacity(opacity);
+        r2.setOpacity(opacity);
+        //r3.setOpacity(opacity);
+        bg1.setOpacity(opacity);
+        bg2.setOpacity(opacity);
+        label.setOpacity(opacity);
+    }
+
+    //
+    // updateLabel
+    //
+    num function updateLabel() {								// {joj 24/9/17}
+        if (invalid) {
+            label.setTxt("INV");
+        } else if (useTag) {
+            if (tag >= 0)
+                label.setTxt("R%d:%02X", tag, value)
+            else
+                label.setTxt("--:%02X", value);
+        } else {
+            label.setTxt("%02X", value);
+        }
+		return 0;
+    }
+
+	//
+    // mouse enter exit event handler
+    //
+    when label ~> eventEE(num enter, num x, num y) {			// {joj 24/10/17}
+        if (fixed == 0)
+            label.setBrush(enter ? whiteBrush : yellowBrush);	// {joj 7/10/16}
+		return 0;
+    }
+
+    //
+    // mouse left button event handler
+    //
+    when label ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/10/17}
+        if (fixed == 0 && down) {
+			if (flags & MB_LEFT) {
+            	value = (value + 1) & 0xFF;
+			} else if (flags & MB_RIGHT) {
+				value = (value - 1) & 0xFF;
+			}
+            updateLabel();
+        }
+		return 0;
+    }
+
+    //
+    // setValue
+    //
+    function setValue(num val) {
+        value = val;
+        invalid = 0;
+        updateLabel();
+    }
+
+    //
+    // setNewValue
+    //
+    function setNewValue(num val) {
+        newValue = val;
+    }
+
+    //
+    // setNewTag
+    //
+    function setNewTag(num t) {
+        newTag = t;
+    }
+
+    //
+    // setTag
+    //
+    function setTag(num t) {
+        useTag = 1;
+        tag = t;
+        updateLabel();
+    }
+
+    //
+    // update
+    //
+    function update() {			// {joj 14/11/17}
+        value = newValue;
+        tag = newTag;
+        updateLabel();
+        bg1.setBrush(yellowBrush);  // joj
+        bg2.setBrush(yellowBrush);  // joj
+        wait(16);
+        bg1.setBrush(whiteBrush);   // joj
+        bg2.setBrush(whiteBrush);   // joj
+    }
+
+    //
+    // setInvalid
+    //
+    function setInvalid(num i) {
+        useTag = 1;
+        invalid = i;
+    }
+
+    //
+    // tagMatches
+    //
+    num function tagMatches(num t) {
+        return (invalid) ? 0 : (tag == t) ? 1 : 0;  // {joj 27/10/06}
+    }
+
+    num hmode = 0;
+
+    //
+    // highlight
+    //
+    function highlight(Brush brush) {
+        if (hmode == 0) {
+            bg1.setBrush(brush);    // joj
+            bg2.setBrush(brush);    // joj
+            hmode = 1;
+        } else {
+            bg2.setBrush(brush);    // joj
+        }
+    }
+
+    //
+    // unHighlight
+    //
+    function unHighlight() {
+        bg1.setBrush(whiteBrush);   // joj
+        bg2.setBrush(whiteBrush);   // joj
+        hmode = 0;
+    }
+
+    //
+    // reset
+    //
+    function reset() {
+        value = 0;
+        newValue = 0;
+        tag = 0;
+        newTag = 0;
+        useTag = 0;
+        invalid = 0;
+        unHighlight();
+        updateLabel();
+    }
+
+}
+
+// eof

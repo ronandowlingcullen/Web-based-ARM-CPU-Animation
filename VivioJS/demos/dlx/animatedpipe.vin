@@ -1,0 +1,99 @@
+//
+// animatedpipe.vin
+//
+// Simulation of the DLX
+// Written by Edsko de Vries, Summer 2003
+//
+// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software Foundation;
+// either version 2 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+class AnimPipe() {
+
+    num w = 5;			// line width 										// could be static / global
+ 	num n = 0;   		// # points
+	num px[0];			// x co-ordinates
+	num py[0];			// y co-ordinates
+	num ls[0];			// line segment lengths
+    num ll = 0;			// line length (assumes a Manhattan layout)
+	num head = 1;		// if 1 draw line with an arrow60 end
+
+    Pen bgPen0 = SolidPen(SOLID, w, GRAY192, BEVEL_JOIN | BUTT_END);		// could be static / global
+	Pen bgPen1 = SolidPen(SOLID, w, GRAY192, BEVEL_JOIN | ARROW60_END);		// could be static / global
+
+    Pen fgPen0 = SolidPen(SOLID, w, RED, BEVEL_JOIN | BUTT_END);			// could be static / global
+    Pen fgPen1 = SolidPen(SOLID, w, RED, BEVEL_JOIN | ARROW60_END);			// could be static / global
+
+    Line bgLine = Line(inactivePipesLayer, 0, bgPen1, 0, 0);	// {joj 17/10/16}
+	Line fgLine = Line(activePipesLayer, 0, fgPen0, 0, 0);		// {joj 17/10/16}
+
+    function setOpacity(num opacity) { // {joj 20/8/10}
+        bgLine.setOpacity(opacity);
+        fgLine.setOpacity(opacity);
+    }
+
+    function setHead(num h) {
+        head = h ? 1 : 0;
+		bgLine.setPen(head ? bgPen1 : bgPen0);
+		fgLine.setPen(fgPen0);
+    }
+
+    function addPoint(num x, num y) {
+        px[n] = x;
+        py[n] = y;
+        bgLine.setPt(n, x, y);
+        n++;
+    }
+
+    function calcLength() {
+        num dx, dy;
+        ll = 0;
+        for (num i = 0; i < n - 1; i++) {
+            dx = px[i + 1] - px[i];
+            dy = py[i + 1] - py[i];
+            ll += ls[i] = sqrt(dx*dx + dy*dy);
+        }
+    }
+
+    // Only call on inactive arrows
+    function setPoint(num n, num x, num y) {
+        px[n] = x;
+        py[n] = y;
+        bgLine.setPt(n, x, y);
+    }
+
+    function reset() {
+		fgLine.setNPts(0);
+        fgLine.setPen(fgPen0);
+    }
+
+    function animate(num steps) {	// {joj 14/11/17}
+		num l = 0, s, ss = 0;
+		num d = 0;
+		calcLength();
+		fgLine.setPt(0, px[0], py[0]);
+		fgLine.setPen(fgPen0);
+		for (num i = 1; i < n; i++) {
+			fgLine.setPt(i, px[i - 1], py[i - 1]);
+			l += ls[i - 1];
+			s = round(l * steps / ll);
+			fgLine.setPt(i, px[i], py[i], s - ss, 1, 1);
+			ss = s;
+		}
+		if (head)
+			fgLine.setPen(fgPen1);
+	}
+}
+
+// eof

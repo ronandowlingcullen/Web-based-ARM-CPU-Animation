@@ -1,0 +1,44 @@
+//
+// button.vin
+//
+// Simulation of the DLX
+// Written by Edsko de Vries, Summer 2003
+//
+// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software Foundation;
+// either version 2 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+Brush buttonBrush = SolidBrush(WHITE);
+Brush hoverBrush = SolidBrush(GRAY224);
+
+class Button(num x, num y, num w, num h, string caption, num ID) {
+
+    Rectangle label = Rectangle2(0, 0, blackPen, buttonBrush, x, y, w, h, blackPen, font, caption);
+
+    when label ~> eventEE(num enter, num x, num y) {		// {joj 24/9/17}
+   		label.setBrush(enter ? hoverBrush : buttonBrush);
+		return 0;
+    }
+
+    function setCaption(string caption) {
+        label.setTxt(caption);
+    }
+
+    function showLocked(num locked) {
+        label.setFont(locked ? fontST : font);
+    }
+
+}
+
+// eof

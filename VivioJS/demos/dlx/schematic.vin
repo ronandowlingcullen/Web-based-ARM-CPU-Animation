@@ -1,0 +1,1163 @@
+//
+// schematic.vin
+//
+// Simulation of the DLX
+// Written by Edsko de Vries, Summer 2003
+//
+// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software Foundation;
+// either version 2 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+string name = getArg("name", "");					// optional name of code example {joj 2/11/16}
+if (name != "")
+	name = sprintf(":  %s", name);					// {joj 2/10/16}}
+
+Font fTitle = Font("Calibri", 20, SMALLCAPS | ITALIC);
+
+Rectangle title = Rectangle2(0, HLEFT, 0, SolidBrush(DARK_BLUE), 10, 10, 300, 30, whitePen, fTitle, sprintf(" MIPS Animation %s", name));	// {joj 2/10/16}
+
+Pen borderPen = SolidPen(DASH, 1, DARK_BLUE, ROUND_START | ROUND_JOIN | ROUND_END);
+
+Line2(0, ABSOLUTE, borderPen, 120, 80, 700, 80);
+Line2(0, ABSOLUTE, borderPen, 120, 440, 700, 440);
+
+Line2(0, ABSOLUTE, borderPen, 120, 80, 120, 440);
+Line b1 = Line2(0, ABSOLUTE, borderPen, 240, 80, 240, 440);
+Line b2 = Line2(0, ABSOLUTE, borderPen, 390, 80, 390, 440);
+Line b3 = Line2(0, ABSOLUTE, borderPen, 540, 80, 540, 440);
+Line b4 = Line2(0, ABSOLUTE, borderPen, 650, 80, 650, 440);
+Line2(0, ABSOLUTE, borderPen, 700, 80, 700, 440);
+
+// Buttons
+
+const num BUTTON_PE = 0;    // Pipeling enabled
+const num BUTTON_BP = 1;    // Branch prediction
+const num BUTTON_LI = 2;    // Load numerlock
+const num BUTTON_AF = 3;    // ALU forwarding
+const num BUTTON_SF = 4;    // SMDR forwarding
+const num BUTTON_ZF = 5;    // Zero forwarding
+
+const num BUTTON_SP = 6;    // Safe program
+
+Pen delimeter = SolidPen(DOT, THIN, BLACK);
+Line2(0, ABSOLUTE, delimeter, 10, 450, 700, 450);
+
+Font arialBold10 = Font("Calibri", 10, BOLD);
+
+Button buttonSP = Button(20, 460, 80, 20, "Save Configuration", BUTTON_SP);            // {joj}
+Button buttonPE = Button(120, 460, 80, 20, "Pipelining Enabled", BUTTON_PE);           // {joj}
+Button buttonBP = Button(210, 460, 80, 20, "Branch Prediction", BUTTON_BP);            // {joj}
+Button buttonLI = Button(300, 460, 80, 20, "Load Interlock", BUTTON_LI);               // {joj}
+Button buttonAF = Button(390, 460, 80, 20, "ALU Forwarding", BUTTON_AF);               // {joj}
+Button buttonSF = Button(480, 460, 80, 20, "Store Operand\nForwarding", BUTTON_SF);    // {joj}
+Button buttonZF = Button(570, 460, 80, 20, "Zero Forwarding", BUTTON_ZF);              // {joj}
+
+//
+// Vivio logo
+//
+// TODO: {joj 2/10.16}
+//
+const num LOGOW = 20;																	// 64 x 64 image
+const num LOGOH = 20;
+Image logo = Image(0, 0, 0, "vivio.png", 660,460, 0,0, LOGOW,LOGOH);					// {joj 24/9/17}
+
+// Statistics
+
+Txt(0, HLEFT | VTOP, 10, 46, darkGrayPen, font, "instructions executed:");		// {joj 25/7/10}
+Rectangle et = Txt(0, HLEFT | VTOP, 10, 56, darkGrayPen, font, "ticks:");		// {joj}
+
+Rectangle statIC = Txt(0, HLEFT | VTOP, 90, 46, redPen, font, "0");				// {joj}
+Rectangle statTE = Txt(0, HLEFT | VTOP, 90, 56, redPen, font, "0");				// {joj}
+
+// Instruction memory and clock
+Rectangle imLabel = Rectangle2(0, 0, 0, 0, 10, 68, 100, 10, 0, font, "Instruction Cache"); // {joj}
+InstructionMemory im = InstructionMemory(10, 80, 100, 320);
+AnimatedClock animClock = AnimatedClock(20, 410, 80, 30);
+
+// IF and PC
+Register regPC = Register(200, 210, 20, 40, TOP, "PC");
+
+// branch target buffer
+Rectangle btbLabel  = Rectangle2(0, 0, 0, 0, 150, 85, 80, 10, 0, font, "Branch Target Buffer");    // {joj}
+Register btbPC[2];										// {joj 2/10/16}
+btbPC[0]  = Register(150, 100, 40, 20, LEFT, "PC");     // {joj 1/2/06}
+btbPC[1]  = Register(150, 120, 40, 20, LEFT, "PC");     // {joj 1/2/06}
+Register btbPPC[2];										// {joj 2/10/16}
+btbPPC[0] = Register(190, 100, 40, 20, RIGHT, "PPC");   // {joj 1/2/06}
+btbPPC[1] = Register(190, 120, 40, 20, RIGHT, "PPC");   // {joj 1/2/06}
+
+// Other components
+Component cMUX2 = Component(200, 170, 30, 10, "mux 2");       // {joj}
+Component cMUX1 = Component(170, 205, 10, 50, "mux 1");       // {joj}
+Component cPLUS4 = Component(160, 270, 20, 10, "+4");
+
+// connections from and to instruction memory
+AnimPipe apIM_ID = AnimPipe();
+apIM_ID.addPoint(110, 390);
+apIM_ID.addPoint(250, 390);
+Rectangle txtIM_ID = Rectangle(activePipesLayer, 0, 0, redBrush, 180,390, -30,-6, 60,12, whitePen, font);	// {joj 1/4/06, 17/10/16}
+txtIM_ID.setRounded(2, 2);	// {joj 17/10/16}
+
+AnimPipe apPC_IM = AnimPipe();
+apPC_IM.addPoint(210, 250);
+apPC_IM.addPoint(210, 320);
+apPC_IM.addPoint(110, 320);
+
+// connections into MUX1
+AnimPipe apMUX3_MUX1 = AnimPipe();
+apMUX3_MUX1.addPoint(300, 170);
+apMUX3_MUX1.addPoint(300, 160);
+apMUX3_MUX1.addPoint(150, 160);
+apMUX3_MUX1.addPoint(150, 215);
+apMUX3_MUX1.addPoint(170, 215);
+
+AnimPipe apBTB_MUX1 = AnimPipe();
+apBTB_MUX1.addPoint(150, 120);
+apBTB_MUX1.addPoint(140, 120);
+apBTB_MUX1.addPoint(140, 225);
+apBTB_MUX1.addPoint(170, 225);
+
+AnimPipe apRF_MUX1 = AnimPipe();
+apRF_MUX1.addPoint(315, 50);
+apRF_MUX1.addPoint(130, 50);
+apRF_MUX1.addPoint(130, 235);
+apRF_MUX1.addPoint(170, 235);
+
+AnimPipe apADD4_MUX1 = AnimPipe();
+apADD4_MUX1.addPoint(160, 275);
+apADD4_MUX1.addPoint(150, 275);
+apADD4_MUX1.addPoint(150, 245);
+apADD4_MUX1.addPoint(170, 245);
+
+// Connections to and from PC
+AnimPipe apMUX1_PC = AnimPipe();
+apMUX1_PC.addPoint(180, 230);
+apMUX1_PC.addPoint(200, 230);
+
+AnimPipe apPC_MUX2 = AnimPipe();
+apPC_MUX2.addPoint(210, 210);
+apPC_MUX2.addPoint(210, 180);
+
+AnimPipe apPC_ADD4 = AnimPipe();
+apPC_ADD4.addPoint(210, 250);
+apPC_ADD4.addPoint(210, 275);
+apPC_ADD4.addPoint(180, 275);
+
+AnimPipe apPC_PC1 = AnimPipe();
+apPC_PC1.addPoint(220, 230);
+apPC_PC1.addPoint(240, 230);
+apPC_PC1.addPoint(250, 230);
+
+// MUX2 to BTB
+AnimPipe apMUX2_BTB = AnimPipe();
+apMUX2_BTB.addPoint(215, 170);
+apMUX2_BTB.addPoint(215, 140);
+
+//
+// Instruction Decode
+//
+// ID to EX
+//
+AnimPipe apID_EX = AnimPipe();
+apID_EX.addPoint(270, 390);
+apID_EX.addPoint(400, 390);
+
+// ID and PC1
+InstructionRegister regID = InstructionRegister(250, 350, 20, 85, "ID");
+Register regPC1 = Register(250, 210, 20, 40, TOP, "PC1");
+
+// Register file
+Txt(0, HLEFT | VTOP, 400, 40, 0, font, "Register\nFile");		// {joj}
+Register regFile[4];
+regFile[0] = Register(315, 30, 40, 20, LEFT, "R0"); regFile[0].setFixed();                  // {joj 29/10/06}
+regFile[1] = Register(315, 50, 40, 20, LEFT, "R1");
+regFile[2] = Register(355, 30, 40, 20, RIGHT, "R2");
+regFile[3] = Register(355, 50, 40, 20, RIGHT, "R3");
+
+// Other components
+Component cMUX3 = Component(275, 170, 50, 10, "mux 3");                                               // {joj}
+Component cADD4 = Component(270, 270, 30, 10, "ADD4");                                                // {joj}
+Component cADDi = Component(300, 270, 30, 10, "ADDi");                                                //
+Component cMUX4 = Component(250, 100, 10, 40, "mux 4");                                               // {joj}
+Component cMUX5 = Component(370, 235, 10, 30, "mux 5");                                               // {joj}
+
+Rectangle2(0, 0, 0, 0, 280, 300, 20, 10, 0, font, "4");
+
+// Control lines for MUX3
+Pen controlPen = SolidPen(SOLID, 0, PURPLE, ARROW60_END);
+Pen controlHLPen = SolidPen(SOLID, 2, RED, ARROW60_END);
+Pen muxPen = SolidPen(SOLID, MEDIUM, BLACK);															// {joj}
+
+// inputs to cZeroMux
+Line clALU = Line2(valuesLayer, ABSOLUTE, controlPen, 548,230, 548,150, 365,150, 365,160);		// {joj 8/12/16}
+Line clOUT0 = Line2(valuesLayer, ABSOLUTE, controlPen, 646,230, 646,145, 360,145, 360,160);		// {joj 8/12/16}
+Line clOUT1 = Line2(valuesLayer, ABSOLUTE, controlPen, 690,140, 355,140, 355,160);				// {joj 8/12/16}
+Line clA = Line(valuesLayer, ABSOLUTE, controlPen, 0,0, 370,135, 345,135, 345,160);
+Line clMUX = Line2(valuesLayer, ABSOLUTE, controlPen, 355,160, 355,175, 325,175);
+
+Line cZeroMux = Line2(valuesLayer, ABSOLUTE, muxPen, 344, 160, 366, 160);
+Rectangle cZeroTxt = Txt(valuesLayer,HLEFT | VTOP, 346, 162, 0, font, "zero");			// {joj}
+
+// Connections from PC1
+AnimPipe apPC1_MUX2 = AnimPipe();
+apPC1_MUX2.addPoint(260, 210);
+apPC1_MUX2.addPoint(260, 200);
+apPC1_MUX2.addPoint(220, 200);
+apPC1_MUX2.addPoint(220, 180);
+
+AnimPipe apADD4_MUX5 = AnimPipe();
+apADD4_MUX5.addPoint(285, 270);
+apADD4_MUX5.addPoint(285, 255);
+apADD4_MUX5.addPoint(370, 255);
+
+AnimPipe apPC1_ADD4 = AnimPipe();
+apPC1_ADD4.addPoint(260, 250);
+apPC1_ADD4.addPoint(260, 320);
+apPC1_ADD4.addPoint(280, 320);
+apPC1_ADD4.addPoint(280, 280);
+
+AnimPipe apPC1_ADDi = AnimPipe();
+apPC1_ADDi.addPoint(260, 250);
+apPC1_ADDi.addPoint(260, 320);
+apPC1_ADDi.addPoint(310, 320);
+apPC1_ADDi.addPoint(310, 280);
+
+// Connections to and from the adders
+AnimPipe ap4_ADD4 = AnimPipe();
+ap4_ADD4.addPoint(290, 300);
+ap4_ADD4.addPoint(290, 280);
+
+AnimPipe apID_ADDi = AnimPipe();
+apID_ADDi.addPoint(270, 390);
+apID_ADDi.addPoint(320, 390);
+apID_ADDi.addPoint(320, 280);
+Rectangle txtID_ADDi = Rectangle(activePipesLayer, 0, 0, redBrush, 320,376, -12,-6, 24,12, whitePen, font);		// {joj 29/10/06, 17/10/16}
+txtID_ADDi.setRounded(2, 2);	// {joj 17/10/16}
+
+AnimPipe apADD4_MUX3 = AnimPipe();
+apADD4_MUX3.addPoint(285, 270);
+apADD4_MUX3.addPoint(285, 180);
+Rectangle txtADD4_MUX3 = Rectangle(activePipesLayer, 0, 0, redBrush, 285,200, -12,-6, 24,12, whitePen, font);	// {joj 29/10/06, 15/3/15}
+txtADD4_MUX3.setRounded(2, 2); // {joj 17/10/16}
+
+AnimPipe apADDi_MUX3 = AnimPipe();
+apADDi_MUX3.addPoint(315, 270);
+apADDi_MUX3.addPoint(315, 180);
+Rectangle txtADDi_MUX3 = Rectangle(activePipesLayer, 0, 0, redBrush, 315,200, -12,-6, 24,12, whitePen, font);	// {joj 29/10/06, 15/3/15}
+txtADDi_MUX3.setRounded(2, 2); // {joj 17/10/16}
+
+// Connection to BTB
+AnimPipe apMUX3_MUX4 = AnimPipe();
+apMUX3_MUX4.addPoint(300, 170);
+apMUX3_MUX4.addPoint(300, 130);
+apMUX3_MUX4.addPoint(260, 130);
+Rectangle txtMUX3_MUX4 = Rectangle(activePipesLayer, 0, 0, redBrush, 300,160, -12,-6, 24,12, whitePen, font);	// {joj 29/10/06, 15/3/15}
+txtMUX3_MUX4.setRounded(2, 2); // {joj 17/10/16}
+
+AnimPipe apMUX4_BTB = AnimPipe();
+apMUX4_BTB.addPoint(250, 120);
+apMUX4_BTB.addPoint(230, 120);
+
+AnimPipe apRF_MUX4 = AnimPipe();
+apRF_MUX4.addPoint(315, 50);
+apRF_MUX4.addPoint(300, 50);
+apRF_MUX4.addPoint(300, 110);
+apRF_MUX4.addPoint(260, 110);
+Rectangle txtRF_MUX1 = Rectangle(activePipesLayer, 0, 0, redBrush, 300,44, -12,0, 24,12, whitePen, font);   // {joj 4/11/12}
+
+// MUX5 to A
+AnimPipe apMUX5_B = AnimPipe();
+apMUX5_B.addPoint(380, 250);
+apMUX5_B.addPoint(400, 250);
+
+// Connections from the register file
+AnimPipe apRF_MUX5 = AnimPipe();
+apRF_MUX5.addPoint(340, 70);
+apRF_MUX5.addPoint(340, 245);
+apRF_MUX5.addPoint(370, 245);
+Rectangle txtRF_MUX5 = Rectangle(activePipesLayer, 0, 0, redBrush, 340,82, -12,0, 24,12, whitePen, font, "R0:0");   // {joj 1/4/06, 17/10/16}
+txtRF_MUX5.setRounded(2, 2);	// {joj 17/10/16}
+
+AnimPipe apRF_A = AnimPipe();
+apRF_A.addPoint(370, 70);
+apRF_A.addPoint(370, 210);
+apRF_A.addPoint(400, 210);
+Rectangle txtRF_A = Rectangle(activePipesLayer, 0, 0, redBrush, 370,82, -12,0, 24,12, whitePen, font, "R0:0");      // {joj 1/4/06, 17/10/16}
+txtRF_A.setRounded(2, 2);	// {joj 17/10/16}
+
+//
+// Execution
+//
+// EX, A and B
+//
+InstructionRegister regEX = InstructionRegister(400, 350, 20, 85, "EX");
+Register regA = Register(400, 190, 20, 40, TOP, "A");
+Register regB = Register(400, 230, 20, 40, BOTTOM, "B");
+
+// Other components
+Component cMUX6 = Component(470, 180, 10, 50, "mux 6");   // {joj}
+Component cMUX7 = Component(470, 230, 10, 50, "mux 7");   // {joj}
+Component cMUX8 = Component(470, 310, 10, 40, "mux 8");   // {joj}
+ALU alu = ALU(490, 190, 40, 80);
+
+// EX to MA
+AnimPipe apEX_MA = AnimPipe();
+apEX_MA.addPoint(420, 390);
+apEX_MA.addPoint(560, 390);
+
+// Connections numo MUX6
+AnimPipe apOUT0_MUX6 = AnimPipe();
+apOUT0_MUX6.addPoint(570, 210);
+apOUT0_MUX6.addPoint(570, 170);
+apOUT0_MUX6.addPoint(450, 170);
+apOUT0_MUX6.addPoint(450, 190);
+apOUT0_MUX6.addPoint(470, 190);
+
+AnimPipe apOUT1_MUX6 = AnimPipe();
+apOUT1_MUX6.addPoint(670, 210);
+apOUT1_MUX6.addPoint(670, 160);
+apOUT1_MUX6.addPoint(440, 160);
+apOUT1_MUX6.addPoint(440, 200);
+apOUT1_MUX6.addPoint(470, 200);
+
+AnimPipe apA_MUX6 = AnimPipe();
+apA_MUX6.addPoint(420, 220);
+apA_MUX6.addPoint(470, 220);
+
+// Connections numo MUX7
+AnimPipe apB_MUX7 = AnimPipe();
+apB_MUX7.addPoint(420, 240);
+apB_MUX7.addPoint(470, 240);
+
+AnimPipe apEX_MUX7 = AnimPipe();
+apEX_MUX7.addPoint(420, 390);
+apEX_MUX7.addPoint(430, 390);
+apEX_MUX7.addPoint(430, 250);
+apEX_MUX7.addPoint(470, 250);
+Rectangle txtEX_MUX7 = Rectangle(activePipesLayer, 0, 0, redBrush, 432,370, -10,0, 20,12, whitePen, font, "IMM");	// {joj 1/4/06, 17/10/16}
+txtEX_MUX7.setRounded(2, 2);	// {joj 17/10/16}
+
+AnimPipe apOUT1_MUX7 = AnimPipe();
+apOUT1_MUX7.addPoint(670, 250);
+apOUT1_MUX7.addPoint(670, 300);
+apOUT1_MUX7.addPoint(440, 300);
+apOUT1_MUX7.addPoint(440, 260);
+apOUT1_MUX7.addPoint(470, 260);
+
+AnimPipe apOUT0_MUX7 = AnimPipe();
+apOUT0_MUX7.addPoint(570, 250);
+apOUT0_MUX7.addPoint(570, 290);
+apOUT0_MUX7.addPoint(450, 290);
+apOUT0_MUX7.addPoint(450, 270);
+apOUT0_MUX7.addPoint(470, 270);
+
+// Connectings to and from MUX8
+AnimPipe apOUT0_MUX8 = AnimPipe();
+apOUT0_MUX8.addPoint(570, 250);
+apOUT0_MUX8.addPoint(570, 290);
+apOUT0_MUX8.addPoint(450, 290);
+apOUT0_MUX8.addPoint(450, 320);
+apOUT0_MUX8.addPoint(470, 320);
+
+AnimPipe apOUT1_MUX8 = AnimPipe();
+apOUT1_MUX8.addPoint(670, 250);
+apOUT1_MUX8.addPoint(670, 300);
+apOUT1_MUX8.addPoint(440, 300);
+apOUT1_MUX8.addPoint(440, 330);
+apOUT1_MUX8.addPoint(470, 330);
+
+AnimPipe apB_MUX8 = AnimPipe();
+apB_MUX8.addPoint(410, 270);
+apB_MUX8.addPoint(410, 340);
+apB_MUX8.addPoint(470, 340);
+
+AnimPipe apMUX8_SMDR = AnimPipe();
+apMUX8_SMDR.addPoint(480, 330);
+apMUX8_SMDR.addPoint(550, 330);
+
+//
+// Connections from MUX6 through the ALU to OUT0
+//
+AnimPipe apMUX6_OUT0 = AnimPipe();
+apMUX6_OUT0.addPoint(480, 205);
+apMUX6_OUT0.addPoint(490, 205);
+apMUX6_OUT0.addPoint(540, 230);
+apMUX6_OUT0.addPoint(560, 230);
+
+AnimPipe apMUX7_OUT0 = AnimPipe();
+apMUX7_OUT0.addPoint(480, 255);
+apMUX7_OUT0.addPoint(490, 255);
+apMUX7_OUT0.addPoint(540, 230);
+apMUX7_OUT0.addPoint(560, 230);
+
+//
+// Memory access
+//
+// MA, SMDR and OUT0
+//
+InstructionRegister regMA = InstructionRegister(560, 350, 20, 85, "MA");
+Register regOUT0 = Register(560, 210, 20, 40, TOP, "O0");
+Register regSMDR = Register(550, 320, 40, 20, RIGHT, "SMR");
+Txt(valuesLayer, HLEFT | VTOP, 553, 100, 0, font, "memory\naddress");        // {joj}
+Txt(valuesLayer, HLEFT | VTOP, 605, 320, 0, font, "memory\ndata-in");        // {joj}
+Txt(valuesLayer, HLEFT | VTOP, 615, 100, 0, font, "memory\ndata-out");       // {joj}
+
+// Memory
+Txt(0, HLEFT | VTOP, 645, 35, 0, font, "Data\nCache\n(memory)"); // {joj}
+Register memory[4];
+memory[0] = Register(560, 30, 40, 20, LEFT, "M0");
+memory[1] = Register(560, 50, 40, 20, LEFT, "M1");
+memory[2] = Register(600, 30, 40, 20, RIGHT, "M2");
+memory[3] = Register(600, 50, 40, 20, RIGHT, "M3");
+
+//
+// Other components
+//
+Component cMUX9 = Component(630, 210, 10, 40, "mux 9");                                                   // {joj}
+
+// MA to WB
+AnimPipe apMA_WB = AnimPipe();
+apMA_WB.addPoint(580, 390);
+apMA_WB.addPoint(660, 390);
+
+// OUT0 to MUX 8/OUT1
+//
+AnimPipe apOUT0_MUX9 = AnimPipe();
+apOUT0_MUX9.addPoint(580, 230);
+apOUT0_MUX9.addPoint(630, 230);
+
+AnimPipe apMUX9_OUT1 = AnimPipe();
+apMUX9_OUT1.addPoint(640, 230);
+apMUX9_OUT1.addPoint(660, 230);
+
+// Connections to and from memory
+
+AnimPipe apOUT0_Mem = AnimPipe();
+apOUT0_Mem.addPoint(580, 230);
+apOUT0_Mem.addPoint(590, 230);
+apOUT0_Mem.addPoint(590, 70);
+
+AnimPipe apSMDR_Mem = AnimPipe();
+apSMDR_Mem.addPoint(590, 330);
+apSMDR_Mem.addPoint(600, 330);
+apSMDR_Mem.addPoint(600, 70);
+
+AnimPipe apMem_MUX9 = AnimPipe();
+apMem_MUX9.addPoint(610, 70);
+apMem_MUX9.addPoint(610, 220);
+apMem_MUX9.addPoint(630, 220);
+
+//
+// Write Back
+//
+
+// WB and OUT1
+
+InstructionRegister regWB = InstructionRegister(660, 350, 20, 85, "WB");
+Register regOUT1 = Register(660, 210, 20, 40, TOP, "O1");
+
+// Connections from OUT1 to the register file
+
+AnimPipe apOUT1_RF = AnimPipe();
+apOUT1_RF.addPoint(680, 230);
+apOUT1_RF.addPoint(690, 230);
+apOUT1_RF.addPoint(690, 10);
+apOUT1_RF.addPoint(355, 10);
+apOUT1_RF.addPoint(355, 30);
+
+alu.txtResult.moveToFront();                            // {joj 29/10/06}
+
+//
+// ResetWires
+//
+function resetWires() {
+    
+	//
+	// IF
+	//
+    apPC_IM.reset();
+    apIM_ID.reset();
+    txtIM_ID.setOpacity(0);                             // {joj 29/10/06}
+    //apIF_ID.reset();
+    apMUX3_MUX1.reset();
+    apBTB_MUX1.reset();
+    apRF_MUX1.reset();
+    apADD4_MUX1.reset();
+    apMUX1_PC.reset();
+    apPC_MUX2.reset();
+    apPC_ADD4.reset();
+    apPC_PC1.reset();
+    apMUX2_BTB.reset();
+
+    //
+	// ID
+	//
+    apID_EX.reset();
+    apPC1_MUX2.reset();
+    //apPC1_MUX5.reset();
+    apADD4_MUX5.reset();
+    apPC1_ADD4.reset();
+    apPC1_ADDi.reset();
+    ap4_ADD4.reset();
+    apID_ADDi.reset(); txtID_ADDi.setOpacity(0);            // {joj 29/10/06}
+    apADD4_MUX3.reset(); txtADD4_MUX3.setOpacity(0);        // {joj 29/10/06}
+    apADDi_MUX3.reset(); txtADDi_MUX3.setOpacity(0);        // {joj 29/10/06}
+    apMUX3_MUX4.reset(); txtMUX3_MUX4.setOpacity(0);        // {joj 29/10/06}
+    apRF_MUX4.reset();
+    apMUX4_BTB.reset();
+    apMUX5_B.reset();
+    apRF_MUX5.reset(); txtRF_MUX5.setOpacity(0);            // {joj}
+    apRF_A.reset(); txtRF_A.setOpacity(0);                  // {joj}
+    txtRF_MUX1.setOpacity(0);								// {joj 4/11/12}
+	clALU.setPen(controlPen);
+    clOUT0.setPen(controlPen);
+    clOUT1.setPen(controlPen);
+    clA.setPen(controlPen);
+    clMUX.setPen(controlPen);
+
+    //
+    // EX
+    //
+    apEX_MA.reset();
+    apOUT0_MUX6.reset();
+    apOUT1_MUX6.reset();
+    apA_MUX6.reset();
+    apB_MUX7.reset();
+    apEX_MUX7.reset(); txtEX_MUX7.setOpacity(0);        // {joj 29/10/06}
+    apOUT1_MUX7.reset();
+    apOUT0_MUX7.reset();
+    apOUT0_MUX8.reset();
+    apOUT1_MUX8.reset();
+    apB_MUX8.reset();
+    apMUX8_SMDR.reset();
+    apMUX6_OUT0.reset();
+    apMUX7_OUT0.reset();
+    alu.txtOp.setOpacity(0);                            // hide ALU txtOp {joj 29/10/06}
+    alu.txtResult.setOpacity(0);                        // hide ALU txtResult {joj 29/10/06}
+
+    //
+    // MA
+    //
+    apMA_WB.reset();
+    apOUT0_MUX9.reset();
+    apMUX9_OUT1.reset();
+    apOUT0_Mem.reset();
+    apSMDR_Mem.reset();
+    apMem_MUX9.reset();
+
+    //
+    // WB
+    //
+    apOUT1_RF.reset();
+
+}
+
+//
+// resetRegisters()
+//
+function resetRegisters() {
+
+    regPC.reset(); regPC.setValue(0x7C);
+    regPC1.reset();
+    regA.reset();
+    regB.reset();
+    regSMDR.reset();
+    regOUT0.reset();
+    regOUT1.reset();
+
+    btbPC[0].reset();               // {joj 1/2/06}
+    btbPC[1].reset();               // {joj 1/2/06}
+    btbPPC[0].reset();              // {joj 1/2/06}
+    btbPPC[1].reset();              // {joj 1/2/06}
+
+//  regFile[0].reset();
+//  regFile[1].reset();
+//  regFile[2].reset();
+//  regFile[3].reset();
+
+//  memory[0].reset();
+//  memory[1].reset();
+//  memory[2].reset();
+//  memory[3].reset();
+
+    regID.reset();
+    regEX.reset();
+    regMA.reset();
+    regWB.reset();
+
+    im.setActive(0x7C);
+
+    regOUT0.setInvalid(1);
+    regOUT0.updateLabel();
+    regOUT1.setInvalid(1);
+    regOUT1.updateLabel();
+    btbPC[0].setValue(-1);          // {joj 1/2/06} - was (-1) & 0xFF
+    btbPC[0].setInvalid(1);         // {joj 1/2/06}
+    btbPC[0].updateLabel();         // {joj 1/2/06}
+    btbPC[1].setValue(-1);          // {joj 1/2/06} - was (-1) & 0xFF
+    btbPC[1].setInvalid(1);         // {joj 1/2/06}
+    btbPC[1].updateLabel();         // {joj 1/2/06}
+
+    instrCount = 0;
+    tickCount = 0;
+
+    statIC.setTxt("%4d", 0);        // {joj}
+    statTE.setTxt("%4d", 0);        // {joj}
+
+}
+
+function resetCircuit() {
+    resetRegisters();
+    resetWires();
+}
+
+//
+// Enabling and disabling parts of the pipeline
+//
+function showBTB(num opacity) {
+
+    btbLabel.setOpacity(opacity);
+    btbPC[0].setOpacity(opacity);   // {joj 1/2/06}
+    btbPC[1].setOpacity(opacity);   // {joj 1/2/06}
+    btbPPC[0].setOpacity(opacity);  // {joj 1/2/06}
+    btbPPC[1].setOpacity(opacity);  // {joj 1/2/06}
+
+    apPC_MUX2.setOpacity(opacity);
+    apPC1_MUX2.setOpacity(opacity);
+    cMUX2.setOpacity(opacity);
+    apMUX2_BTB.setOpacity(opacity);
+
+    apBTB_MUX1.setOpacity(opacity);
+
+    apMUX3_MUX4.setOpacity(opacity);
+    apRF_MUX4.setOpacity(opacity);
+    cMUX4.setOpacity(opacity);
+    apMUX4_BTB.setOpacity(opacity);
+
+}
+
+//
+// showALUForwarding
+//
+function showALUForwarding(num opacity) {  // {joj 20/8/10}
+
+    if (opacity == 0) {
+
+        //
+        // NOT pipelined
+        //
+        apA_MUX6.setPoint(0, 420, 205);
+        apA_MUX6.setPoint(1, 481, 205);
+
+        apB_MUX7.setPoint(0, (afMode) ? 420 : 410, 250);    // {joj 28/10/06}
+        apB_MUX7.setPoint(1, 470, 250);
+
+        apEX_MUX7.setPoint(2, 430, 260);
+        apEX_MUX7.setPoint(3, 470, 260);
+
+        apA_MUX6.setHead(0);
+
+    } else {
+
+        apA_MUX6.setPoint(0, 420, 220);
+        apA_MUX6.setPoint(1, 470, 220);
+
+        apB_MUX7.setPoint(0, 420, 240);
+        apB_MUX7.setPoint(1, 470, 240);
+
+        apEX_MUX7.setPoint(2, 430, 250);
+        apEX_MUX7.setPoint(3, 470, 250);
+
+        apA_MUX6.setHead(1);
+
+    }
+
+    cMUX6.setOpacity(opacity);
+    apOUT0_MUX6.setOpacity(opacity);
+    apOUT1_MUX6.setOpacity(opacity);
+
+    apOUT0_MUX7.setOpacity(opacity);
+    apOUT1_MUX7.setOpacity(opacity);
+
+}
+
+//
+// showSMDRForwarding
+//
+function showSMDRForwarding(num opacity) { // {joj 20/8/10}
+
+    if (opacity == 0) {
+
+        apB_MUX8.setPoint(1, 410, 330);
+        apB_MUX8.setPoint(2, 480, 330);
+        apB_MUX8.setHead(0);
+
+    } else {
+
+        apB_MUX8.setPoint(1, 410, 340);
+        apB_MUX8.setPoint(2, 470, 340);
+        apB_MUX8.setHead(1);
+
+    }
+
+    cMUX8.setOpacity(opacity);
+    apOUT0_MUX8.setOpacity(opacity);
+    apOUT1_MUX8.setOpacity(opacity);
+
+}
+
+//
+// showZeroForwarding
+//
+function showZeroForwarding(num opacity) { // {joj 20/8/10}
+
+    if (opacity == 0) {
+        //clA.setPt(1, -15, 0);				// {joj 15/3/15}
+        //clA.setPt(2, -15, 25);			// {joj 15/3/15}
+        clA.setPt(1, 355, 135);				// {joj 5/10/16}
+        clA.setPt(2, 355, 160);				// {joj 5/10/16}
+    } else {
+		//clA.setPt(1, -25, 0);				// {joj 15/3/15}
+        //clA.setPt(2, -25, 25);			// {joj 15/3/15}
+		clA.setPt(1, 345, 135);				// {joj 5/10/16}
+        clA.setPt(2, 345, 160);				// {joj 5/10/16}
+
+   }
+
+    cZeroMux.setOpacity(opacity);
+    cZeroTxt.setOpacity(opacity);
+    clALU.setOpacity(opacity);
+    clOUT0.setOpacity(opacity);
+    clOUT1.setOpacity(opacity);
+
+}
+
+//
+// showPipeline
+//
+function showPipeline(num opacity) {   // {joj 20/8/10}
+
+    if (opacity == 0) {
+
+        //
+        // not pipelined
+        //
+        apPC_PC1.setPoint(1, 260, 230);
+        apPC_PC1.setPoint(2, 260, 240);
+
+        apPC1_ADD4.setPoint(0, 260, 230);
+        apPC1_ADDi.setPoint(0, 260, 230);
+
+        apID_EX.setPoint(1, 420, 390);
+
+        apRF_A.setPoint(1, 370, 205);
+        apRF_A.setPoint(2, 420, 205);
+        apMUX5_B.setPoint(1, 410, 250);             // {joj 28/10/06}
+        apB_MUX8.setPoint(0, 410, 250);
+
+        apMUX6_OUT0.setPoint(3, 580, 230);
+        apMUX7_OUT0.setPoint(3, 580, 230);
+        apMUX8_SMDR.setPoint(1, 590, 330);
+        apMUX9_OUT1.setPoint(1, 680, 230);
+
+        apID_EX.setHead(0);
+        apPC_PC1.setHead(0);
+        apRF_A.setHead(0);
+        apA_MUX6.setHead(0);
+        apMUX5_B.setHead(0);
+        apB_MUX8.setHead(0);
+        apMUX8_SMDR.setHead(0);
+        apMUX6_OUT0.setHead(0);
+        apMUX7_OUT0.setHead(0);
+        apMUX9_OUT1.setHead(0);
+
+        showBTB(opacity);
+        showALUForwarding(opacity);
+        showSMDRForwarding(opacity);
+        showZeroForwarding(opacity);
+
+    } else {
+
+        apPC_PC1.setPoint(1, 240, 230);
+        apPC_PC1.setPoint(2, 250, 230);
+
+        apPC1_ADD4.setPoint(0, 260, 250);
+        apPC1_ADDi.setPoint(0, 260, 250);
+
+        apID_EX.setPoint(1, 400, 390);
+
+        apRF_A.setPoint(1, 370, 210);
+        apRF_A.setPoint(2, 400, 210);
+        apMUX5_B.setPoint(1, 400, 250);
+        apB_MUX8.setPoint(0, 410, 270);
+
+        apMUX6_OUT0.setPoint(3, 560, 230);
+        apMUX7_OUT0.setPoint(3, 560, 230);
+        apMUX8_SMDR.setPoint(1, 550, 330);
+        apMUX9_OUT1.setPoint(1, 660, 230);
+
+        apID_EX.setHead(1);
+        apPC_PC1.setHead(1);
+        apRF_A.setHead(1);
+        apA_MUX6.setHead(1);
+        apMUX5_B.setHead(1);
+        apB_MUX8.setHead(1);
+        apMUX8_SMDR.setHead(1);
+        apMUX6_OUT0.setHead(1);
+        apMUX7_OUT0.setHead(1);
+        apMUX9_OUT1.setHead(1);
+
+        showBTB(bpMode == BRANCH_PREDICTION ? 1 : 0);
+        showALUForwarding(afMode == ALU_FORWARDING ? 1 : 0);
+        showSMDRForwarding(sfMode == FORWARDING_TO_SMDR ? 1 : 0);
+        showZeroForwarding(zfMode == ZERO_FORWARDING ? 1 : 0);
+
+    }
+
+    apPC_ADD4.setOpacity(opacity);
+    cPLUS4.setOpacity(opacity);
+    apADD4_MUX1.setOpacity(opacity);
+
+    regPC1.setOpacity(opacity);
+    regEX.setOpacity(opacity);
+    regMA.setOpacity(opacity);
+    regWB.setOpacity(opacity);
+
+    apEX_MA.setOpacity(opacity);
+    apMA_WB.setOpacity(opacity);
+
+    regA.setOpacity(opacity);
+    regB.setOpacity(opacity);
+    regOUT0.setOpacity(opacity);
+    regOUT1.setOpacity(opacity);
+    regSMDR.setOpacity(opacity);
+
+    buttonBP.label.setOpacity(opacity);
+    buttonLI.label.setOpacity(opacity);
+    buttonAF.label.setOpacity(opacity);
+    buttonSF.label.setOpacity(opacity);
+    buttonZF.label.setOpacity(opacity);
+
+}
+
+//
+// setPEMode
+//
+function setPEMode(num mode) {
+    peMode = mode;
+    if (peMode == 0) {
+        buttonPE.setCaption("Pipelining Enabled");
+        showPipeline(1);
+    } else if (peMode == 1) {
+        buttonPE.setCaption("Pipelining Disabled");
+        showPipeline(0);
+    }
+    setArg("peMode", peMode.toString()); // {joj 6/11/16}
+}
+
+//
+// setBPMode
+//
+function setBPMode(num mode) {
+    bpMode = mode;
+    if (bpMode == 0) {
+        buttonBP.setCaption("Branch Prediction");
+        showBTB(1);
+    } else if (bpMode == 1) {
+        buttonBP.setCaption("Branch Interlock");
+        showBTB(0);
+    } else if (bpMode == 2) {
+        buttonBP.setCaption("Delayed Branches");
+        showBTB(0);
+    }
+    setArg("bpMode", bpMode.toString()); // {joj 6/11/16}
+}
+
+//
+// setLIMode
+//
+function setLIMode(num mode) {
+    liMode = mode;
+    if (liMode == 0) {
+        buttonLI.setCaption("Load Interlock");
+    } else if (liMode == 1) {
+        buttonLI.setCaption("No Load Interlock");
+    }
+    setArg("liMode", liMode.toString()); // {joj 6/11/16}
+}
+
+//
+// setAFMode
+//
+function setAFMode(num mode) {
+    afMode = mode;
+    if (afMode == 0) {
+        buttonAF.setCaption("ALU Forwarding");
+        showALUForwarding(1);
+    } else if (afMode == 1) {
+        buttonAF.setCaption("ALU Interlock");
+        showALUForwarding(0);
+    } else if (afMode == 2) {
+        buttonAF.setCaption("No ALU Interlock");
+        showALUForwarding(0);
+    }
+    setArg("afMode", afMode.toString()); // {joj 6/11/16}
+}
+
+//
+// setLIMode
+//
+function setSFMode(num mode) {
+    sfMode = mode;
+    if (sfMode == 0) {
+        buttonSF.setCaption("Store Operand\nForwarding");
+        showSMDRForwarding(1);
+    } else if (sfMode == 1) {
+        buttonSF.setCaption("Store Interlock");
+        showSMDRForwarding(0);
+    } else if (sfMode == 2) {
+        buttonSF.setCaption("No Store Interlock");
+        showSMDRForwarding(0);
+    }
+    setArg("sfMode", sfMode.toString()); // {joj 6/11/16}
+}
+
+//
+// setZFMode
+//
+function setZFMode(num mode) {
+    zfMode = mode;
+    if (zfMode == 0) {
+        buttonZF.setCaption("Zero Forwarding");
+        showZeroForwarding(1);
+    } else if (zfMode == 1) {
+        buttonZF.setCaption("Zero Interlock");
+        showZeroForwarding(0);
+    } else if (zfMode == 2) {
+        buttonZF.setCaption("No Zero Interlock");
+        showZeroForwarding(0);
+    }
+    setArg("zfMode", zfMode.toString()); // {joj 6/11/16}
+}
+
+// initialisation
+
+resetCircuit();
+
+num i, v;
+string s;
+
+//
+// clear instruction memory
+//
+for (i = 0; i < 32; i++)			// {joj 27/10/06}
+    im.setOpcode(4*i, 0);			// {joj 27/10/06}
+
+//
+// initialise registers
+//
+for (i = 0; i < 4; i++) {                           // {joj 31/10/10}
+    s = sprintf("r%d", i);							// {joj 2/10/16}
+    regFile[i].setValue(getArgAsNum(s, 0));			// {joj 4/10/16}
+}                                                   // {joj}
+
+//
+// initialise memory
+//
+for (i = 0; i < 4; i++) {                           // {joj}
+    s = sprintf("m%d", i);                          // {joj 31/10/10}
+    memory[i].setValue(getArgAsNum(s, 0));			// {joj 7/10/16}
+}
+
+setTPS(20);                                         // {joj}
+example = getArgAsNum("example", 0);				// {joj 4/10/16}
+
+if (example == 0) {
+
+    //
+    // user defined
+    //
+    for (i = 0; i < 32; i++)  {                     // {joj}
+        s = sprintf("i%d", i);						// {joj 31/10/10}
+        im.setOpcode(4*i, getArgAsNum(s, 0));       // {joj 20/10/16}
+    }
+
+} else if (example == 1) {                          // {joj}
+
+    //
+    // multiplication program
+    //
+    // r1 = r2*r3
+    //
+    im.setValue( 0, XOR,  1, 1, 1);                  // {joj}
+    im.setValue( 4, BEQZ, 0, 2, 36);                 // {joj}
+    im.setValue( 8, ST,   2, 0, 0);                  // {joj}
+    im.setValue(12, ANDi, 2, 2, 1);                 // {joj}
+    im.setValue(16, BEQZ, 0, 2, 8);                 // {joj}
+    im.setValue(20, ADD,  1, 1, 3);                 // {joj}
+    im.setValue(24, LD,   2, 0, 0);                 // {joj}
+	im.setValue(28, SRLi, 2, 2, 1);                 // {joj 29/11/16}
+	im.setValue(32, SLLi, 3, 3, 1);                 // {joj 29/11/16}
+    im.setValue(36, J,    0, 0, 4-36);              // {joj 01/11/06}
+    im.setValue(40, ST,   1, 0, 0);                 // {joj 4/10/16}
+    im.setValue(44, HALT, 0, 0, 0);                 // {joj}
+    regFile[2].setValue(9);                         // {joj}
+    regFile[3].setValue(8);                         // {joj}
+    setTPS(100);                                    // {joj}
+
+} else if (example == 2) {                          // {joj}
+
+    //
+    // pipeline forwarding example
+    //
+    im.setValue( 0, ADD, 1, 2, 3);                   // r1 = r2 + r3     // {joj 20/10/12}
+    im.setValue( 4, SUB, 3, 1, 2);                   // r3 = r1 - r2     // {joj 20/10/12}
+    im.setValue( 8, AND, 2, 1, 3);                   // r2 = r1 & r3     // {joj 20/10/12}
+    im.setValue(12, XOR, 2, 1, 3);                  // r2 = r1 ^ r3     // {joj 20/10/12}
+    im.setValue(16, ADD, 2, 1, 0);                  // r2 = r1 + r0     // {joj 20/10/12}
+    im.setValue(20, HALT, 0, 0, 0);                 //                  // {joj 20/10/12}
+    regFile[1].setValue(1);                         // r1 = 1           // {joj 20/10/12}
+    regFile[2].setValue(2);                         // r2 = 2           // {joj 20/10/12}
+    setTPS(50);                                     // {joj}
+
+} else if (example == 3) {                          // {joj}
+
+    //
+    // tutorial 4
+    //
+    im.setValue( 0, ADD, 1, 1, 2);					// r1 = r1 + r2     // {joj 13/11/17}
+    im.setValue( 4, ADD, 2, 1, 2);					// r2 = r1 + r2		// {joj 13/11/17}
+    im.setValue( 8, ADD, 1, 1, 2);					// r1 = r1 + r2		// {joj 13/11/17}
+    im.setValue(12, ADD, 2, 1, 2);					// r2 = r1 + r2		// {joj 13/11/17}
+    im.setValue(16, ADD, 1, 1, 2);        			// r1 = r1 + r2		// {joj 13/11/17}
+    im.setValue(20, HALT, 0, 0, 0);                 // HALT             // {joj 13/11/17}
+	regFile[1].setValue(1);                         // r1 = 1           // {joj 13/11/17}
+	regFile[2].setValue(2);                         // r2 = 2           // {joj 13/11/17}
+	setTPS(50);                                     // 
+
+} else if (example == 4) {
+
+	//
+    // branch prediction example
+    //
+    im.setValue( 0, ADDi, 1, 0, 3);                 //      r1 = 3      // {joj}
+    im.setValue( 4, ADD,  0, 0, 0);                 // L:               // {joj}
+    im.setValue( 8, ADD,  0, 0, 0);                 //                  // {joj}
+    im.setValue(12, SUBi, 1, 1, 1);                 //      r1 = r1-1   // {joj}
+    im.setValue(16, BNEZ, 0, 1, -12 & 0xff);        //      bnez r1, L  // {joj}
+    im.setValue(20, HALT, 0, 0, 0);                 //                  // {joj}
+    setTPS(50);                                     // {joj}
+
+} else if (example == 5) {
+
+	// used to fix reported errors
+
+	im.setValue( 0,   JR, 0, 0, 1);				// {joj 29/11/16}
+	im.setValue(32,  ADD, 1, 1, 1);				// {joj 29/11/16}
+	im.setValue(36, HALT, 0, 0, 0);				// {joj 29/11/16}
+	regFile[1].setValue(32);					// {joj 29/11/16}
+
+	//im.setValue( 0,  ADD, 2, 2, 3);				// {joj 30/11/16}
+	//im.setValue( 4,  NOP, 0, 0, 0);				// {joj 30/11/16}
+	//im.setValue( 8,  ADD, 1, 2, 3);				// {joj 30/11/16}
+	//im.setValue(12, HALT, 0, 0, 0);				// {joj 30/11/16}
+	
+	//im.setValue( 0,   LD, 1, 0, 0);					// {joj 5/12/16}
+	//im.setValue( 4, BEQZ, 0, 1, 28);				// {joj 5/12/16}
+	//im.setValue(32, HALT, 0, 0, 0);					// {joj 5/12/16}
+
+	//im.setValue( 0,   LD, 1, 0, 1);				// {joj 7/12/16}
+	//im.setValue( 4,  ADD, 2, 0, 0);				// {joj 7/12/16}
+	//im.setValue( 8,  ADD, 3, 0, 0);				// {joj 7/12/16}
+	//im.setValue(12, BEQZ, 0, 1, 20);				// {joj 7/12/16}
+	//im.setValue(32, HALT, 0, 0, 0);				// {joj 7/12/16}
+	
+}
+
+//
+// save args
+//
+if (example > 0) {										// {joj 27/10/06}
+
+    for (i = 0; i < 32; i++) { 							// {joj 27/10/06}
+        s = sprintf("i%d", i);							// {joj 31/10/10}
+        setArg(s, im.getOpcode(i * 4).toString());		// {joj 6/11/16}
+    }
+
+    example = (example > maxexample) ? 0 : example		// {joj 28/11/16}
+
+}
+
+num haltOnHalt = getArgAsNum("haltOnHalt", 1);			// {joj 29/7/08}
+
+bpMode = getArgAsNum("bpMode", 0); setBPMode(bpMode);	// {joj 27/11/16}
+liMode = getArgAsNum("liMode", 0); setLIMode(liMode);	// {joj 27/11/16}
+afMode = getArgAsNum("afMode", 0); setAFMode(afMode);	// {joj 27/11/16}
+sfMode = getArgAsNum("sfMode", 0); setSFMode(sfMode);	// {joj 27/11/16}
+zfMode = getArgAsNum("zfMode", 0); setZFMode(zfMode);	// {joj 27/11/16}
+peMode = getArgAsNum("peMode", 0); setPEMode(peMode);	// {joj 27/11/16}
+lockCircuit = getArgAsNum("locked", 0);					// {joj 27/11/16}
+
+//
+// Help
+//
+num showHelp = getArgAsNum("help", 1);				// {joj 4/10/16}
+
+Rectangle r = Rectangle2(helpLayer, 0, 0, whiteBrush, 0, 0, WIDTH, HEIGHT);
+r.setOpacity(0.5);                                  // {joj 20/8/10}
+r.setRounded(10, 10);
+
+Pen helpPen = SolidPen(SOLID, 2, RED, ROUND_START | ROUND_JOIN | ROUND_END);
+Font helpFont = Font("Arial", 12, BOLD);
+
+Txt(helpLayer, HLEFT | VTOP, 12, 290, helpPen, helpFont, "LEFT CLICK on animation background to start and stop clock.\n\nSHIFT LEFT CLICK on background to execute \"single MIPS clock cycle\".");
+if (!lockCircuit) {
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 20, 68, 80, 10); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 25, 121, 30, 10); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 60, 121, 14, 10); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 76, 121, 14, 10); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 92, 121, 14, 10); r.setRounded(5, 5);
+    Txt(helpLayer, HLEFT | VTOP, 110, 60, helpPen, helpFont, "LEFT CLICK to change\ninitial program.");
+    Txt(helpLayer, HLEFT | VTOP, 110, 105, helpPen, helpFont, "LEFT or RIGHT CLICK to \"rotate\"\ninstructions and operands.\nHold and release to reset value.");
+}
+
+r = Rectangle2(helpLayer, 0, helpPen, 0, 310, 25, 90, 50);
+r.setRounded(10, 10);
+Txt(helpLayer, HLEFT | VTOP, 410, 40, helpPen, helpFont, "LEFT or RIGHT CLICK register\nto increment or decrement value.");
+
+if (!lockCircuit) {
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 110, 455, 550, 30);
+    r.setRounded(10, 10);
+    Txt(helpLayer, HLEFT | VTOP, 180, 435, helpPen, helpFont, "LEFT CLICK on any of the buttons below to change circuit configuration.");
+}
+
+Rectangle closeHelp = Rectangle2(helpLayer, 0, helpPen, yellowBrush, 305, 230, 100, 30, helpPen, helpFont, "CLOSE HELP");
+closeHelp.setRounded(5, 5);
+
+when closeHelp ~> eventEE(num enter, num x, num y) {			// {joj 24/9/17}
+    closeHelp.setBrush(enter ? gray224Brush : yellowBrush);		// {joj 17/10/16}
+}
+
+when closeHelp ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/9/17}
+	if (down && (flags & MB_LEFT)) {
+		setArg("help", "0");   									// {joj 6/11/16}
+		helpLayer.setOpacity(0);
+	}
+	return 0;
+}
+
+if (showHelp == 0)
+    helpLayer.setOpacity(0);
+
+// eof

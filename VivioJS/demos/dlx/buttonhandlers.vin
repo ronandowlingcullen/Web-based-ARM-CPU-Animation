@@ -1,0 +1,239 @@
+//
+// buttonhandlers.vin
+//
+// Simulation of the DLX
+// Written by Edsko de Vries, Summer 2003
+//
+// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software Foundation;
+// either version 2 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+function setlocked() {                      // joj
+	num b_locked = locked || lockCircuit;   // joj
+	buttonPE.showLocked(b_locked);          // joj
+	buttonBP.showLocked(b_locked);          // joj
+	buttonLI.showLocked(b_locked);          // joj
+	buttonAF.showLocked(b_locked);          // joj
+	buttonSF.showLocked(b_locked);          // joj
+	buttonZF.showLocked(b_locked);          // joj
+}                                           // joj
+
+//
+// run animation
+//
+// run until HALT instruction executed
+//
+function run() {
+	wait(1);                                                                // {joj 25/10/06)
+	locked = 1;                                                             // {joj 25/10/06)
+	setlocked();                                                            // {joj 25/10/06)
+	while(1) {
+		//debug("clock cycle");
+		fork(animClock.clockCycle((peMode == PIPELINING_ENABLED)  ? 80 : 400));
+		exec();
+		if (((regWB.vIns == HALT) && (peMode == PIPELINING_ENABLED)) ||     // {joj 30/20/06}
+			((regID.vIns == HALT) && (peMode == PIPELINING_DISABLED))) {
+			stop();                                                         // {joj 30/20/06}
+			if (haltOnHalt)													// {joj 29/7/08
+				break;                                                      // {joj 29/7/08}
+		}                                                                   // {joj 30/20/06}
+		wait(1);                                                           	// {joj 30/10/06}
+	}
+}
+
+//when animClock.clkDisplay.eventLB(int down, real x, real y) {
+//  if (down) {
+//      if (!locked) {
+//          locked = 1;
+//          setlocked();    // joj
+//          if (peMode == PIPELINING_ENABLED)
+//              fork(animClock.clockCycle(80));
+//          else
+//              fork(animClock.clockCycle(400));
+//          exec();
+//          locked = 0;
+//          setlocked();    // joj
+//      }
+//  }
+//}
+
+//
+// {joj 21/10/06}
+//
+//when startStopEvent(int startStop)
+//  if (startStop)
+//      fork(run());
+//  end;
+//end;
+
+//when animClock.clkDisplay.eventRB(int flags, real x, real y)
+//  if (flags & EB_RIGHT)
+//      if (!running)
+//          if (!locked)
+//              running = 1;
+//              locked = 1;
+//              setlocked();    // joj
+//              fork(run());
+//              start();
+//          end;
+//      else
+//          running = 0;
+//      end;
+//  end;
+//end;
+
+//
+// pipeline enable
+//
+when buttonPE.label ~> eventMB(num down, num flags, num x, num y) {		// {joj 24/9/17}
+	if (down && (flags & MB_LEFT) && (!locked) && (!lockCircuit)) {
+		setPEMode((peMode + 1)% 2);
+		//et.setTxt(peMode == 0 ? "ticks:" : "elapsed time:");          // {joj 4/10/16}
+		resetCircuit();
+	}
+	return 0;
+}
+
+//
+// branch prediction
+//
+when buttonBP.label ~> eventMB(num down, num flags, num x, num y) {		// {joj 24/9/17}
+	if (down && (flags & MB_LEFT) && (!locked) && (!lockCircuit)) {
+		setBPMode((bpMode + 1) % 3);
+		resetCircuit();
+	}
+	return 0;
+}
+
+//
+// load interlocked
+//
+when buttonLI.label ~> eventMB(num down, num flags, num x, num y) {		// {joj 24/9/17}
+	if (down && (flags & MB_LEFT) && (!locked) && (!lockCircuit)) {
+		setLIMode((liMode + 1) % 2);
+		resetCircuit();
+	}
+	return 0;
+}
+
+//
+// ALU forwarding
+//
+when buttonAF.label ~> eventMB(num down, num flags, num x, num y) {		// {joj 24/9/17}
+	if (down && (flags & MB_LEFT) && (!locked) && (!lockCircuit)) {
+		setAFMode((afMode + 1) % 3);
+		resetCircuit();
+	}
+	return 0;
+}
+
+//
+// store forwarding
+//
+when buttonSF.label ~> eventMB(num down, num flags, num, num) {			// {joj 24/9/17}
+	if (down && (flags & MB_LEFT) && (!locked) && (!lockCircuit)) {
+		setSFMode((sfMode + 1) % 3);
+		resetCircuit();
+	}
+	return 0;
+}
+
+//
+// zero forwarding
+//
+when buttonZF.label ~> eventMB(num down, num flags, num, num) {			// {joj 4/10/16}
+	if (down && (flags & MB_LEFT) && (!locked) && (!lockCircuit)) {
+		setZFMode((zfMode + 1) % 3);
+		resetCircuit();
+	}
+	return 0;
+}
+
+//
+// save configuration
+//
+// NB: generating unnecessary quotes for compatibilty with previous versions
+//
+when buttonSP.label ~> eventMB(num down, num flags, num x, num y) {		// {joj 24/9/17}
+	if (down && (flags & MB_LEFT)) {
+		
+		//debug("save configuration");
+
+		num lp1, opcode, reg;
+		Instruction instr;
+
+        string s = "saveanim.php?state=";      // {joj 31/10/10}
+
+        for (lp1 = 0; lp1 < 32; lp1++) {
+            instr = im.instruction[lp1];
+            opcode = (instr.vIns << 24) | (instr.vRdt << 16) | (instr.vRs1 << 8) | (instr.vRs2);
+            s = sprintf("%si%d='0x%08X' ", s, lp1, opcode);  // {joj 20/10/16}
+        }
+
+        for (lp1 = 0; lp1 < 4; lp1++) {
+            reg = regFile[lp1].value;
+            s = sprintf("%sr%d='0x%02X' ", s, lp1, reg); // {joj 20/10/16}
+        }
+
+        for (lp1 = 0; lp1 < 4; lp1++) {
+            reg = memory[lp1].value;
+            s = sprintf("%sm%d='0x%02X' ", s, lp1, reg); // {joj 20/10/16}
+        }
+
+        s = sprintf("%speMode='%d' bpMode='%d' liMode='%d' afMode='%d' sfMode='%d' zfMode='%d'", s, peMode, bpMode, liMode, afMode, sfMode, zfMode); // {joj 31/10/10}
+		//debug("%s", s);
+		getURL(s);
+
+	}
+	return 0;
+}
+
+//
+// Vivio logo
+//
+when logo ~> eventMB(num down, num flags, num x, num y) {				// {joj 24/9/17}
+     if (down && (flags & MB_LEFT))
+         getURL("https://www.scss.tcd.ie/Jeremy.Jones/VivioJS/vivio.htm");
+     return 0;
+}
+
+//
+// load program from database
+//
+when title ~> eventMB(num down, num flags, num, num) {              	// {joj 24/9/17}
+    if (down && (flags & MB_LEFT))
+        getURL("showanim.php");
+}
+
+//
+// change initial builtin program and reset
+//
+when imLabel ~> eventEE(num enter, num x, num y) {						// {joj 24/9/17}
+	imLabel.setBrush(enter? gray192Brush : whiteBrush);					// {joj 7/10/16}
+	imLabel.setTxtPen(enter ? redPen : blackPen);
+	return 0;
+}
+
+when imLabel ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/9/17}
+	if (down && (flags & MB_LEFT)) {
+		example = (example == maxexample) ? 0 : example + 1;
+		setArg("example", example.toString());							// {joj 6/11/16}
+		reset();
+	}
+	return 0;
+}
+
+run();																	// {joj 25/10/06}
+
+// eof

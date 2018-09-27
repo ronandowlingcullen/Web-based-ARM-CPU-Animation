@@ -1,0 +1,103 @@
+//
+// instructionregister.vin
+//
+// Simulation of the DLX
+// Written by Edsko de Vries, Summer 2003
+//
+// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software Foundation;
+// either version 2 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+class InstructionRegister(num x, num y, num w, num h, string caption) {
+
+    num vIns = EMPTY, vRdt = 0, vRs1 = 0, vRs2 = 0;
+    num nIns = EMPTY, nRdt = 0, nRs1 = 0, nRs2 = 0;
+
+    string txt = "EMPTY";
+
+    Rectangle r1 = Rectangle2(0, 0, blackPen, blackBrush, x, y, w, h);
+	r1.setRounded(2, 2); // {joj 16/10/16}
+    Rectangle r2 = Rectangle2(0, 0, blackPen, whiteBrush, x + 2, y + 2, w - 4, h - 14);
+	r2.setRounded(2, 2); // {joj 16/10/16}
+    Rectangle r3 = Rectangle2(0, 0, 0, 0, x, y + h - 10, w, 10, whitePen, font, caption);
+    Rectangle label = Txt(valuesLayer, 0, x + w/2, y + (h - 14)/2, 0, font, txt); // {joj 16/10/16}
+	label.rotate(-90); // {joj 14/10/16}
+
+    //
+    // setNewValue
+    //
+    function setNewValue(num instr, num rdt, num rs1, num rs2) {
+        nIns = instr;
+        nRdt = rdt;
+        nRs1 = rs1;
+        nRs2 = rs2;
+    }
+
+    //
+    // setNewInstruction
+    //
+    function setNewInstruction(Instruction i) {
+        nIns = i.vIns;
+        nRdt = i.vRdt;
+        nRs1 = i.vRs1;
+        nRs2 = i.vRs2;
+    }
+
+    //
+    // getNewInstrTxt
+    //
+    string function getNewInstrTxt() {
+        return instrText(nIns, nRdt, nRs1, nRs2);       // {joj 28/10/10}
+    }
+
+    //
+    // update
+    //
+   function update() {									// {joj 14/11/17}
+        vIns = nIns;
+        vRdt = nRdt;
+        vRs1 = nRs1;
+        vRs2 = nRs2;
+        txt = instrText(vIns, vRdt, vRs1, vRs2);        // {joj 28/10/10}
+        label.setTxt(txt);
+        r2.setBrush(yellowBrush);                       // {joj}
+        wait(16);
+        r2.setBrush(whiteBrush);                        // {joj}
+    }
+
+    //
+    // setOpacity
+    //
+    function setOpacity(num opacity) {					// {joj 20/8/10}
+        r1.setOpacity(opacity);
+        r2.setOpacity(opacity);
+        r3.setOpacity(opacity);
+        label.setOpacity(opacity);
+    }
+
+	//
+    // reset
+    //
+    function reset() {
+        vIns = EMPTY;
+        vRdt = vRs1 = vRs2 = 0;
+        nIns = EMPTY;
+        nRdt = nRs1 = nRs2 = 0;
+        txt = instrText(vIns, vRdt, vRs1, vRs2);        // {joj 28/10/10}
+        label.setTxt(txt);
+    }
+
+}
+
+// eof
