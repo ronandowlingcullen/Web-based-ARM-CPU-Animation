@@ -37,7 +37,7 @@ Line b1 = Line2(0, ABSOLUTE, borderPen, 240, 80, 240, 440);
 Line b2 = Line2(0, ABSOLUTE, borderPen, 390, 80, 390, 440);
 Line b3 = Line2(0, ABSOLUTE, borderPen, 540, 80, 540, 440);
 Line b4 = Line2(0, ABSOLUTE, borderPen, 650, 80, 650, 440);
-Line2(0, ABSOLUTE, borderPen, 700, 80, 700, 440);
+Line2(0, ABSOLUTE, borderPen, 900, 80, 900, 440);
 
 // Buttons
 
@@ -304,6 +304,7 @@ txtRF_A.setRounded(2, 2);	// {joj 17/10/16}
 InstructionRegister regEX = InstructionRegister(400, 350, 20, 85, "EX");
 Register regA = Register(400, 190, 20, 40, TOP, "A");
 Register regB = Register(400, 230, 20, 40, BOTTOM, "B");
+Register shifter = Register(430, 230, 20, 40, TOP, "SH");	// {rdc 27/09/18}
 
 // Other components
 Component cMUX6 = Component(470, 180, 10, 50, "mux 6");   // {joj}
@@ -338,7 +339,7 @@ apA_MUX6.addPoint(470, 220);
 // Connections numo MUX7
 AnimPipe apB_MUX7 = AnimPipe();
 apB_MUX7.addPoint(420, 240);
-apB_MUX7.addPoint(470, 240);
+apB_MUX7.addPoint(430, 240);
 
 AnimPipe apEX_MUX7 = AnimPipe();
 apEX_MUX7.addPoint(420, 390);
@@ -401,6 +402,8 @@ apMUX7_OUT0.addPoint(490, 255);
 apMUX7_OUT0.addPoint(540, 230);
 apMUX7_OUT0.addPoint(560, 230);
 
+
+
 //
 // Memory access
 //
@@ -429,7 +432,7 @@ Component cMUX9 = Component(630, 210, 10, 40, "mux 9");                         
 // MA to WB
 AnimPipe apMA_WB = AnimPipe();
 apMA_WB.addPoint(580, 390);
-apMA_WB.addPoint(660, 390);
+apMA_WB.addPoint(860, 390);
 
 // OUT0 to MUX 8/OUT1
 //
@@ -464,8 +467,8 @@ apMem_MUX9.addPoint(630, 220);
 
 // WB and OUT1
 
-InstructionRegister regWB = InstructionRegister(660, 350, 20, 85, "WB");
-Register regOUT1 = Register(660, 210, 20, 40, TOP, "O1");
+InstructionRegister regWB = InstructionRegister(860, 350, 20, 85, "WB");
+Register regOUT1 = Register(860, 210, 20, 40, TOP, "O1");
 
 // Connections from OUT1 to the register file
 
@@ -572,6 +575,7 @@ function resetRegisters() {
     regPC1.reset();
     regA.reset();
     regB.reset();
+	shifter.reset();				// {rdc 27/09/18}
     regSMDR.reset();
     regOUT0.reset();
     regOUT1.reset();
@@ -661,7 +665,7 @@ function showALUForwarding(num opacity) {  // {joj 20/8/10}
         apA_MUX6.setPoint(1, 481, 205);
 
         apB_MUX7.setPoint(0, (afMode) ? 420 : 410, 250);    // {joj 28/10/06}
-        apB_MUX7.setPoint(1, 470, 250);
+        apB_MUX7.setPoint(1, 430, 250);
 
         apEX_MUX7.setPoint(2, 430, 260);
         apEX_MUX7.setPoint(3, 470, 260);
@@ -674,7 +678,7 @@ function showALUForwarding(num opacity) {  // {joj 20/8/10}
         apA_MUX6.setPoint(1, 470, 220);
 
         apB_MUX7.setPoint(0, 420, 240);
-        apB_MUX7.setPoint(1, 470, 240);
+        apB_MUX7.setPoint(1, 430, 240);
 
         apEX_MUX7.setPoint(2, 430, 250);
         apEX_MUX7.setPoint(3, 470, 250);
@@ -839,6 +843,7 @@ function showPipeline(num opacity) {   // {joj 20/8/10}
 
     regA.setOpacity(opacity);
     regB.setOpacity(opacity);
+    shifter.setOpacity(opacity);	// {rdc 27/09/18}
     regOUT0.setOpacity(opacity);
     regOUT1.setOpacity(opacity);
     regSMDR.setOpacity(opacity);

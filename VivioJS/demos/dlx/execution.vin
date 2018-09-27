@@ -425,6 +425,7 @@ function idExec() {																// {joj 14/11/17}
 
             regA.setNewValue(0);
             regB.setNewValue((regPC1.value + 4) & 0x7F);
+            shifter.setNewValue((regPC1.value + 4) & 0x7F);						//{rdc 27/09/18}
             apADD4_MUX5.animate(18);
             apMUX5_B.animate(6);
 
@@ -436,10 +437,12 @@ function idExec() {																// {joj 14/11/17}
             // decision facilitated by the opcode format and does not need a MUX
             if (instrOpTypeRs2(regID.vIns) == OP_TYPE_REG) {
                 regFile[regID.vRs2].highlight(bhighlight);                         // {joj}
-                regB.setNewValue(regFile[regID.vRs2].value);
+                regB.setNewValue(regFile[regID.vRs2].value);                         
+                shifter.setNewValue(regFile[regID.vRs2].value);						// {rdc 27/09/18}
             } else {
                 regFile[regID.vRdt].highlight(bhighlight);                         // {joj}
                 regB.setNewValue(regFile[regID.vRdt].value);
+				shifter.setNewValue(regFile[regID.vRdt].value);						// {rdc 27/09/18}
             }
 
             txtRF_A.setTxt("R%d:%02X", regID.vRs1, regFile[regID.vRs1].value);      // {joj 29/10/06}
@@ -480,6 +483,7 @@ function exExec() {														// {joj 14/11/17}
 	if (!instrIsNop(regEX.nIns)) {
         fork(regA.update());
         fork(regB.update());
+		fork(shifter.update());					// {rdc 27/09/18}
     }
 
     wait(8);
@@ -768,7 +772,7 @@ function nonPipelinedBranch() {										// {joj 14/11/11}
 //
 function execNonPipelined() {													// {joj 14/11/17}
 
-    num regA, regB, result, smdr;
+    num regA, regB, shifter, result, smdr;										// {rdc 27/09/18}
 
     // Update registers
 
@@ -803,6 +807,7 @@ function execNonPipelined() {													// {joj 14/11/17}
         apMUX5_B.animate(20);
         regA = 0;
         regB = (regPC.value + 4) & 0x7F;
+		shifter = (regPC.value + 4) & 0x7F;		//{rdc 27/09/18}
 
     } else if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) {
 
@@ -817,9 +822,11 @@ function execNonPipelined() {													// {joj 14/11/17}
 
             if (instrOpTypeRs2(regID.vIns) == OP_TYPE_IMM) {
                 regB = regFile[regID.vRdt].value;
+                shifter = regFile[regID.vRdt].value;								// {rdc 27/09/18}
                 regFile[regID.vRdt].highlight(bhighlight);                     		// {joj}
             } else {
                 regB = regFile[regID.vRs2].value;
+                shifter = regFile[regID.vRs2].value;									// {rdc 27/09/18}
                 regFile[regID.vRs2].highlight(bhighlight);                    		 // {joj}
             }
 
