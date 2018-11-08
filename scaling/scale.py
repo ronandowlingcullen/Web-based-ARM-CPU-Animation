@@ -15,27 +15,80 @@ newHeight = float(args[5])
 
 
 with open(ifil) as infile, open('./testo.txt', 'w') as outfile:
-    for line in infile:
-        numStrings = re.findall('\d+, \d+',line)
-        newNums = []
-        for tuple in numStrings:
-            xy = re.findall('\d+',tuple)
-            x = float(xy[0])
-            y = float(xy[1])
-            if ((x >= 10.0) & (y >= 10.0)) | ((x >= 10.0) & (y==0)) | ((x==0) & (y >= 10.0)):
-                x = (x/oldWidth)*newWidth
-                y = (y/oldHeight)*newHeight
-                newStr = str(round(x)) + ", " + str(round(y))
-                newNums.append(newStr)
-            else:
-                newNums.append(tuple)
+    for i,line in enumerate(infile):
+        # Ignoring comments
+        if not re.match('\/\/.*',line):
+            # Pattern matching all Line2 constructors
+            matchObj = re.match('.*Line2\([\s\S\d]* ?, ?[\s\S\d]* ?, ?[\s\S\d]* ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?\)',line)
+            if matchObj:
+                newNums = []
+                newNums.append((float(matchObj.group(1))/oldWidth)*newWidth)
+                newNums.append((float(matchObj.group(2))/oldHeight)*newHeight)
+                newNums.append((float(matchObj.group(3))/oldWidth)*newWidth)
+                newNums.append((float(matchObj.group(4))/oldHeight)*newHeight)
+                for i in range(0,4):
+                    line = line.replace(matchObj.group(i+1),str(round(newNums[i])))
+            elif re.match('.*Line2\(.*\)',line):
+                print("Manual update needed at line " + str(i+1) + " for Line2 call.")
 
-        # numbers = list(map(float,numStrings))
-        # newNums = [i * 2 for i in numbers]
-        tups = zip(numStrings,newNums)
-        for numString,newNum in tups:
-            line = line.replace(numString, str(newNum))
+
+            # Pattern matching all Font constructors
+            matchObj = re.match('.*Font\([\s\S\d]* ?, ?(\d+) ?,.*\)',line)
+            if matchObj:
+                old = oldWidth
+                new = newWidth
+                if (newHeight/oldHeight) > (newWidth/oldWidth):
+                    old = oldHeight
+                    new = newHeight
+                newNums = []
+                newNums.append((float(matchObj.group(1))/old)*new)
+                for i in range(0,1):
+                    line = line.replace(matchObj.group(i+1),str(round(newNums[i])))
+            elif re.match('.*Font\(.*\)',line):
+                print("Manual update needed at line " + str(i+1) + " for Font call.")
+
+
+            # Pattern matching all Rectangle2 constructors
+            matchObj = re.match('.*Rectangle2\(.+,.+,.+,.+, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?.*\)',line)
+            if matchObj:
+                newNums = []
+                newNums.append((float(matchObj.group(1))/oldWidth)*newWidth)
+                newNums.append((float(matchObj.group(2))/oldHeight)*newHeight)
+                newNums.append((float(matchObj.group(3))/oldWidth)*newWidth)
+                newNums.append((float(matchObj.group(4))/oldHeight)*newHeight)
+                for i in range(0,4):
+                    line = line.replace(matchObj.group(i+1),str(round(newNums[i])))
+            elif re.match('.*Rectangle2\(.*\)',line):
+                print("Manual update needed at line " + str(i+1) + " for Rectangle2 call.")
+
+
+            # Pattern matching all SolidPen constructors
+            matchObj = re.match('.*SolidPen\(.+, ?(\d+).*\)',line)
+            if matchObj:
+                old = oldWidth
+                new = newWidth
+                if (newHeight/oldHeight) > (newWidth/oldWidth):
+                    old = oldHeight
+                    new = newHeight
+                newNums = []
+                newNums.append((float(matchObj.group(1))/old)*new)
+                for i in range(0,1):
+                    line = line.replace(matchObj.group(i+1),str(round(newNums[i])))
+            elif re.match('.*SolidPen\(.*\)',line):
+                print("Manual update needed at line " + str(i+1) + " for SolidPen call.")
+
+
+            # Pattern matching all Button constructors
+            matchObj = re.match('.*Button\( ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?.*\)',line)
+            if matchObj:
+                newNums = []
+                newNums.append((float(matchObj.group(1))/oldWidth)*newWidth)
+                newNums.append((float(matchObj.group(2))/oldHeight)*newHeight)
+                newNums.append((float(matchObj.group(3))/oldWidth)*newWidth)
+                newNums.append((float(matchObj.group(4))/oldHeight)*newHeight)
+                for i in range(0,4):
+                    line = line.replace(matchObj.group(i+1),str(round(newNums[i])))
+            elif re.match('.*Button\(.*\)',line):
+                print("Manual update needed at line " + str(i+1) + " for Button call.")
+
         outfile.write(line)
-
-
-print(newNums)

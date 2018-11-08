@@ -482,7 +482,7 @@ alu.txtResult.moveToFront();                            // {joj 29/10/06}
 // ResetWires
 //
 function resetWires() {
-    
+
 	//
 	// IF
 	//
@@ -1044,7 +1044,7 @@ if (example == 0) {
     im.setValue(20, HALT, 0, 0, 0);                 // HALT             // {joj 13/11/17}
 	regFile[1].setValue(1);                         // r1 = 1           // {joj 13/11/17}
 	regFile[2].setValue(2);                         // r2 = 2           // {joj 13/11/17}
-	setTPS(50);                                     // 
+	setTPS(50);                                     //
 
 } else if (example == 4) {
 
@@ -1072,7 +1072,7 @@ if (example == 0) {
 	//im.setValue( 4,  NOP, 0, 0, 0);				// {joj 30/11/16}
 	//im.setValue( 8,  ADD, 1, 2, 3);				// {joj 30/11/16}
 	//im.setValue(12, HALT, 0, 0, 0);				// {joj 30/11/16}
-	
+
 	//im.setValue( 0,   LD, 1, 0, 0);					// {joj 5/12/16}
 	//im.setValue( 4, BEQZ, 0, 1, 28);				// {joj 5/12/16}
 	//im.setValue(32, HALT, 0, 0, 0);					// {joj 5/12/16}
@@ -1082,7 +1082,7 @@ if (example == 0) {
 	//im.setValue( 8,  ADD, 3, 0, 0);				// {joj 7/12/16}
 	//im.setValue(12, BEQZ, 0, 1, 20);				// {joj 7/12/16}
 	//im.setValue(32, HALT, 0, 0, 0);				// {joj 7/12/16}
-	
+
 }
 
 //

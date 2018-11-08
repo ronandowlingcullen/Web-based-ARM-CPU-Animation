@@ -1,0 +1,6 @@
+Constructors covered by scaling function are as follows:
+Line2
+Font
+Rectangle2
+SolidPen
+Button
