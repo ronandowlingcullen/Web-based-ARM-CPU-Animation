@@ -1,4 +1,4 @@
-Constructors covered by scaling function are as follows:
+Constructors/Functions covered by scaling function are as follows:
 Line2
 Font
 Rectangle2
