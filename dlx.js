@@ -147,8 +147,8 @@ function dlx(vplayer) {
 	const BUTTON_SF = 4
 	const BUTTON_ZF = 5
 	const BUTTON_SP = 6
-	const LOGOW = 20
-	const LOGOH = 20
+	const LOGOW = 44
+	const LOGOH = 44
 
 	var $thread = 0
 	var $pc = 0
@@ -639,10 +639,10 @@ function dlx(vplayer) {
 		this.txt = "EMPTY"
 		this.r1 = new Rectangle2($g[0], 0, 0, $g[1], $g[5], x, y, w, h)
 		this.r1.setRounded(2, 2)
-		this.r2 = new Rectangle2($g[0], 0, 0, $g[1], $g[12], x+2, y+2, w-4, h-14)
+		this.r2 = new Rectangle2($g[0], 0, 0, $g[1], $g[12], x+5, y+4, w-11, h-31)
 		this.r2.setRounded(2, 2)
-		this.r3 = new Rectangle2($g[0], 0, 0, 0, 0, x, y+h-10, w, 10, $g[4], $g[15], caption)
-		this.label = new Txt($g[0], $g[17], 0, x+w/2, y+(h-14)/2, 0, $g[15], this.txt)
+		this.r3 = new Rectangle2($g[0], 0, 0, 0, 0, x, y+h-22, w, 22, $g[4], $g[15], caption)
+		this.label = new Txt($g[0], $g[17], 0, x+w/2, y+(h-31)/2, 0, $g[15], this.txt)
 		this.label.rotate(-90)
 	}
 	InstructionRegister.prototype = Object.create(VObj.prototype)
@@ -694,30 +694,30 @@ function dlx(vplayer) {
 		this.bg1 = new Rectangle2($g[0], $g[17], 0, 0, $g[12], this.vx, this.vy, this.vw/2, this.vh)
 		this.bg2 = new Rectangle2($g[0], $g[17], 0, 0, $g[12], this.vx+this.vw/2, this.vy, this.vw/2, this.vh)
 		if (w>=h) {
-			this.vy=y+2
-			this.vw=w-14
-			this.vh=h-4
+			this.vy=y+4
+			this.vw=w-38
+			this.vh=h-9
 			if (labelPos==LEFT) {
-				this.r2 = new Rectangle($g[0], 0, 0, 0, 0, x+7-1, y+h/2, -7, -h/2, 14, h, 0, $g[15], caption)
+				this.r2 = new Rectangle($g[0], 0, 0, 0, 0, x+19-1, y+h/2, -19, -h/2, 38, h, 0, $g[15], caption)
 				this.r2.rotate(-90)
-				this.vx=x+12
+				this.vx=x+32
 			} else
 			if (labelPos==RIGHT) {
-				this.r2=new Rectangle($g[0], 0, 0, 0, 0, x+w-7, y+h/2, -7, -h/2, 14, h, 0, $g[15], caption)
+				this.r2=new Rectangle($g[0], 0, 0, 0, 0, x+w-19, y+h/2, -19, -h/2, 38, h, 0, $g[15], caption)
 				this.r2.rotate(-90)
-				this.vx=x+2
+				this.vx=x+5
 			}
 		} else {
-			this.vx=x+2
-			this.vw=w-4
-			this.vh=h-14
+			this.vx=x+5
+			this.vw=w-11
+			this.vh=h-31
 			if (labelPos==TOP) {
-				this.r2=new Rectangle2($g[0], 0, 0, 0, 0, x, y, w, 14, 0, $g[15], caption)
-				this.vy=y+12
+				this.r2=new Rectangle2($g[0], 0, 0, 0, 0, x, y, w, 31, 0, $g[15], caption)
+				this.vy=y+26
 			} else
 			if (labelPos==BOTTOM) {
-				this.r2=new Rectangle2($g[0], 0, 0, 0, 0, x, y+h-10, w, 10, 0, $g[15], caption)
-				this.vy=y+2
+				this.r2=new Rectangle2($g[0], 0, 0, 0, 0, x, y+h-22, w, 22, 0, $g[15], caption)
+				this.vy=y+4
 			}
 		}
 		if (w>=h) {
@@ -846,7 +846,7 @@ function dlx(vplayer) {
 		if (this.w>=this.h) {
 			this.label=new Rectangle2($g[0], 0, 0, 0, 0, this.x, this.y, this.w, this.h, 0, $g[43], caption)
 		} else {
-			this.label=new Rectangle($g[0], 0, 0, 0, 0, this.x+this.w/2-1, this.y+this.h/2, -this.w/2, -this.h/2, this.w, this.h, 0, $g[43], caption)
+			this.label=new Rectangle($g[0], 0, 0, 0, 0, this.x+this.w/2-3, this.y+this.h/2, -this.w/2, -this.h/2, this.w, this.h, 0, $g[43], caption)
 			this.label.rotate(-90)
 		}
 	}
@@ -917,7 +917,7 @@ function dlx(vplayer) {
 
 	function AnimPipe() {
 		VObj.call(this)
-		this.w = 5
+		this.w = 10
 		this.n = 0
 		this.px = newArray(0)
 		this.py = newArray(0)
@@ -1141,7 +1141,7 @@ function dlx(vplayer) {
 		if (opacity==0) {
 			$g[142].setPoint(0, 1136, 452)
 			$g[142].setPoint(1, 1301, 452)
-			$g[143].setPoint(0, ($g[29]) ? 420 : 410, 250)
+			$g[143].setPoint(0, ($g[29]) ? 1136 : 1109, 551)
 			$g[143].setPoint(1, 1271, 551)
 			$g[144].setPoint(2, 1163, 573)
 			$g[144].setPoint(3, 1271, 573)
@@ -1638,8 +1638,8 @@ function dlx(vplayer) {
 				$g[14] = 0
 				setViewport(0, 0, WIDTH, HEIGHT, 1)
 				setBgBrush($g[12])
-				$g[15] = new Font("Calibri", 8)
-				$g[16] = new Font("Calibri", 8, STRIKETHROUGH)
+				$g[15] = new Font("Calibri", 22)
+				$g[16] = new Font("Calibri", 22, STRIKETHROUGH)
 				$g[17] = new Layer(1, 3)
 				$g[18] = new Layer(2, 3)
 				$g[19] = new Layer(3, 0)
@@ -1700,7 +1700,7 @@ function dlx(vplayer) {
 				$g[40] = new SolidBrush(PURPLE)
 				$g[41] = new SolidBrush(WHITE)
 				$g[42] = new SolidBrush(LIGHT_BLUE)
-				$g[43] = new Font("Calibri", 9)
+				$g[43] = new Font("Calibri", 24)
 				$g[44] = new SolidPen(SOLID, 1, RED, ROUND_START|ROUND_JOIN|ROUND_END)
 				$g[45] = new SolidPen(SOLID, 1, GREEN, ROUND_START|ROUND_JOIN|ROUND_END)
 				$g[46] = new SolidPen(SOLID, 1, ORANGE, ROUND_START|ROUND_JOIN|ROUND_END)
@@ -1735,21 +1735,21 @@ function dlx(vplayer) {
 				$g[63] = new Button(1055, 1014, 216, 44, "ALU Forwarding", BUTTON_AF)
 				$g[64] = new Button(1298, 1014, 216, 44, "Store Operand\nForwarding", BUTTON_SF)
 				$g[65] = new Button(1541, 1014, 216, 44, "Zero Forwarding", BUTTON_ZF)
-				$g[66] = new Image($g[0], 0, 0, 0, "vivio.png", 660, 460, 0, 0, LOGOW, LOGOH)
+				$g[66] = new Image($g[0], 0, 0, 0, "vivio.png", 1785, 1014, 0, 0, LOGOW, LOGOH)
 				new Txt($g[0], 0, HLEFT|VTOP, 27, 101, $g[2], $g[15], "instructions executed:")
 				$g[67] = new Txt($g[0], 0, HLEFT|VTOP, 27, 123, $g[2], $g[15], "ticks:")
 				$g[68] = new Txt($g[0], 0, HLEFT|VTOP, 243, 101, $g[3], $g[15], "0")
 				$g[69] = new Txt($g[0], 0, HLEFT|VTOP, 243, 123, $g[3], $g[15], "0")
-				$g[70] = new Rectangle2($g[0], 0, 0, 0, 0, 27, 184, 220, 27, 0, $g[15], "Instruction Cache")
+				$g[70] = new Rectangle2($g[0], 0, 0, 0, 0, 27, 150, 270, 27, 0, $g[15], "Instruction Cache")
 				$g[71] = new InstructionMemory(27, 176, 270, 705)
 				$g[72] = new AnimatedClock($g[0], 54, 904, 216, 66)
 				$g[73] = new Register(541, 463, 54, 88, TOP, "PC")
-				$g[74] = new Rectangle2($g[0], 0, 0, 0, 0, 150, 230, 176, 27, 0, $g[15], "Branch Target Buffer")
+				$g[74] = new Rectangle2($g[0], 0, 0, 0, 0, 406, 187, 216, 22, 0, $g[15], "Branch Target Buffer")
 				$g[75] = newArray(2)
-				$g[75][0]=new Register(1086, 244, 108, 44, LEFT, "PC")
-				$g[75][1]=new Register(1086, 264, 108, 44, LEFT, "PC")
+				$g[75][0]=new Register(406, 220, 108, 44, LEFT, "PC")
+				$g[75][1]=new Register(406, 264, 108, 44, LEFT, "PC")
 				$g[76] = newArray(2)
-				$g[76][0]=new Register(514, 244, 108, 44, RIGHT, "PPC")
+				$g[76][0]=new Register(514, 220, 108, 44, RIGHT, "PPC")
 				$g[76][1]=new Register(514, 264, 108, 44, RIGHT, "PPC")
 				$g[77] = new Component(541, 375, 81, 22, "mux 2")
 				$g[78] = new Component(460, 452, 27, 110, "mux 1")
@@ -1788,7 +1788,7 @@ function dlx(vplayer) {
 				$g[87].addPoint(487, 507)
 				$g[87].addPoint(541, 507)
 				$g[88] = new AnimPipe()
-				$g[88].addPoint(568, 568)
+				$g[88].addPoint(568, 462)
 				$g[88].addPoint(568, 397)
 				$g[89] = new AnimPipe()
 				$g[89].addPoint(568, 551)
@@ -1806,7 +1806,7 @@ function dlx(vplayer) {
 				$g[92].addPoint(1082, 860)
 				$g[93] = new InstructionRegister(676, 771, 54, 187, "ID")
 				$g[94] = new Register(676, 463, 54, 88, TOP, "PC1")
-				new Txt($g[0], 0, HLEFT|VTOP, 1080, 108, 0, $g[15], "Register\nFile")
+				new Txt($g[0], 0, HLEFT|VTOP, 1082, 88, 0, $g[15], "Register\nFile")
 				$g[95] = newArray(4)
 				$g[95][0]=new Register(852, 66, 108, 44, LEFT, "R0")
 				$g[95][0].setFixed()
@@ -1814,21 +1814,21 @@ function dlx(vplayer) {
 				$g[95][2]=new Register(960, 66, 108, 44, RIGHT, "R2")
 				$g[95][3]=new Register(960, 110, 108, 44, RIGHT, "R3")
 				$g[96] = new Component(744, 375, 135, 22, "mux 3")
-				$g[97] = new Component(781, 781, 81, 22, "ADD4")
+				$g[97] = new Component(730, 595, 81, 22, "ADD4")
 				$g[98] = new Component(811, 595, 81, 22, "ADDi")
 				$g[99] = new Component(676, 220, 27, 88, "mux 4")
-				$g[100] = new Component(2701, 518, 27, 66, "mux 5")
-				new Rectangle2($g[0], 0, 0, 0, 0, 280, 811, 44, 27, 0, $g[15], "4")
+				$g[100] = new Component(1001, 518, 27, 66, "mux 5")
+				new Rectangle2($g[0], 0, 0, 0, 0, 757, 661, 54, 22, 0, $g[15], "4")
 				$g[101] = new SolidPen(SOLID, 0, PURPLE, ARROW60_END)
 				$g[102] = new SolidPen(SOLID, 5, RED, ARROW60_END)
-				$g[103] = new SolidPen(SOLID, MEDIUM, BLACK)
-				$g[104] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 548, 230, 548, 331, 987, 331, 987, 353)
-				$g[105] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 646, 230, 646, 320, 974, 320, 974, 353)
-				$g[106] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 690, 309, 960, 309, 960, 353)
+				$g[103] = new SolidPen(SOLID, THICK, BLACK)
+				$g[104] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 1482, 507, 1482, 331, 987, 331, 987, 353)
+				$g[105] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 1747, 507, 1747, 320, 974, 320, 974, 353)
+				$g[106] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 1866, 309, 960, 309, 960, 353)
 				$g[107] = new Line($g[0], $g[17], ABSOLUTE, $g[101], 0, 0, 1001, 298, 933, 298, 933, 353)
-				$g[108] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 960, 160, 960, 386, 879, 386)
+				$g[108] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 960, 353, 960, 386, 879, 386)
 				$g[109] = new Line2($g[0], $g[17], ABSOLUTE, $g[103], 930, 353, 990, 353)
-				$g[110] = new Txt($g[0], $g[17], HLEFT|VTOP, 346, 438, 0, $g[15], "zero")
+				$g[110] = new Txt($g[0], $g[17], HLEFT|VTOP, 936, 357, 0, $g[15], "zero")
 				$g[111] = new AnimPipe()
 				$g[111].addPoint(703, 463)
 				$g[111].addPoint(703, 441)
@@ -1842,7 +1842,7 @@ function dlx(vplayer) {
 				$g[113].addPoint(703, 551)
 				$g[113].addPoint(703, 705)
 				$g[113].addPoint(757, 705)
-				$g[113].addPoint(757, 757)
+				$g[113].addPoint(757, 617)
 				$g[114] = new AnimPipe()
 				$g[114].addPoint(703, 551)
 				$g[114].addPoint(703, 705)
@@ -1901,7 +1901,7 @@ function dlx(vplayer) {
 				$g[133] = new Register(1082, 419, 54, 88, TOP, "A")
 				$g[134] = new Register(1082, 507, 54, 88, BOTTOM, "B")
 				$g[135] = new Component(1271, 397, 27, 110, "mux 6")
-				$g[136] = new Component(1271, 1107, 27, 110, "mux 7")
+				$g[136] = new Component(1271, 507, 27, 110, "mux 7")
 				$g[137] = new Component(1271, 683, 27, 88, "mux 8")
 				$g[138] = new ALU(1325, 419, 108, 176)
 				$g[139] = new AnimPipe()
@@ -1976,10 +1976,10 @@ function dlx(vplayer) {
 				$g[154] = new InstructionRegister(1514, 771, 54, 187, "MA")
 				$g[155] = new Register(1514, 463, 54, 88, TOP, "O0")
 				$g[156] = new Register(1487, 705, 108, 44, RIGHT, "SMR")
-				new Txt($g[0], $g[17], HLEFT|VTOP, 553, 270, 0, $g[15], "memory\naddress")
-				new Txt($g[0], $g[17], HLEFT|VTOP, 605, 865, 0, $g[15], "memory\ndata-in")
-				new Txt($g[0], $g[17], HLEFT|VTOP, 615, 270, 0, $g[15], "memory\ndata-out")
-				new Txt($g[0], 0, HLEFT|VTOP, 645, 95, 0, $g[15], "Data\nCache\n(memory)")
+				new Txt($g[0], $g[17], HLEFT|VTOP, 1495, 220, 0, $g[15], "memory\naddress")
+				new Txt($g[0], $g[17], HLEFT|VTOP, 1636, 705, 0, $g[15], "memory\ndata-in")
+				new Txt($g[0], $g[17], HLEFT|VTOP, 1663, 220, 0, $g[15], "memory\ndata-out")
+				new Txt($g[0], 0, HLEFT|VTOP, 1744, 77, 0, $g[15], "Data\nCache\n(memory)")
 				$g[157] = newArray(4)
 				$g[157][0]=new Register(1514, 66, 108, 44, LEFT, "M0")
 				$g[157][1]=new Register(1514, 110, 108, 44, LEFT, "M1")
@@ -2007,7 +2007,7 @@ function dlx(vplayer) {
 				$g[164].addPoint(1650, 154)
 				$g[164].addPoint(1650, 485)
 				$g[164].addPoint(1704, 485)
-				$g[165] = new InstructionRegister(17187, 771, 54, 187, "WB")
+				$g[165] = new InstructionRegister(1785, 771, 54, 187, "WB")
 				$g[166] = new Register(1785, 463, 54, 88, TOP, "O1")
 				$g[167] = new AnimPipe()
 				$g[167].addPoint(1839, 507)
@@ -2221,28 +2221,28 @@ function dlx(vplayer) {
 					$pc = 29
 					continue
 				}
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 54, 150, 216, 22)
+				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 44, 184, 176, 10)
 				$g[173].setRounded(5, 5)
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 68, 267, 81, 22)
+				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 55, 327, 66, 10)
 				$g[173].setRounded(5, 5)
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 162, 267, 38, 22)
+				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 132, 327, 31, 10)
 				$g[173].setRounded(5, 5)
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 206, 267, 38, 22)
+				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 168, 327, 31, 10)
 				$g[173].setRounded(5, 5)
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 249, 267, 38, 22)
+				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 203, 327, 31, 10)
 				$g[173].setRounded(5, 5)
 				new Txt($g[0], $g[20], HLEFT|VTOP, 297, 132, $g[174], $g[175], "LEFT CLICK to change\ninitial program.")
 				new Txt($g[0], $g[20], HLEFT|VTOP, 297, 231, $g[174], $g[175], "LEFT or RIGHT CLICK to \"rotate\"\ninstructions and operands.\nHold and release to reset value.")
 				$pc = 29
 			case 29:
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 838, 55, 243, 110)
+				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 683, 68, 198, 50)
 				$g[173].setRounded(10, 10)
 				new Txt($g[0], $g[20], HLEFT|VTOP, 1109, 88, $g[174], $g[175], "LEFT or RIGHT CLICK register\nto increment or decrement value.")
 				if (!(!$g[22])) {
 					$pc = 30
 					continue
 				}
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 297, 1003, 1487, 66)
+				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 242, 1230, 1212, 30)
 				$g[173].setRounded(10, 10)
 				new Txt($g[0], $g[20], HLEFT|VTOP, 487, 959, $g[174], $g[175], "LEFT CLICK on any of the buttons below to change circuit configuration.")
 				$pc = 30

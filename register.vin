@@ -49,18 +49,18 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
         //
         // horizontal
         //
-        vy = y + 2;
-        vw = w - 14;
-        vh = h - 4;
+        vy = y + 4;
+        vw = w - 38;
+        vh = h - 9;
 
         if (labelPos == LEFT) {
-			Rectangle r2 = Rectangle(0, 0, 0, 0, x + 7 - 1, y + h/2, -7, -h/2, 14, h, 0, font, caption);	// {joj 7/10/16}
+			Rectangle r2 = Rectangle(0, 0, 0, 0, x + 19 - 1, y + h/2, -19, -h/2, 38, h, 0, font, caption);	// {joj 7/10/16}
 			r2.rotate(-90);	// {joj 7/10/16}
-            vx = x + 12;
+            vx = x + 32;
         } else if (labelPos == RIGHT) {
-          r2 = Rectangle(0, 0, 0, 0, x + w - 7, y + h/2, -7, -h/2, 14, h, 0, font, caption);
+          r2 = Rectangle(0, 0, 0, 0, x + w - 19, y + h/2, -19, -h/2, 38, h, 0, font, caption);
             r2.rotate(-90);
-           	vx = x + 2;
+           	vx = x + 5;
         }
 
     } else {
@@ -68,16 +68,16 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
         //
         // vertical
         //
-        vx = x + 2;
-        vw = w - 4;
-        vh = h - 14;
+        vx = x + 5;
+        vw = w - 11;
+        vh = h - 31;
 
         if (labelPos == TOP) {
-            r2 = Rectangle2(0, 0, 0, 0, x,y, w,14, 0, font, caption);
-            vy = y + 12;
+            r2 = Rectangle2(0, 0, 0, 0, x,y, w,31, 0, font, caption);
+            vy = y + 26;
         } else if (labelPos == BOTTOM) {
-            r2 = Rectangle2(0, 0, 0, 0, x,y+h-10, w,10, 0, font, caption);
-            vy = y + 2;
+            r2 = Rectangle2(0, 0, 0, 0, x,y+h-22, w,22, 0, font, caption);
+            vy = y + 4;
         }
 
     }

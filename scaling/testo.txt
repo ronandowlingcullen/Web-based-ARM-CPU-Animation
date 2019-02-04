@@ -25,7 +25,7 @@ if (name != "")
 
 Font fTitle = Font("Calibri", 54, SMALLCAPS | ITALIC);
 
-Rectangle title = Rectangle2(0, HLEFT, 0, SolidBrush(DARK_BLUE), 27, 27, 811, 66, whitePen, fTitle, sprintf(" MIPS Animation %s", name));	// {joj 2/27/16}
+Rectangle title = Rectangle2(0, HLEFT, 0, SolidBrush(DARK_BLUE), 10, 10, 300, 30, whitePen, fTitle, sprintf(" MIPS Animation %s", name));	// {joj 2/10/16}
 
 Pen borderPen = SolidPen(DASH, 3, DARK_BLUE, ROUND_START | ROUND_JOIN | ROUND_END);
 
@@ -81,7 +81,7 @@ Rectangle statIC = Txt(0, HLEFT | VTOP, 243, 101, redPen, font, "0");				// {joj
 Rectangle statTE = Txt(0, HLEFT | VTOP, 243, 123, redPen, font, "0");				// {joj}
 
 // Instruction memory and clock
-Rectangle imLabel = Rectangle2(0, 0, 0, 0, 27, 184, 220, 27, 0, font, "Instruction Cache"); // {joj}
+Rectangle imLabel = Rectangle2(0, 0, 0, 0, 27, 150, 270, 27, 0, font, "Instruction Cache"); // {joj}
 InstructionMemory im = InstructionMemory(27, 176, 270, 705);
 AnimatedClock animClock = AnimatedClock(54, 904, 216, 66);
 
@@ -89,7 +89,7 @@ AnimatedClock animClock = AnimatedClock(54, 904, 216, 66);
 Register regPC = Register(541, 463, 54, 88, TOP, "PC");
 
 // branch target buffer
-Rectangle btbLabel  = Rectangle2(0, 0, 0, 0, 150, 230, 176, 27, 0, font, "Branch Target Buffer");    // {joj}
+Rectangle btbLabel  = Rectangle2(0, 0, 0, 0, 406, 187, 216, 22, 0, font, "Branch Target Buffer");    // {joj}
 Register btbPC[2];										// {joj 2/10/16}
 btbPC[0]  = Register(1086, 244, 108, 44, LEFT, "PC");     // {joj 1/2/06}
 btbPC[1]  = Register(1086, 264, 108, 44, LEFT, "PC");     // {joj 1/2/06}
@@ -178,7 +178,7 @@ InstructionRegister regID = InstructionRegister(676, 771, 54, 187, "ID");
 Register regPC1 = Register(676, 463, 54, 88, TOP, "PC1");
 
 // Register file
-Txt(0, HLEFT | VTOP, 1080, 108, 0, font, "Register\nFile");		// {joj}
+Txt(0, HLEFT | VTOP, 1082, 88, 0, font, "Register\nFile");		// {joj}
 Register regFile[4];
 regFile[0] = Register(852, 66, 108, 44, LEFT, "R0"); regFile[0].setFixed();                  // {joj 29/10/06}
 regFile[1] = Register(852, 110, 108, 44, LEFT, "R1");
@@ -192,7 +192,7 @@ Component cADDi = Component(811, 595, 81, 22, "ADDi");                          
 Component cMUX4 = Component(676, 220, 27, 88, "mux 4");                                               // {joj}
 Component cMUX5 = Component(2701, 518, 27, 66, "mux 5");                                               // {joj}
 
-Rectangle2(0, 0, 0, 0, 280, 811, 44, 27, 0, font, "4");
+Rectangle2(0, 0, 0, 0, 757, 661, 54, 22, 0, font, "4");
 
 // Control lines for MUX3
 Pen controlPen = SolidPen(SOLID, 0, PURPLE, ARROW60_END);
@@ -200,14 +200,14 @@ Pen controlHLPen = SolidPen(SOLID, 5, RED, ARROW60_END);
 Pen muxPen = SolidPen(SOLID, MEDIUM, BLACK);															// {joj}
 
 // inputs to cZeroMux
-Line clALU = Line2(valuesLayer, ABSOLUTE, controlPen, 548,230, 548,331, 987,331, 987,353);		// {joj 8/12/16}
-Line clOUT0 = Line2(valuesLayer, ABSOLUTE, controlPen, 646,230, 646,320, 974,320, 974,353);		// {joj 8/12/16}
-Line clOUT1 = Line2(valuesLayer, ABSOLUTE, controlPen, 690,309, 960,309, 960,353);				// {joj 8/12/16}
+Line clALU = Line2(valuesLayer, ABSOLUTE, controlPen, 1482,507, 1482,331, 987,331, 987,353);		// {joj 8/12/16}
+Line clOUT0 = Line2(valuesLayer, ABSOLUTE, controlPen, 1747,507, 1747,320, 974,320, 974,353);		// {joj 8/12/16}
+Line clOUT1 = Line2(valuesLayer, ABSOLUTE, controlPen, 1866,309, 960,309, 960,353);				// {joj 8/12/16}
 Line clA = Line(valuesLayer, ABSOLUTE, controlPen, 0,0, 1001,298, 933,298, 933,353);
-Line clMUX = Line2(valuesLayer, ABSOLUTE, controlPen, 960,160, 960,386, 879,386);
+Line clMUX = Line2(valuesLayer, ABSOLUTE, controlPen, 960,353, 960,386, 879,386);
 
 Line cZeroMux = Line2(valuesLayer, ABSOLUTE, muxPen, 930, 353, 990, 353);
-Rectangle cZeroTxt = Txt(valuesLayer,HLEFT | VTOP, 346, 438, 0, font, "zero");			// {joj}
+Rectangle cZeroTxt = Txt(valuesLayer,HLEFT | VTOP, 936, 357, 0, font, "zero");			// {joj}
 
 // Connections from PC1
 AnimPipe apPC1_MUX2 = AnimPipe();
@@ -409,12 +409,12 @@ apMUX7_OUT0.addPoint(1514, 507);
 InstructionRegister regMA = InstructionRegister(1514, 771, 54, 187, "MA");
 Register regOUT0 = Register(1514, 463, 54, 88, TOP, "O0");
 Register regSMDR = Register(1487, 705, 108, 44, RIGHT, "SMR");
-Txt(valuesLayer, HLEFT | VTOP, 553, 270, 0, font, "memory\naddress");        // {joj}
-Txt(valuesLayer, HLEFT | VTOP, 605, 865, 0, font, "memory\ndata-in");        // {joj}
-Txt(valuesLayer, HLEFT | VTOP, 615, 270, 0, font, "memory\ndata-out");       // {joj}
+Txt(valuesLayer, HLEFT | VTOP, 1495, 220, 0, font, "memory\naddress");        // {joj}
+Txt(valuesLayer, HLEFT | VTOP, 1636, 705, 0, font, "memory\ndata-in");        // {joj}
+Txt(valuesLayer, HLEFT | VTOP, 1663, 220, 0, font, "memory\ndata-out");       // {joj}
 
 // Memory
-Txt(0, HLEFT | VTOP, 645, 95, 0, font, "Data\nCache\n(memory)"); // {joj}
+Txt(0, HLEFT | VTOP, 1744, 77, 0, font, "Data\nCache\n(memory)"); // {joj}
 Register memory[4];
 memory[0] = Register(1514, 66, 108, 44, LEFT, "M0");
 memory[1] = Register(1514, 110, 108, 44, LEFT, "M1");
@@ -723,13 +723,13 @@ function showSMDRForwarding(num opacity) { // {joj 20/8/10}
 function showZeroForwarding(num opacity) { // {joj 20/8/10}
 
     if (opacity == 0) {
-        //clA.setPt(1, -15, 0);				// {joj 15/3/15}
-        //clA.setPt(2, -15, 25);			// {joj 15/3/15}
+        //clA.setPt(1, -41, 0);				// {joj 41/3/41}
+        //clA.setPt(2, -41, 55);			// {joj 41/3/41}
         clA.setPt(1, 960, 298);				// {joj 5/10/16}
         clA.setPt(2, 960, 353);				// {joj 5/10/16}
     } else {
-		//clA.setPt(1, -25, 0);				// {joj 15/3/15}
-        //clA.setPt(2, -25, 25);			// {joj 15/3/15}
+		//clA.setPt(1, -68, 0);				// {joj 15/3/15}
+        //clA.setPt(2, -68, 68);			// {joj 15/3/15}
 		clA.setPt(1, 933, 298);				// {joj 5/10/16}
         clA.setPt(2, 933, 353);				// {joj 5/10/16}
 
@@ -1123,26 +1123,26 @@ Font helpFont = Font("Arial", 32, BOLD);
 
 Txt(helpLayer, HLEFT | VTOP, 32, 639, helpPen, helpFont, "LEFT CLICK on animation background to start and stop clock.\n\nSHIFT LEFT CLICK on background to execute \"single MIPS clock cycle\".");
 if (!lockCircuit) {
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 54, 150, 216, 22); r.setRounded(5, 5);
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 68, 267, 81, 22); r.setRounded(5, 5);
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 162, 267, 38, 22); r.setRounded(5, 5);
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 206, 267, 38, 22); r.setRounded(5, 5);
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 249, 267, 38, 22); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 44, 184, 176, 10); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 55, 327, 66, 10); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 132, 327, 31, 10); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 168, 327, 31, 10); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 203, 327, 31, 10); r.setRounded(5, 5);
     Txt(helpLayer, HLEFT | VTOP, 297, 132, helpPen, helpFont, "LEFT CLICK to change\ninitial program.");
     Txt(helpLayer, HLEFT | VTOP, 297, 231, helpPen, helpFont, "LEFT or RIGHT CLICK to \"rotate\"\ninstructions and operands.\nHold and release to reset value.");
 }
 
-r = Rectangle2(helpLayer, 0, helpPen, 0, 838, 55, 243, 110);
+r = Rectangle2(helpLayer, 0, helpPen, 0, 683, 68, 198, 50);
 r.setRounded(10, 10);
 Txt(helpLayer, HLEFT | VTOP, 1109, 88, helpPen, helpFont, "LEFT or RIGHT CLICK register\nto increment or decrement value.");
 
 if (!lockCircuit) {
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 297, 1003, 1487, 66);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 242, 1230, 1212, 30);
     r.setRounded(10, 10);
     Txt(helpLayer, HLEFT | VTOP, 487, 959, helpPen, helpFont, "LEFT CLICK on any of the buttons below to change circuit configuration.");
 }
 
-Rectangle closeHelp = Rectangle2(helpLayer, 0, helpPen, yellowBrush, 825, 507, 270, 66, helpPen, helpFont, "CLOSE HELP");
+Rectangle closeHelp = Rectangle2(helpLayer, 0, helpPen, yellowBrush, 305, 230, 100, 30, helpPen, helpFont, "CLOSE HELP");
 closeHelp.setRounded(5, 5);
 
 when closeHelp ~> eventEE(num enter, num x, num y) {			// {joj 24/9/17}

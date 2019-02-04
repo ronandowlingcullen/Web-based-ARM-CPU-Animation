@@ -20,7 +20,7 @@
 //
 
 Brush componentBrush = SolidBrush(LIGHT_BLUE);
-Font componentFont = Font("Calibri", 9);          // joj
+Font componentFont = Font("Calibri", 24);          // joj
 
 class Component(num _x, num _y, num _w, num _h, string caption) {
 
@@ -36,7 +36,7 @@ class Component(num _x, num _y, num _w, num _h, string caption) {
     if (w >= h) {
         label = Rectangle2(0, 0, 0, 0, x, y, w, h, 0, componentFont, caption);
     } else {
-        label = Rectangle(0, 0, 0, 0, x + w/2 - 1, y + h/2, -w/2, -h/2, w, h, 0, componentFont, caption);   // {joj 7/10/16}
+        label = Rectangle(0, 0, 0, 0, x + w/2 - 3, y + h/2, -w/2, -h/2, w, h, 0, componentFont, caption);   // {joj 7/10/16}
 		label.rotate(-90);			// {joj 7/10/16}
     }
 

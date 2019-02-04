@@ -19,17 +19,45 @@ with open(ifil) as infile, open('./testo.txt', 'w') as outfile:
         # Ignoring comments
         if not re.match('\/\/.*',line):
             # Pattern matching all Line2 constructors
-            matchObj = re.match('.*Line2\([\s\S\d]* ?, ?[\s\S\d]* ?, ?[\s\S\d]* ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?\)',line)
+            matchObj = re.match('.*Line2\(.+,.+,.+, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?\)',line)
             if matchObj:
                 newNums = []
                 newNums.append((float(matchObj.group(1))/oldWidth)*newWidth)
                 newNums.append((float(matchObj.group(2))/oldHeight)*newHeight)
                 newNums.append((float(matchObj.group(3))/oldWidth)*newWidth)
                 newNums.append((float(matchObj.group(4))/oldHeight)*newHeight)
-                for i in range(0,4):
+                newNums.append((float(matchObj.group(5))/oldWidth)*newWidth)
+                newNums.append((float(matchObj.group(6))/oldHeight)*newHeight)
+                newNums.append((float(matchObj.group(7))/oldWidth)*newWidth)
+                newNums.append((float(matchObj.group(8))/oldHeight)*newHeight)
+                for i in range(0,8):
                     line = line.replace(matchObj.group(i+1),str(round(newNums[i])))
             elif re.match('.*Line2\(.*\)',line):
-                print("Manual update needed at line " + str(i+1) + " for Line2 call.")
+                matchObj = re.match('.*Line2\(.+,.+,.+, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?\)',line)
+                if matchObj:
+                    newNums = []
+                    newNums.append((float(matchObj.group(1))/oldWidth)*newWidth)
+                    newNums.append((float(matchObj.group(2))/oldHeight)*newHeight)
+                    newNums.append((float(matchObj.group(3))/oldWidth)*newWidth)
+                    newNums.append((float(matchObj.group(4))/oldHeight)*newHeight)
+                    newNums.append((float(matchObj.group(5))/oldWidth)*newWidth)
+                    newNums.append((float(matchObj.group(6))/oldHeight)*newHeight)
+                    for i in range(0,6):
+                        line = line.replace(matchObj.group(i+1),str(round(newNums[i])))
+                elif re.match('.*Line2\(.*\)',line):
+                    matchObj = re.match('.*Line2\([\s\S\d]* ?, ?[\s\S\d]* ?, ?[\s\S\d]* ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?\)',line)
+                    if matchObj:
+                        newNums = []
+                        newNums.append((float(matchObj.group(1))/oldWidth)*newWidth)
+                        newNums.append((float(matchObj.group(2))/oldHeight)*newHeight)
+                        newNums.append((float(matchObj.group(3))/oldWidth)*newWidth)
+                        newNums.append((float(matchObj.group(4))/oldHeight)*newHeight)
+                        for i in range(0,4):
+                            line = line.replace(matchObj.group(i+1),str(round(newNums[i])))
+                    elif re.match('.*Line2\(.*\)',line):
+                        print("Manual update needed at line " + str(i+1) + " for Line2 call.")
+
+
 
 
             # Pattern matching all Font constructors
@@ -49,7 +77,7 @@ with open(ifil) as infile, open('./testo.txt', 'w') as outfile:
 
 
             # Pattern matching all Rectangle2 constructors
-            matchObj = re.match('.*Rectangle2\(.+,.+,.+,.+, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?.*\)',line)
+            matchObj = re.match('.*Rectangle2\(.+, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+) ?, ?(\d+).*\)',line)
             if matchObj:
                 newNums = []
                 newNums.append((float(matchObj.group(1))/oldWidth)*newWidth)
@@ -107,7 +135,7 @@ with open(ifil) as infile, open('./testo.txt', 'w') as outfile:
                 print("Manual update needed at line " + str(i+1) + " for Image call.")
 
             # Txt(0, HLEFT | VTOP, 10, 46, darkGrayPen, font, "instructions executed:");
-            matchObj = re.match('.*Txt\( ?.+ ?,.+, ?(\d+) ?, ?(\d+).*\)',line)
+            matchObj = re.match('.*Txt\(.*[a-zA-Z], ?(\d+) ?, ?(\d+).*\)',line)
             if matchObj:
                 newNums = []
                 newNums.append((float(matchObj.group(1))/oldWidth)*newWidth)
@@ -214,7 +242,7 @@ with open(ifil) as infile, open('./testo.txt', 'w') as outfile:
                 print("Manual update needed at line " + str(i+1) + " for Line call.")
 
             # .setPoint(0, 420, 205);
-            matchObj = re.match('.*.setPoint\(.+, ?(\d+) ?, ?(\d+).*\)',line)
+            matchObj = re.match('.*.setPoint\(.+, ?-?(\d+) ?, ?-?(\d+).*\)',line)
             if matchObj:
                 newNums = []
                 newNums.append((float(matchObj.group(1))/oldWidth)*newWidth)
@@ -225,7 +253,7 @@ with open(ifil) as infile, open('./testo.txt', 'w') as outfile:
                 print("Manual update needed at line " + str(i+1) + " for .setPoint call.")
 
             # .setPt(0, 420, 205);
-            matchObj = re.match('.*.setPt\(.+, ?(\d+) ?, ?(\d+).*\)',line)
+            matchObj = re.match('.*.setPt\(.+, ?-?(\d+) ?, ?-?(\d+).*\)',line)
             if matchObj:
                 newNums = []
                 newNums.append((float(matchObj.group(1))/oldWidth)*newWidth)

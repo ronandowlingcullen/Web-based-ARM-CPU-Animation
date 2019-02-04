@@ -28,10 +28,10 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
 
     Rectangle r1 = Rectangle2(0, 0, blackPen, blackBrush, x, y, w, h);
 	r1.setRounded(2, 2); // {joj 16/10/16}
-    Rectangle r2 = Rectangle2(0, 0, blackPen, whiteBrush, x + 2, y + 2, w - 4, h - 14);
+    Rectangle r2 = Rectangle2(0, 0, blackPen, whiteBrush, x + 5, y + 4, w - 11, h - 31);
 	r2.setRounded(2, 2); // {joj 16/10/16}
-    Rectangle r3 = Rectangle2(0, 0, 0, 0, x, y + h - 10, w, 10, whitePen, font, caption);
-    Rectangle label = Txt(valuesLayer, 0, x + w/2, y + (h - 14)/2, 0, font, txt); // {joj 16/10/16}
+    Rectangle r3 = Rectangle2(0, 0, 0, 0, x, y + h - 22, w, 22, whitePen, font, caption);
+    Rectangle label = Txt(valuesLayer, 0, x + w/2, y + (h - 31)/2, 0, font, txt); // {joj 16/10/16}
 	label.rotate(-90); // {joj 14/10/16}
 
     //

@@ -21,7 +21,7 @@
 
 class AnimPipe() {
 
-    num w = 5;			// line width 										// could be static / global
+    num w = 10;			// line width 										// could be static / global
  	num n = 0;   		// # points
 	num px[0];			// x co-ordinates
 	num py[0];			// y co-ordinates
