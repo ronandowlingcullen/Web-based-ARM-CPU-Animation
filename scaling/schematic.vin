@@ -70,7 +70,7 @@ Button buttonZF = Button(570, 460, 80, 20, "Zero Forwarding", BUTTON_ZF);       
 //
 const num LOGOW = 20;																	// 64 x 64 image
 const num LOGOH = 20;
-Image logo = Image(0, 0, 0, "vivio.png", 660,460, 0,0, LOGOW,LOGOH);					// {joj 24/9/17}
+Image logo = Image(0, 0, 0, "vivio.png", 660,460, 0,0, LOGOW, LOGOH);					// {joj 24/9/17}
 
 // Statistics
 

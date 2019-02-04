@@ -4,3 +4,15 @@ Font
 Rectangle2
 SolidPen
 Button
+Image
+Txt
+InstructionMemory
+AnimatedClock
+Register
+addPoint
+Rectangle
+InstructionRegister
+Line
+setPoint
+setPt
+Alu
