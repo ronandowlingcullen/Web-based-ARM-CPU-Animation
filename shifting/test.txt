@@ -1,0 +1,28 @@
+//
+// schematic.vin
+//
+// Simulation of the DLX
+// Written by Edsko de Vries, Summer 2003
+//
+// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software Foundation;
+// either version 2 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+string name = getArg("name", "");					// optional name of code example {joj 2/11/16}
+if (name != "")
+	name = sprintf(":  %s", name);					// {joj 2/10/16}}
+
+Font fTitle = Font("Calibri", 54, SMALLCAPS | ITALIC);
+
+Rectangle title = Rectangle2(0, HLEFT, 0, SolidBrush(DARK_BLUE), 27, 27, 811, 66, whitePen, fTitle, sprintf(" MIPS Animation %s", name));	// {joj 2/27/16}
