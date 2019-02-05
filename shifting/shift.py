@@ -43,4 +43,4 @@ with open(ifil) as infile, open('./testo.txt', 'w') as outfile:
         outfile.write(line)
 
 
-print("\nScaled version of " + ifil + " generated in testo.txt")
+print("\Shifted version of " + ifil + " generated in testo.txt")
