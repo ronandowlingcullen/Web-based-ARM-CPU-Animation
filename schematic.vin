@@ -82,7 +82,7 @@ Rectangle statTE = Txt(0, HLEFT | VTOP, 243, 123, redPen, font, "0");				// {joj
 
 // Instruction memory and clock
 Rectangle imLabel = Rectangle2(0, 0, 0, 0, 27, 150, 270, 27, 0, font, "Instruction Cache"); // {joj}
-InstructionMemory im = InstructionMemory(27, 176, 270, 705);
+InstructionMemory im = InstructionMemory(27, 176, 370, 705);
 AnimatedClock animClock = AnimatedClock(54, 904, 216, 66);
 
 // IF and PC

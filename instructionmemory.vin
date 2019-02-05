@@ -33,17 +33,19 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 	num h = _h;
 	num addr = _addr;
 
-    num vIns = 0, vRdt = 0, vRs1 = 0, vRs2 = 0;
-    num opTypeRdt = 0, opTypeRs1 = 0, opTypeRs2 = 0;
+    num vIns = 0, vIns2 = 0, vRdt = 0, vRs1 = 0, vRs2 = 0, vRs3 = 0;
+    num opTypeRdt = 0, opTypeRs1 = 0, opTypeRs2 = 0, opTypeRs3 = 0;
     num clk;
 
-    num fw = w / 6;
+    num fw = w / 8;
 
     // Brushes for the individual boxes so we can highlight them one by one
     Pen insPen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
     Pen rdtPen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
     Pen rs1Pen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
     Pen rs2Pen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
+    Pen ins2Pen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
+    Pen rs3Pen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
 
     Brush brush = SolidBrush(WHITE);
     Rectangle adr = Rectangle2(valuesLayer, 0, 0, brush, x, y, fw, h, 0, font, "%02X", addr);
@@ -51,6 +53,8 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
     Rectangle rdt = Rectangle2(valuesLayer, 0, 0, brush, x + 3 * fw, y, fw, h, rdtPen, font, "-");
     Rectangle rs1 = Rectangle2(valuesLayer, 0, 0, brush, x + 4 * fw, y, fw, h, rs1Pen, font, "-");
     Rectangle rs2 = Rectangle2(valuesLayer, 0, 0, brush, x + 5 * fw, y, fw, h, rs2Pen, font, "-");
+    Rectangle ins2 = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 6 * fw, y, 2 * fw, h, insPen, font, " NOP");
+    Rectangle rs3 = Rectangle2(valuesLayer, 0, 0, brush, x + 7 * fw, y, fw, h, rs2Pen, font, "-");
 
     Rectangle dot = Rectangle2(valuesLayer, 0, 0, redBrush, x+fw*0.8, y+2, h/2, h/2);	// {joj 30/10/06}
     dot.setOpacity(0);                                                                  // {joj 30/10/06}
@@ -85,6 +89,12 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 		return 0;
     }
 
+    when ins2 ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+        brush.setSolid(enter ? MARINE : WHITE);
+        ins2Pen.setRGBA(enter ? RED : BLACK);					// {joj 24/9/17}
+		return 0;
+    }
+
     when rdt ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
         brush.setSolid(enter ? MARINE : WHITE);
         if (opTypeRdt != OP_TYPE_UNUSED) {
@@ -115,6 +125,16 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 		return 0;
     }
 
+    when rs3 ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+        brush.setSolid(enter ? MARINE : WHITE);
+        if (opTypeRs3 != OP_TYPE_UNUSED) {
+            rs3Pen.setRGBA(enter ? RED : BLACK);				// {joj 24/9/17}
+        } else {
+            rs3Pen.setRGBA(BLACK);								// {joj 14/9/17}
+		}
+		return 0;
+    }
+
     num function getOpcode() {                                  // {joj 27/10/06}
         return vIns << 24 | vRdt << 16 | vRs1 << 8 | vRs2;      // {joj 27/10/06}
     }                                                           // {joj 27/10/06}
@@ -124,13 +144,18 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         num offset;
 
         ins.setTxt("%c%s", 32, instrNames[vIns]);
+        ins2.setTxt("%c%s", 32, instrNames[vIns2]);
 
         opTypeRdt = instrOpTypeRdt(vIns);
         opTypeRs1 = instrOpTypeRs1(vIns);
         opTypeRs2 = instrOpTypeRs2(vIns);
+        opTypeRs3 = instrOpTypeRs2(vIns2);
 
         if (opTypeRs2 == OP_TYPE_REG)
             vRs2 = (vRs2 % 4);
+
+        if (opTypeRs3 == OP_TYPE_REG)
+            vRs3 = (vRs3 % 4);
 
         if (opTypeRdt == OP_TYPE_UNUSED) rdt.setTxt("-") else rdt.setTxt("R%d", vRdt);
         if (opTypeRs1 == OP_TYPE_UNUSED) rs1.setTxt("-") else rs1.setTxt("R%d", vRs1);
@@ -141,6 +166,13 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
             rs2.setTxt("R%d", vRs2)
         else
             rs2.setTxt("%02X", vRs2);
+
+        if (opTypeRs3 == OP_TYPE_UNUSED)
+            rs3.setTxt("-")
+        else if (opTypeRs2 == OP_TYPE_REG)
+            rs3.setTxt("R%d", vRs3)
+        else
+            rs3.setTxt("%02X", vRs3);
 
         if (instrIsBranch(vIns) || isJorJAL(vIns)) {
             if (vRs2 & 0x80) {
@@ -207,6 +239,25 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 		return 0;
     }
 
+    when ins2 ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/9/17}
+        if (!lockCircuit) {
+            if (down) {
+                clk = timeMS();
+				if (flags & MB_LEFT) {
+                	vIns2 = (vIns2 == MAX_INSTR) ? 0 : vIns2 + 1;
+				} else if (flags & MB_RIGHT) {
+ 					vIns2 = (vIns2 == 0) ? MAX_INSTR : vIns2 - 1;
+				}
+            } else {
+                clk = clk + 500;
+                if (timeMS() > clk)
+                    vIns2 = 0;
+            }
+            initRegs(1);
+        }
+		return 0;
+    }
+
     when rdt ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/10/17}
         if (!lockCircuit && down && opTypeRdt != OP_TYPE_UNUSED) {
             if (flags & MB_LEFT) {
@@ -254,6 +305,37 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
                     clk = clk + 500;
                     if (timeMS() > clk)
                         vRs2 = 0;
+                }
+            }
+            initRegs(1);
+        }
+    }
+
+	when rs3 ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/10/17}
+        if (!lockCircuit && down) {
+            if (flags & MB_LEFT) {
+                if (opTypeRs3 == OP_TYPE_REG) {
+                    vRs3 = (vRs3 + 1) % 4;
+                } else if (opTypeRs3 == OP_TYPE_IMM) {
+                    clk = timeMS();
+                    vRs3 = (vRs3 + 1) % 256;
+                }
+			} else if (flags & MB_RIGHT) {
+				if (opTypeRs3 == OP_TYPE_REG) {
+                    vRs3 = (vRs3 - 1) % 4;
+                    if (vRs3 < 0)
+                        vRs3 = 4 + vRs3;
+                } else if (opTypeRs3 == OP_TYPE_IMM) {
+                    clk = timeMS();
+                    vRs3 = (vRs3 - 1) % 256;
+                    if (vRs3 < 0)
+                        vRs3 = 256 + vRs3;
+                }
+            } else {
+                if (opTypeRs3 == OP_TYPE_IMM) {
+                    clk = clk + 500;
+                    if (timeMS() > clk)
+                        vRs3 = 0;
                 }
             }
             initRegs(1);

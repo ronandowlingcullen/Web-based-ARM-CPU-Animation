@@ -381,20 +381,24 @@ function dlx(vplayer) {
 		this.w = _w
 		this.h = _h
 		this.addr = _addr
-		this.vIns = 0, this.vRdt = 0, this.vRs1 = 0, this.vRs2 = 0
-		this.opTypeRdt = 0, this.opTypeRs1 = 0, this.opTypeRs2 = 0
+		this.vIns = 0, this.vIns2 = 0, this.vRdt = 0, this.vRs1 = 0, this.vRs2 = 0, this.vRs3 = 0
+		this.opTypeRdt = 0, this.opTypeRs1 = 0, this.opTypeRs2 = 0, this.opTypeRs3 = 0
 		this.clk
-		this.fw = this.w/6
+		this.fw = this.w/8
 		this.insPen = new SolidPen(0, 0, BLACK)
 		this.rdtPen = new SolidPen(0, 0, BLACK)
 		this.rs1Pen = new SolidPen(0, 0, BLACK)
 		this.rs2Pen = new SolidPen(0, 0, BLACK)
+		this.ins2Pen = new SolidPen(0, 0, BLACK)
+		this.rs3Pen = new SolidPen(0, 0, BLACK)
 		this.brush = new SolidBrush(WHITE)
 		this.adr = new Rectangle2($g[0], $g[17], 0, 0, this.brush, this.x, this.y, this.fw, this.h, 0, $g[15], "%02X", this.addr)
 		this.ins = new Rectangle2($g[0], $g[17], HLEFT, 0, this.brush, this.x+this.fw, this.y, 2*this.fw, this.h, this.insPen, $g[15], " NOP")
 		this.rdt = new Rectangle2($g[0], $g[17], 0, 0, this.brush, this.x+3*this.fw, this.y, this.fw, this.h, this.rdtPen, $g[15], "-")
 		this.rs1 = new Rectangle2($g[0], $g[17], 0, 0, this.brush, this.x+4*this.fw, this.y, this.fw, this.h, this.rs1Pen, $g[15], "-")
 		this.rs2 = new Rectangle2($g[0], $g[17], 0, 0, this.brush, this.x+5*this.fw, this.y, this.fw, this.h, this.rs2Pen, $g[15], "-")
+		this.ins2 = new Rectangle2($g[0], $g[17], HLEFT, 0, this.brush, this.x+6*this.fw, this.y, 2*this.fw, this.h, this.insPen, $g[15], " NOP")
+		this.rs3 = new Rectangle2($g[0], $g[17], 0, 0, this.brush, this.x+7*this.fw, this.y, this.fw, this.h, this.rs2Pen, $g[15], "-")
 		this.dot = new Rectangle2($g[0], $g[17], 0, 0, $g[11], this.x+this.fw*0.80000000000000004, this.y+2, this.h/2, this.h/2)
 		this.dot.setOpacity(0)
 		this.arrowDown = new Line($g[0], $g[17], 0, $g[39], 0, 0, this.x+this.w+2, this.y+this.h*0.5, 5, 0, 0, 0, 0, 0)
@@ -403,13 +407,17 @@ function dlx(vplayer) {
 		this.arrowUp.setOpacity(0)
 		this.adr.addEventHandler("eventEE", this, this.$eh0)
 		this.ins.addEventHandler("eventEE", this, this.$eh1)
-		this.rdt.addEventHandler("eventEE", this, this.$eh2)
-		this.rs1.addEventHandler("eventEE", this, this.$eh3)
-		this.rs2.addEventHandler("eventEE", this, this.$eh4)
-		this.ins.addEventHandler("eventMB", this, this.$eh5)
-		this.rdt.addEventHandler("eventMB", this, this.$eh6)
-		this.rs1.addEventHandler("eventMB", this, this.$eh7)
-		this.rs2.addEventHandler("eventMB", this, this.$eh8)
+		this.ins2.addEventHandler("eventEE", this, this.$eh2)
+		this.rdt.addEventHandler("eventEE", this, this.$eh3)
+		this.rs1.addEventHandler("eventEE", this, this.$eh4)
+		this.rs2.addEventHandler("eventEE", this, this.$eh5)
+		this.rs3.addEventHandler("eventEE", this, this.$eh6)
+		this.ins.addEventHandler("eventMB", this, this.$eh7)
+		this.ins2.addEventHandler("eventMB", this, this.$eh8)
+		this.rdt.addEventHandler("eventMB", this, this.$eh9)
+		this.rs1.addEventHandler("eventMB", this, this.$eh10)
+		this.rs2.addEventHandler("eventMB", this, this.$eh11)
+		this.rs3.addEventHandler("eventMB", this, this.$eh12)
 	}
 	Instruction.prototype = Object.create(VObj.prototype)
 
@@ -426,6 +434,12 @@ function dlx(vplayer) {
 
 	Instruction.prototype.$eh2 = function(enter, $1, $2) {
 		this.brush.setSolid(enter ? MARINE : WHITE)
+		this.ins2Pen.setRGBA(enter ? RED : BLACK)
+		return 0
+	}
+
+	Instruction.prototype.$eh3 = function(enter, $1, $2) {
+		this.brush.setSolid(enter ? MARINE : WHITE)
 		if (this.opTypeRdt!=OP_TYPE_UNUSED) {
 			this.rdtPen.setRGBA(enter ? RED : BLACK)
 		} else {
@@ -434,7 +448,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	Instruction.prototype.$eh3 = function(enter, $1, $2) {
+	Instruction.prototype.$eh4 = function(enter, $1, $2) {
 		this.brush.setSolid(enter ? MARINE : WHITE)
 		if (this.opTypeRs1!=OP_TYPE_UNUSED) {
 			this.rs1Pen.setRGBA(enter ? RED : BLACK)
@@ -444,12 +458,22 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	Instruction.prototype.$eh4 = function(enter, $1, $2) {
+	Instruction.prototype.$eh5 = function(enter, $1, $2) {
 		this.brush.setSolid(enter ? MARINE : WHITE)
 		if (this.opTypeRs2!=OP_TYPE_UNUSED) {
 			this.rs2Pen.setRGBA(enter ? RED : BLACK)
 		} else {
 			this.rs2Pen.setRGBA(BLACK)
+		}
+		return 0
+	}
+
+	Instruction.prototype.$eh6 = function(enter, $1, $2) {
+		this.brush.setSolid(enter ? MARINE : WHITE)
+		if (this.opTypeRs3!=OP_TYPE_UNUSED) {
+			this.rs3Pen.setRGBA(enter ? RED : BLACK)
+		} else {
+			this.rs3Pen.setRGBA(BLACK)
 		}
 		return 0
 	}
@@ -461,11 +485,15 @@ function dlx(vplayer) {
 	Instruction.prototype.initRegs = function(remember) {
 		let offset
 		this.ins.setTxt("%c%s", 32, $g[35][this.vIns])
+		this.ins2.setTxt("%c%s", 32, $g[35][this.vIns2])
 		this.opTypeRdt=instrOpTypeRdt(this.vIns)
 		this.opTypeRs1=instrOpTypeRs1(this.vIns)
 		this.opTypeRs2=instrOpTypeRs2(this.vIns)
+		this.opTypeRs3=instrOpTypeRs2(this.vIns2)
 		if (this.opTypeRs2==OP_TYPE_REG)
 		this.vRs2=(this.vRs2%4)
+		if (this.opTypeRs3==OP_TYPE_REG)
+		this.vRs3=(this.vRs3%4)
 		if (this.opTypeRdt==OP_TYPE_UNUSED)
 		this.rdt.setTxt("-")
 		else 
@@ -481,6 +509,13 @@ function dlx(vplayer) {
 		this.rs2.setTxt("R%d", this.vRs2)
 		else 
 		this.rs2.setTxt("%02X", this.vRs2)
+		if (this.opTypeRs3==OP_TYPE_UNUSED)
+		this.rs3.setTxt("-")
+		else 
+		if (this.opTypeRs2==OP_TYPE_REG)
+		this.rs3.setTxt("R%d", this.vRs3)
+		else 
+		this.rs3.setTxt("%02X", this.vRs3)
 		if (instrIsBranch(this.vIns) || isJorJAL(this.vIns)) {
 			if (this.vRs2&128) {
 				offset=(se8(this.vRs2)/4)*this.h+this.h/2
@@ -523,7 +558,7 @@ function dlx(vplayer) {
 		this.initRegs(0)
 	}
 
-	Instruction.prototype.$eh5 = function(down, flags, x, y) {
+	Instruction.prototype.$eh7 = function(down, flags, x, y) {
 		if (!$g[22]) {
 			if (down) {
 				this.clk=timeMS()
@@ -543,7 +578,27 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	Instruction.prototype.$eh6 = function(down, flags, x, y) {
+	Instruction.prototype.$eh8 = function(down, flags, x, y) {
+		if (!$g[22]) {
+			if (down) {
+				this.clk=timeMS()
+				if (flags&MB_LEFT) {
+					this.vIns2=(this.vIns2==MAX_INSTR) ? 0 : this.vIns2+1
+				} else
+				if (flags&MB_RIGHT) {
+					this.vIns2=(this.vIns2==0) ? MAX_INSTR : this.vIns2-1
+				}
+			} else {
+				this.clk=this.clk+500
+				if (timeMS()>this.clk)
+				this.vIns2=0
+			}
+			this.initRegs(1)
+		}
+		return 0
+	}
+
+	Instruction.prototype.$eh9 = function(down, flags, x, y) {
 		if (!$g[22] && down && this.opTypeRdt!=OP_TYPE_UNUSED) {
 			if (flags&MB_LEFT) {
 				this.vRdt=(this.vRdt==3) ? 0 : this.vRdt+1
@@ -555,7 +610,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	Instruction.prototype.$eh7 = function(down, flags, x, y) {
+	Instruction.prototype.$eh10 = function(down, flags, x, y) {
 		if (!$g[22] && down && this.opTypeRdt!=OP_TYPE_UNUSED) {
 			if (flags&MB_LEFT) {
 				this.vRs1=(this.vRs1==3) ? 0 : this.vRs1+1
@@ -567,7 +622,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	Instruction.prototype.$eh8 = function(down, flags, x, y) {
+	Instruction.prototype.$eh11 = function(down, flags, x, y) {
 		if (!$g[22] && down) {
 			if (flags&MB_LEFT) {
 				if (this.opTypeRs2==OP_TYPE_REG) {
@@ -595,6 +650,40 @@ function dlx(vplayer) {
 					this.clk=this.clk+500
 					if (timeMS()>this.clk)
 					this.vRs2=0
+				}
+			}
+			this.initRegs(1)
+		}
+	}
+
+	Instruction.prototype.$eh12 = function(down, flags, x, y) {
+		if (!$g[22] && down) {
+			if (flags&MB_LEFT) {
+				if (this.opTypeRs3==OP_TYPE_REG) {
+					this.vRs3=(this.vRs3+1)%4
+				} else
+				if (this.opTypeRs3==OP_TYPE_IMM) {
+					this.clk=timeMS()
+					this.vRs3=(this.vRs3+1)%256
+				}
+			} else
+			if (flags&MB_RIGHT) {
+				if (this.opTypeRs3==OP_TYPE_REG) {
+					this.vRs3=(this.vRs3-1)%4
+					if (this.vRs3<0)
+					this.vRs3=4+this.vRs3
+				} else
+				if (this.opTypeRs3==OP_TYPE_IMM) {
+					this.clk=timeMS()
+					this.vRs3=(this.vRs3-1)%256
+					if (this.vRs3<0)
+					this.vRs3=256+this.vRs3
+				}
+			} else {
+				if (this.opTypeRs3==OP_TYPE_IMM) {
+					this.clk=this.clk+500
+					if (timeMS()>this.clk)
+					this.vRs3=0
 				}
 			}
 			this.initRegs(1)
@@ -726,8 +815,8 @@ function dlx(vplayer) {
 			this.label=new Rectangle($g[0], $g[17], 0, 0, $g[13], this.vx+this.vw/2, this.vy+this.vh/2, -this.vw/2, -this.vh/2, this.vw, this.vh, 0, $g[15], "%02X", this.value)
 		}
 		this.label.setRounded(2, 2)
-		this.label.addEventHandler("eventEE", this, this.$eh9)
-		this.label.addEventHandler("eventMB", this, this.$eh10)
+		this.label.addEventHandler("eventEE", this, this.$eh13)
+		this.label.addEventHandler("eventMB", this, this.$eh14)
 		this.hmode = 0
 	}
 	Register.prototype = Object.create(VObj.prototype)
@@ -759,13 +848,13 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	Register.prototype.$eh9 = function(enter, x, y) {
+	Register.prototype.$eh13 = function(enter, x, y) {
 		if (this.fixed==0)
 		this.label.setBrush(enter ? $g[12] : $g[13])
 		return 0
 	}
 
-	Register.prototype.$eh10 = function(down, flags, x, y) {
+	Register.prototype.$eh14 = function(down, flags, x, y) {
 		if (this.fixed==0 && down) {
 			if (flags&MB_LEFT) {
 				this.value=(this.value+1)&255
@@ -998,11 +1087,11 @@ function dlx(vplayer) {
 	function Button(x, y, w, h, caption, ID) {
 		VObj.call(this)
 		this.label = new Rectangle2($g[0], 0, 0, $g[1], $g[47], x, y, w, h, $g[1], $g[15], caption)
-		this.label.addEventHandler("eventEE", this, this.$eh11)
+		this.label.addEventHandler("eventEE", this, this.$eh15)
 	}
 	Button.prototype = Object.create(VObj.prototype)
 
-	Button.prototype.$eh11 = function(enter, x, y) {
+	Button.prototype.$eh15 = function(enter, x, y) {
 		this.label.setBrush(enter ? $g[48] : $g[47])
 		return 0
 	}
@@ -1363,11 +1452,11 @@ function dlx(vplayer) {
 		setArg("zfMode", $g[31].toString())
 	}
 
-	function $eh12(enter, x, y) {
+	function $eh16(enter, x, y) {
 		$g[176].setBrush(enter ? $g[9] : $g[13])
 	}
 
-	function $eh13(down, flags, x, y) {
+	function $eh17(down, flags, x, y) {
 		if (down && (flags&MB_LEFT)) {
 			setArg("help", "0")
 			$g[20].setOpacity(0)
@@ -1514,7 +1603,7 @@ function dlx(vplayer) {
 		$g[65].showLocked(b_locked)
 	}
 
-	function $eh14(down, flags, x, y) {
+	function $eh18(down, flags, x, y) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setPEMode(($g[26]+1)%2)
 			resetCircuit()
@@ -1522,7 +1611,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh15(down, flags, x, y) {
+	function $eh19(down, flags, x, y) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setBPMode(($g[27]+1)%3)
 			resetCircuit()
@@ -1530,7 +1619,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh16(down, flags, x, y) {
+	function $eh20(down, flags, x, y) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setLIMode(($g[28]+1)%2)
 			resetCircuit()
@@ -1538,7 +1627,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh17(down, flags, x, y) {
+	function $eh21(down, flags, x, y) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setAFMode(($g[29]+1)%3)
 			resetCircuit()
@@ -1546,7 +1635,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh18(down, flags, $2, $3) {
+	function $eh22(down, flags, $2, $3) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setSFMode(($g[30]+1)%3)
 			resetCircuit()
@@ -1554,7 +1643,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh19(down, flags, $2, $3) {
+	function $eh23(down, flags, $2, $3) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setZFMode(($g[31]+1)%3)
 			resetCircuit()
@@ -1562,7 +1651,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh20(down, flags, x, y) {
+	function $eh24(down, flags, x, y) {
 		if (down && (flags&MB_LEFT)) {
 			let lp1, opcode, reg
 			let instr
@@ -1586,24 +1675,24 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh21(down, flags, x, y) {
+	function $eh25(down, flags, x, y) {
 		if (down && (flags&MB_LEFT))
 		getURL("https://www.scss.tcd.ie/Jeremy.Jones/VivioJS/vivio.htm")
 		return 0
 	}
 
-	function $eh22(down, flags, $2, $3) {
+	function $eh26(down, flags, $2, $3) {
 		if (down && (flags&MB_LEFT))
 		getURL("showanim.php")
 	}
 
-	function $eh23(enter, x, y) {
+	function $eh27(enter, x, y) {
 		$g[70].setBrush(enter ? $g[8] : $g[12])
 		$g[70].setTxtPen(enter ? $g[3] : $g[1])
 		return 0
 	}
 
-	function $eh24(down, flags, x, y) {
+	function $eh28(down, flags, x, y) {
 		if (down && (flags&MB_LEFT)) {
 			$g[14]=($g[14]==maxexample) ? 0 : $g[14]+1
 			setArg("example", $g[14].toString())
@@ -1741,7 +1830,7 @@ function dlx(vplayer) {
 				$g[68] = new Txt($g[0], 0, HLEFT|VTOP, 243, 101, $g[3], $g[15], "0")
 				$g[69] = new Txt($g[0], 0, HLEFT|VTOP, 243, 123, $g[3], $g[15], "0")
 				$g[70] = new Rectangle2($g[0], 0, 0, 0, 0, 27, 150, 270, 27, 0, $g[15], "Instruction Cache")
-				$g[71] = new InstructionMemory(27, 176, 270, 705)
+				$g[71] = new InstructionMemory(27, 176, 370, 705)
 				$g[72] = new AnimatedClock($g[0], 54, 904, 216, 66)
 				$g[73] = new Register(641, 463, 54, 88, TOP, "PC")
 				$g[74] = new Rectangle2($g[0], 0, 0, 0, 0, 506, 187, 216, 22, 0, $g[15], "Branch Target Buffer")
@@ -2249,8 +2338,8 @@ function dlx(vplayer) {
 			case 30:
 				$g[176] = new Rectangle2($g[0], $g[20], 0, $g[174], $g[13], 925, 507, 270, 66, $g[174], $g[175], "CLOSE HELP")
 				$g[176].setRounded(5, 5)
-				$g[176].addEventHandler("eventEE", this, $eh12)
-				$g[176].addEventHandler("eventMB", this, $eh13)
+				$g[176].addEventHandler("eventEE", this, $eh16)
+				$g[176].addEventHandler("eventMB", this, $eh17)
 				if (!($g[172]==0)) {
 					$pc = 31
 					continue
@@ -2258,17 +2347,17 @@ function dlx(vplayer) {
 				$g[20].setOpacity(0)
 				$pc = 31
 			case 31:
-				$g[60].label.addEventHandler("eventMB", this, $eh14)
-				$g[61].label.addEventHandler("eventMB", this, $eh15)
-				$g[62].label.addEventHandler("eventMB", this, $eh16)
-				$g[63].label.addEventHandler("eventMB", this, $eh17)
-				$g[64].label.addEventHandler("eventMB", this, $eh18)
-				$g[65].label.addEventHandler("eventMB", this, $eh19)
-				$g[59].label.addEventHandler("eventMB", this, $eh20)
-				$g[66].addEventHandler("eventMB", this, $eh21)
-				$g[51].addEventHandler("eventMB", this, $eh22)
-				$g[70].addEventHandler("eventEE", this, $eh23)
-				$g[70].addEventHandler("eventMB", this, $eh24)
+				$g[60].label.addEventHandler("eventMB", this, $eh18)
+				$g[61].label.addEventHandler("eventMB", this, $eh19)
+				$g[62].label.addEventHandler("eventMB", this, $eh20)
+				$g[63].label.addEventHandler("eventMB", this, $eh21)
+				$g[64].label.addEventHandler("eventMB", this, $eh22)
+				$g[65].label.addEventHandler("eventMB", this, $eh23)
+				$g[59].label.addEventHandler("eventMB", this, $eh24)
+				$g[66].addEventHandler("eventMB", this, $eh25)
+				$g[51].addEventHandler("eventMB", this, $eh26)
+				$g[70].addEventHandler("eventEE", this, $eh27)
+				$g[70].addEventHandler("eventMB", this, $eh28)
 				callf(266, $obj)
 				continue
 			case 32:
