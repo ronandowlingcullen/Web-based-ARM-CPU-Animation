@@ -30,42 +30,83 @@ const num MAX_INSTR = 31;
 const num NOP = 0;
 
 // Arithmetic instructions (register-register)
+//const num ADD   = 1;    // Add
+//const num SUB   = 2;    // Subtract
+//const num AND   = 3;    // Logical AND
+//const num OR    = 4;    // Logical OR
+//const num XOR   = 5;    // Logical exclusive OR
+//const num SLL   = 6;    // Logical shift left
+//const num SRL   = 7;    // Logical shift right
+//const num SLT   = 8;    // Set if less than
+//const num SGT   = 9;    // Set if greater than
+//const num SLE   = 10;   // Set if less or equal
+//const num SGE   = 11;   // Set if greater or equal
 const num ADD   = 1;    // Add
 const num SUB   = 2;    // Subtract
 const num AND   = 3;    // Logical AND
-const num OR    = 4;    // Logical OR
-const num XOR   = 5;    // Logical exclusive OR
-const num SLL   = 6;    // Logical shift left
-const num SRL   = 7;    // Logical shift right
-const num SLT   = 8;    // Set if less than
-const num SGT   = 9;    // Set if greater than
-const num SLE   = 10;   // Set if less or equal
-const num SGE   = 11;   // Set if greater or equal
+const num ORR   = 4;    // Logical OR
+const num EOR	= 5;	// Exclusive OR
+const num LSL	= 6;	// Logical Shift Left
+const num LSR	= 7;	// Logical Shift Right
+
+const num ADC	= 8;	// Add with Carry
+const num BIC	= 9;	// Bit Clear
+const num CMN	= 10;	// Compare Negative
+const num CMP	= 11;	// Compare
+const num MOV	= 12;	// Move register or constant
+const num MUL	= 13;	// Multiply
+const num MVN	= 14;	// Move negative register
+const num RSB	= 15;	// Reverse Subtract
+const num RSC	= 16;	// Reverse Subtract with Carry
+const num SBC	= 17;	// Subtract with Carry
+const num ASR	= 18;	// Arithmetic Shift RIght
+const num ROR	= 19;	// Rotate Right
+
+
+
+
+const num SWP	= 20;	// Swap register with memory
+const num TEQ	= 21;	// Test bitwise equality
+const num TST	= 22;	// Test bits
+
 
 // Arithmetic instructions (register-immediate)
-const num ADDi  = 12;
-const num SUBi  = 13;
-const num ANDi  = 14;
-const num ORi   = 15;
-const num XORi  = 16;
-const num SLLi  = 17;
-const num SRLi  = 18;
-const num SLTi  = 19;
-const num SGTi  = 20;
-const num SLEi  = 21;
-const num SGEi  = 22;
+//const num ADDi  = 12;
+//const num SUBi  = 13;
+//const num ANDi  = 14;
+//const num ORi   = 15;
+//const num XORi  = 16;
+//const num SLLi  = 17;
+//const num SRLi  = 18;
+//const num SLTi  = 19;
+//const num SGTi  = 20;
+//const num SLEi  = 21;
+//const num SGEi  = 22;
 
 // Load/store instructions
-const num LD    = 23;   // Load             // joj
-const num ST    = 24;   // Store            // joj
+//const num LD    = 23;   // Load             // joj
+//const num ST    = 24;   // Store            // joj
+const num LDR	= 23;   // Load register from memory
+const num STR	= 24;   // Store register to memory
+const num LDM	= 25;   // Load multiple registers
+const num STM	= 26;   // Store Multiple
+
 
 // Control instructions
-const num BEQZ  = 25;   // Branch if equal to zero
-const num BNEZ  = 26;   // Branch if not equal to zero
-const num J     = 27;   // Jump
-const num JAL   = 28;   // Jump and link
-const num JR    = 29;   // Jump register
-const num JALR  = 30;   // Jump and link register
+//const num BEQZ  = 25;   // Branch if equal to zero
+//const num BNEZ  = 26;   // Branch if not equal to zero
+//const num J     = 27;   // Jump
+//const num JAL   = 28;   // Jump and link
+//const num JR    = 29;   // Jump register
+//const num JALR  = 30;   // Jump and link register
+
+
+const num B		= 27;   // Branch
+const num BL	= 28;   // Branch with Link
+const num BX	= 29;   // Branch and Exchange
+
+
+
 
 // Halt
 const num HALT  = 31;   // Stop running
@@ -83,43 +124,74 @@ string instrNames[34];
 // NOP
 instrNames[NOP] = "NOP";
 
-// Arithmetic instructions (register-register)
-instrNames[ADD] = "ADD";    // Add
-instrNames[SUB] = "SUB";    // Subtract
-instrNames[AND] = "AND";    // Logical AND
-instrNames[OR]  = "OR";     // Logical OR
-instrNames[XOR] = "XOR";    // Logical exclusive OR
-instrNames[SLL] = "SLL";    // Logical shift left
-instrNames[SRL] = "SRL";    // Logical shift right
-instrNames[SLT] = "SLT";    // Set if less than
-instrNames[SGT] = "SGT";    // Set if greater than
-instrNames[SLE] = "SLE";    // Set if less or equal
-instrNames[SGE] = "SGE";    // Set if greater or equal
+// Arithmetic //instructions (register-register)
+//instrNames[ADD] = "ADD";    // Add
+//instrNames[SUB] = "SUB";    // Subtract
+//instrNames[AND] = "AND";    // Logical AND
+//instrNames[OR]  = "OR";     // Logical OR
+//instrNames[XOR] = "XOR";    // Logical exclusive OR
+//instrNames[SLL] = "SLL";    // Logical shift left
+//instrNames[SRL] = "SRL";    // Logical shift right
+//instrNames[SLT] = "SLT";    // Set if less than
+//instrNames[SGT] = "SGT";    // Set if greater than
+//instrNames[SLE] = "SLE";    // Set if less or equal
+//instrNames[SGE] = "SGE";    // Set if greater or equal
 
-// Arithmetic instructions (register-immediate)
-instrNames[ADDi]    = "ADDi";
-instrNames[SUBi]    = "SUBi";
-instrNames[ANDi]    = "ANDi";
-instrNames[ORi]     = "ORi";
-instrNames[XORi]    = "XORi";
-instrNames[SLLi]    = "SLLi";
-instrNames[SRLi]    = "SRLi";
-instrNames[SLTi]    = "SLTi";
-instrNames[SGTi]    = "SGTi";
-instrNames[SLEi]    = "SLEi";
-instrNames[SGEi]    = "SGEi";
+// Arithmetic //instructions (register-immediate)
+//instrNames[ADDi]    = "ADDi";
+//instrNames[SUBi]    = "SUBi";
+//instrNames[ANDi]    = "ANDi";
+//instrNames[ORi]     = "ORi";
+//instrNames[XORi]    = "XORi";
+//instrNames[SLLi]    = "SLLi";
+//instrNames[SRLi]    = "SRLi";
+//instrNames[SLTi]    = "SLTi";
+//instrNames[SGTi]    = "SGTi";
+//instrNames[SLEi]    = "SLEi";
+//instrNames[SGEi]    = "SGEi";
 
-// Load/store instructions
-instrNames[LD]      = "LD";     // Load             // joj
-instrNames[ST]      = "ST";     // Store            // joj
+// Load/store //instructions
+//instrNames[LD]      = "LD";     // Load             // joj
+//instrNames[ST]      = "ST";     // Store            // joj
 
-// Control instructions
-instrNames[BEQZ]    = "BEQZ";   // Branch if equal to zero
-instrNames[BNEZ]    = "BNEZ";   // Branch if not equal to zero
-instrNames[J]       = "J";      // Jump
-instrNames[JAL]     = "JAL";    // Jump and link
-instrNames[JR]      = "JR";     // Jump register
-instrNames[JALR]    = "JALR";   // Jump and link register
+// Control //instructions
+//instrNames[BEQZ]    = "BEQZ";   // Branch if equal to zero
+//instrNames[BNEZ]    = "BNEZ";   // Branch if not equal to zero
+//instrNames[J]       = "J";      // Jump
+//instrNames[JAL]     = "JAL";    // Jump and link
+//instrNames[JR]      = "JR";     // Jump register
+//instrNames[JALR]    = "JALR";   // Jump and link register
+
+instrNames[ADD]	= "ADD";    // Add
+instrNames[SUB]	= "SUB";    // Subtract
+instrNames[AND]	= "AND";    // Logical AND
+instrNames[ORR]	= "ORR";    // Logical OR
+instrNames[EOR]	= "EOR";	// Exclusive OR
+instrNames[LSL]	= "LSL";	// Logical Shift Left
+instrNames[LSR]	= "LSR";	// Logical Shift Right
+instrNames[ADC]	= "ADC";	// Add with Carry
+instrNames[BIC]	= "BIC";	// Bit Clear
+instrNames[CMN]	= "CMN";	// Compare Negative
+instrNames[CMP]	= "CMP";	// Compare
+instrNames[MOV]	= "MOV";	// Move register or constant
+instrNames[MUL]	= "MUL";	// Multiply
+instrNames[MVN]	= "MVN";	// Move negative register
+instrNames[RSB]	= "RSB";	// Reverse Subtract
+instrNames[RSC]	= "RSC";	// Reverse Subtract with Carry
+instrNames[SBC]	= "SBC";	// Subtract with Carry
+instrNames[ASR]	= "ASR";	// Arithmetic Shift RIght
+instrNames[ROR]	= "ROR";	// Rotate Right
+instrNames[SWP]	= "SWP";	// Swap register with memory
+instrNames[TEQ]	= "TEQ";	// Test bitwise equality
+instrNames[TST]	= "TST";	// Test bits
+instrNames[LDR]	= "LDR";   // Load register from memory
+instrNames[STR]	= "STR";   // Store register to memory
+instrNames[LDM]	= "LDM";   // Load multiple registers
+instrNames[STM]	= "STM";   // Store Multiple
+instrNames[B]	= "B";   // Branch
+instrNames[BL]	= "BL";   // Branch with Link
+instrNames[BX]	= "BX";   // Branch and Exchange
+
 
 // Halt
 instrNames[HALT]    = "HALT";
@@ -136,23 +208,29 @@ num function instrIsNop(num instr) {
 }
 
 num function instrIsArRR(num instr) {
-    return (instr >= ADD && instr <= SGE) ? 1 : 0;          // {joj 28/10/06}
+    //return (instr >= ADD && instr <= SGE) ? 1 : 0;          // {joj 28/10/06}
+	return (instr >= ADD && instr <= ROR) ? 1 : 0;
 }
 
+//-------Commenting out for the miinute
 num function instrIsArRI(num instr) {
-    return ((instr >= ADDi) && (instr <= SGEi)) ? 1 : 0;	// {joj 28/10/06}
+    //return ((instr >= ADDi) && (instr <= SGEi)) ? 1 : 0;	// {joj 28/10/06}
+	return 0;
 }
 
 num function instrIsBranch(num instr) {
-    return ((instr == BEQZ) || (instr == BNEZ)) ? 1 : 0;    // {joj 28/10/06}
+    //return ((instr == BEQZ) || (instr == BNEZ)) ? 1 : 0;    // {joj 28/10/06}
+	return (instr == BX) ? 1 : 0;
 }
 
 num function isJorJAL(num instr) {							// {joj 3/11/12}
-    return ((instr == J) || (instr == JAL)) ? 1 : 0;        // {joj 28/10/06}
+    //return ((instr == J) || (instr == JAL)) ? 1 : 0;        // {joj 28/10/06}
+	return ((instr == B) || (instr == BL)) ? 1 : 0;
 }
 
 num function instrIsJumpR(num instr) {						
-    return ((instr == JR) || (instr == JALR)) ? 1 : 0;		// {joj 28/10/06}
+    //return ((instr == JR) || (instr == JALR)) ? 1 : 0;		// {joj 28/10/06}
+	return 0;
 }
 
 num function instrIsBranchOrJump(num instr) {
@@ -237,31 +315,52 @@ num function se8(num t) {
 }
 
 num function instrExecute(num instr, num op1, num op2) {
-    if (instr == ADD || instr == ADDi)
+//    if (instr == ADD || instr == ADDi)
+//        return (se8(op1) + se8(op2)) & 0xFF;
+//    else if (instr == SUB || instr == SUBi)
+//        return (se8(op1) - se8(op2)) & 0xFF;
+//    else if (instr == AND || instr == ANDi)
+//        return op1 & op2;
+//    else if (instr == OR || instr == ORi)
+//        return op1 | op2;
+//    else if (instr == XOR || instr == XORi)
+//        return op1 ^ op2;
+//    else if (instr == SLL || instr == SLLi)
+//        return (op1 << op2) & 0xFF;
+//    else if (instr == SRL || instr == SRLi)
+//        return (op1 >> op2) & 0xFF;
+//    else if (instr == SLT || instr == SLTi)
+//        return op1 < op2 ? 1 : 0;
+//    else if (instr == SGT || instr == SGTi)
+//        return op1 > op2 ? 1 : 0;
+//    else if (instr == SLE || instr == SLEi)
+//        return op1 <= op2 ? 1 : 0;
+//    else if (instr == SGE || instr == SGEi)
+//        return op1 >= op2 ? 1 : 0;
+//    else if (instr == LD || instr == ST)                 // joj
+//        return (se8(op1) + se8(op2)) & 0xFF;
+//    else if (instr == JAL || instr == JALR)
+//        return op2;
+//    else
+//        return 0xEE;
+
+    if (instr == ADD)
         return (se8(op1) + se8(op2)) & 0xFF;
-    else if (instr == SUB || instr == SUBi)
+    else if (instr == SUB)
         return (se8(op1) - se8(op2)) & 0xFF;
-    else if (instr == AND || instr == ANDi)
+    else if (instr == AND)
         return op1 & op2;
-    else if (instr == OR || instr == ORi)
+    else if (instr == ORR)
         return op1 | op2;
-    else if (instr == XOR || instr == XORi)
+    else if (instr == EOR)
         return op1 ^ op2;
-    else if (instr == SLL || instr == SLLi)
+    else if (instr == LSL)
         return (op1 << op2) & 0xFF;
-    else if (instr == SRL || instr == SRLi)
+    else if (instr == LSR)
         return (op1 >> op2) & 0xFF;
-    else if (instr == SLT || instr == SLTi)
-        return op1 < op2 ? 1 : 0;
-    else if (instr == SGT || instr == SGTi)
-        return op1 > op2 ? 1 : 0;
-    else if (instr == SLE || instr == SLEi)
-        return op1 <= op2 ? 1 : 0;
-    else if (instr == SGE || instr == SGEi)
-        return op1 >= op2 ? 1 : 0;
-    else if (instr == LD || instr == ST)                 // joj
+    else if (instr == LDR || instr == STR)                 // joj
         return (se8(op1) + se8(op2)) & 0xFF;
-    else if (instr == JAL || instr == JALR)
+    else if (instr == B || instr == BL)
         return op2;
     else
         return 0xEE;
