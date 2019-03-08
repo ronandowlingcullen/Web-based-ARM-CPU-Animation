@@ -21,8 +21,8 @@
 
 class InstructionRegister(num x, num y, num w, num h, string caption) {
 
-    num vIns = EMPTY, vRdt = 0, vRs1 = 0, vRs2 = 0;
-    num nIns = EMPTY, nRdt = 0, nRs1 = 0, nRs2 = 0;
+    num vIns = EMPTY, vRdt = 0, vRs1 = 0, vRs2 = 0, vIns2 = EMPTY, vRs3 = 0;
+    num nIns = EMPTY, nRdt = 0, nRs1 = 0, nRs2 = 0, nIns2 = EMPTY, nRs3 = 0;
 
     string txt = "EMPTY";
 
@@ -37,11 +37,13 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     //
     // setNewValue
     //
-    function setNewValue(num instr, num rdt, num rs1, num rs2) {
+    function setNewValue(num instr, num rdt, num rs1, num rs2, num instr2, num rs3) {
         nIns = instr;
         nRdt = rdt;
         nRs1 = rs1;
         nRs2 = rs2;
+        nIns2 = instr2;
+        nRs3 = rs3;
     }
 
     //
@@ -52,13 +54,15 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
         nRdt = i.vRdt;
         nRs1 = i.vRs1;
         nRs2 = i.vRs2;
+        nIns2 = i.vIns2;
+        nRs3 = i.vRs3;
     }
 
     //
     // getNewInstrTxt
     //
     string function getNewInstrTxt() {
-        return instrText(nIns, nRdt, nRs1, nRs2);       // {joj 28/10/10}
+        return instrText(nIns, nRdt, nRs1, nRs2, nIns2, nRs3);       // {joj 28/10/10}
     }
 
     //
@@ -68,8 +72,10 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
         vIns = nIns;
         vRdt = nRdt;
         vRs1 = nRs1;
-        vRs2 = nRs2;
-        txt = instrText(vIns, vRdt, vRs1, vRs2);        // {joj 28/10/10}
+        vRs2 = nRs2;									
+        vIns2 = nIns2;
+		vRs3 = nRs3;
+        txt = instrText(vIns, vRdt, vRs1, vRs2, nIns2, nRs3);        // {joj 28/10/10}
         label.setTxt(txt);
         r2.setBrush(yellowBrush);                       // {joj}
         wait(16);
@@ -91,10 +97,12 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     //
     function reset() {
         vIns = EMPTY;
-        vRdt = vRs1 = vRs2 = 0;
+		vIns2 = EMPTY;
+        vRdt = vRs1 = vRs2 = vRs3 = 0;
         nIns = EMPTY;
-        nRdt = nRs1 = nRs2 = 0;
-        txt = instrText(vIns, vRdt, vRs1, vRs2);        // {joj 28/10/10}
+		nIns2 = EMPTY;
+        nRdt = nRs1 = nRs2 = nRs3 = 0;
+        txt = instrText(vIns, vRdt, vRs1, vRs2, nIns2, nRs3);        // {joj 28/10/10}
         label.setTxt(txt);
     }
 

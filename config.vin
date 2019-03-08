@@ -19,7 +19,7 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
-const num WIDTH = 2020;
+const num WIDTH = 2200;
 const num HEIGHT = 1080;
     
 //

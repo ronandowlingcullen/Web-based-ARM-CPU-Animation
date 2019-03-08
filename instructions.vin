@@ -238,11 +238,13 @@ num function instrIsBranchOrJump(num instr) {
 }
 
 num function instrIsJumpAndLink(num instr) {
-    return ((instr == JAL) || (instr == JALR)) ? 1 : 0;     // {joj 28/10/06}
+    //return ((instr == JAL) || (instr == JALR)) ? 1 : 0;     // {joj 28/10/06}
+    return (instr == BL) ? 1 : 0;     // {joj 28/10/06}
 }
 
 num function instrIsLoadOrStore(num instr) {
-    return ((instr == LD) || (instr == ST)) ? 1 : 0;            // {joj 28/10/06}
+    //return ((instr == LD) || (instr == ST)) ? 1 : 0;            // {joj 28/10/06}
+    return ((instr == LDR) || (instr == STR)) ? 1 : 0;            // {joj 28/10/06}
 }
 
 //
@@ -278,27 +280,47 @@ num function instrOpTypeRs2(num instr) {
 //
 // Instruction formatting
 //
-string function instrText(num instr, num rdt, num rs1, num rs2) {				// {joj 28/10/10}
+//string function instrText(num instr, num rdt, num rs1, num rs2) {				// {joj 28/10/10}
+//    if (instrIsNop(instr))
+//        return sprintf("%s", instrNames[instr]);                             	// {joj 28/10/10}
+//    else if (instrIsArRR(instr))
+//        return sprintf("%s R%d,R%d,R%d", instrNames[instr], rdt, rs1, rs2);  	// {joj 28/10/10}
+//    else if (instrIsArRI(instr))
+//        return sprintf("%s R%d,R%d,%02X", instrNames[instr], rdt, rs1, rs2); 	// {joj 28/10/10}
+//    else if (instr == LD)														// {joj}
+//       return sprintf("LD R%d,R%d+%02X", rdt, rs1, rs2);                     	// {joj 28/10/06}
+//    else if (instr == ST)                                                		// {joj 28/10/06}
+//        return sprintf("ST R%d,R%d+%02X", rdt, rs1, rs2);                    	// {joj 28/10/06}
+//    else if (instrIsBranch(instr))
+//        return sprintf("%s R%d,%02X", instrNames[instr], rs1, rs2);          	// {joj 28/10/10}
+//    else if (instr == J)
+//        return sprintf("%s %02X", instrNames[instr], rs2);                   	// {joj 28/10/10}
+//    else if (instr == JAL)
+//        return sprintf("%s R%d, %02X", instrNames[instr], rdt, rs2);         	// {joj 28/10/10}
+//    else if (instr == JR)
+//        return sprintf("%s R%d", instrNames[instr], rs2);                    	// {joj 28/10/10}
+//    else if (instr == JALR)
+//        return sprintf("%s R%d, R%d", instrNames[instr], rdt, rs2);          	// {joj 28/10/10}
+//    return "EMPTY";                                                         	// {joj 28/10/10}
+//}
+
+string function instrText(num instr, num rdt, num rs1, num rs2, num instr2, num rs3) {				// {joj 28/10/10}
     if (instrIsNop(instr))
         return sprintf("%s", instrNames[instr]);                             	// {joj 28/10/10}
     else if (instrIsArRR(instr))
         return sprintf("%s R%d,R%d,R%d", instrNames[instr], rdt, rs1, rs2);  	// {joj 28/10/10}
     else if (instrIsArRI(instr))
         return sprintf("%s R%d,R%d,%02X", instrNames[instr], rdt, rs1, rs2); 	// {joj 28/10/10}
-    else if (instr == LD)														// {joj}
-       return sprintf("LD R%d,R%d+%02X", rdt, rs1, rs2);                     	// {joj 28/10/06}
-    else if (instr == ST)                                                		// {joj 28/10/06}
-        return sprintf("ST R%d,R%d+%02X", rdt, rs1, rs2);                    	// {joj 28/10/06}
+    else if (instr == LDR)														// {joj}
+       return sprintf("LDR R%d,R%d+%02X", rdt, rs1, rs2);                     	// {joj 28/10/06}
+    else if (instr == STR)                                                		// {joj 28/10/06}
+        return sprintf("STR R%d,R%d+%02X", rdt, rs1, rs2);                    	// {joj 28/10/06}
     else if (instrIsBranch(instr))
         return sprintf("%s R%d,%02X", instrNames[instr], rs1, rs2);          	// {joj 28/10/10}
-    else if (instr == J)
+    else if (instr == B)
         return sprintf("%s %02X", instrNames[instr], rs2);                   	// {joj 28/10/10}
-    else if (instr == JAL)
+    else if (instr == BL)
         return sprintf("%s R%d, %02X", instrNames[instr], rdt, rs2);         	// {joj 28/10/10}
-    else if (instr == JR)
-        return sprintf("%s R%d", instrNames[instr], rs2);                    	// {joj 28/10/10}
-    else if (instr == JALR)
-        return sprintf("%s R%d, R%d", instrNames[instr], rdt, rs2);          	// {joj 28/10/10}
     return "EMPTY";                                                         	// {joj 28/10/10}
 }
 
@@ -360,6 +382,46 @@ num function instrExecute(num instr, num op1, num op2) {
         return (op1 >> op2) & 0xFF;
     else if (instr == LDR || instr == STR)                 // joj
         return (se8(op1) + se8(op2)) & 0xFF;
+
+
+//instrNames[ADC]	= "ADC";	// Add with Carry
+	else if (instr == BIC)
+		return (op1 & (~op2));
+//instrNames[CMN]	= "CMN";	// Compare Negative
+//instrNames[CMP]	= "CMP";	// Compare
+//instrNames[MOV]	= "MOV";	// Move register or constant
+//instrNames[MUL]	= "MUL";	// Multiply
+//instrNames[MVN]	= "MVN";	// Move negative register
+	else if (instr == RSB)
+		return (se8(op2) - se8(op1)) & 0xFF;
+//instrNames[RSC]	= "RSC";	// Reverse Subtract with Carry
+//instrNames[SBC]	= "SBC";	// Subtract with Carry
+//instrNames[ASR]	= "ASR";	// Arithmetic Shift RIght
+	else if (instr == ASR) {
+		num neg = op1 >> 7;
+		if(op2 > 8) op2 = 8;	//If shifting by more than register size
+		if(neg){
+			op1 = op1 ^ 0xFF00;		//introduce ones before if negative to be shifted into place
+		}
+		return (op1 >> op2) & 0xFF;
+	}
+//instrNames[ROR]	= "ROR";	// Rotate Right
+	else if (instr == ROR) {
+		op2 = op2 % 8;		//modulo by max shift to remove need for loop
+		num newLeftPart = (op1 << (8 - op2)) & 0xFF;
+		num newRightPart = (op1 >> op2) & 0xFF;
+		return newLeftPart + newRightPart;
+	}
+//instrNames[SWP]	= "SWP";	// Swap register with memory
+//instrNames[TEQ]	= "TEQ";	// Test bitwise equality
+//instrNames[TST]	= "TST";	// Test bits
+//instrNames[LDM]	= "LDM";   // Load multiple registers
+//instrNames[STM]	= "STM";   // Store Multiple
+//instrNames[BX]	= "BX";   // Branch and Exchange
+
+
+
+
     else if (instr == B || instr == BL)
         return op2;
     else

@@ -179,11 +179,23 @@ Register regPC1 = Register(776.0, 463, 54, 88, TOP, "PC1");
 
 // Register file
 Txt(0, HLEFT | VTOP, 1182.0, 88, 0, font, "Register\nFile");		// {joj}
-Register regFile[4];
-regFile[0] = Register(952.0, 66, 108, 44, LEFT, "R0"); regFile[0].setFixed();                  // {joj 29/10/06}
-regFile[1] = Register(952.0, 110, 108, 44, LEFT, "R1");
-regFile[2] = Register(1060.0, 66, 108, 44, RIGHT, "R2");
-regFile[3] = Register(1060.0, 110, 108, 44, RIGHT, "R3");
+Register regFile[16];
+regFile[0] = Register(952.0, 66, 32, 88, TOP, "R0"); regFile[0].setFixed();                  // {joj 29/10/06}
+regFile[1] = Register(984.0, 66, 32, 88, TOP, "R1");
+regFile[2] = Register(1016.0, 66, 32, 88, TOP, "R2");
+regFile[3] = Register(1048.0, 66, 32, 88, TOP, "R3");
+regFile[4] = Register(1080.0, 66, 32, 88, TOP, "R4");
+regFile[5] = Register(1112.0, 66, 32, 88, TOP, "R5");
+regFile[6] = Register(1144.0, 66, 32, 88, TOP, "R6");
+regFile[7] = Register(1176.0, 66, 32, 88, TOP, "R7");
+regFile[8] = Register(1208.0, 66, 32, 88, TOP, "R8");
+regFile[9] = Register(1240.0, 66, 32, 88, TOP, "R9");
+regFile[10] = Register(1272.0, 66, 32, 88, TOP, "R10");
+regFile[11] = Register(1304.0, 66, 32, 88, TOP, "R11");
+regFile[12] = Register(1336.0, 66, 32, 88, TOP, "R12");
+regFile[13] = Register(1368.0, 66, 32, 88, TOP, "SP");
+regFile[14] = Register(1400.0, 66, 32, 88, TOP, "LR");
+regFile[15] = Register(1432.0, 66, 32, 88, TOP, "PC");
 
 // Other components
 Component cMUX3 = Component(844.0, 375, 135, 22, "mux 3");                                               // {joj}
@@ -1000,17 +1012,17 @@ if (example == 0) {
     //
     // r1 = r2*r3
     //
-    im.setValue( 0, XOR,  1, 1, 1);                  // {joj}
-    im.setValue( 4, BEQZ, 0, 2, 36);                 // {joj}
-    im.setValue( 8, ST,   2, 0, 0);                  // {joj}
-    im.setValue(12, ANDi, 2, 2, 1);                 // {joj}
-    im.setValue(16, BEQZ, 0, 2, 8);                 // {joj}
-    im.setValue(20, ADD,  1, 1, 3);                 // {joj}
-    im.setValue(24, LD,   2, 0, 0);                 // {joj}
-	im.setValue(28, SRLi, 2, 2, 1);                 // {joj 29/11/16}
-	im.setValue(32, SLLi, 3, 3, 1);                 // {joj 29/11/16}
-    im.setValue(36, J,    0, 0, 4-36);              // {joj 01/11/06}
-    im.setValue(40, ST,   1, 0, 0);                 // {joj 4/10/16}
+    //im.setValue( 0, XOR,  1, 1, 1);                  // {joj}
+    //im.setValue( 4, BEQZ, 0, 2, 36);                 // {joj}
+    //im.setValue( 8, ST,   2, 0, 0);                  // {joj}
+    //im.setValue(12, ANDi, 2, 2, 1);                 // {joj}
+    //im.setValue(16, BEQZ, 0, 2, 8);                 // {joj}
+    //im.setValue(20, ADD,  1, 1, 3);                 // {joj}
+    //im.setValue(24, LD,   2, 0, 0);                 // {joj}
+	//im.setValue(28, SRLi, 2, 2, 1);                 // {joj 29/11/16}
+	//im.setValue(32, SLLi, 3, 3, 1);                 // {joj 29/11/16}
+    //im.setValue(36, J,    0, 0, 4-36);              // {joj 01/11/06}
+    //im.setValue(40, ST,   1, 0, 0);                 // {joj 4/10/16}
     im.setValue(44, HALT, 0, 0, 0);                 // {joj}
     regFile[2].setValue(9);                         // {joj}
     regFile[3].setValue(8);                         // {joj}
@@ -1024,8 +1036,9 @@ if (example == 0) {
     im.setValue( 0, ADD, 1, 2, 3);                   // r1 = r2 + r3     // {joj 20/10/12}
     im.setValue( 4, SUB, 3, 1, 2);                   // r3 = r1 - r2     // {joj 20/10/12}
     im.setValue( 8, AND, 2, 1, 3);                   // r2 = r1 & r3     // {joj 20/10/12}
-    im.setValue(12, XOR, 2, 1, 3);                  // r2 = r1 ^ r3     // {joj 20/10/12}
-    im.setValue(16, ADD, 2, 1, 0);                  // r2 = r1 + r0     // {joj 20/10/12}
+    //im.setValue(12, XOR, 2, 1, 3);                  // r2 = r1 ^ r3     // {joj 20/10/12}
+    im.setValue(12, EOR, 2, 1, 3);
+	im.setValue(16, ADD, 2, 1, 0);                  // r2 = r1 + r0     // {joj 20/10/12}
     im.setValue(20, HALT, 0, 0, 0);                 //                  // {joj 20/10/12}
     regFile[1].setValue(1);                         // r1 = 1           // {joj 20/10/12}
     regFile[2].setValue(2);                         // r2 = 2           // {joj 20/10/12}
@@ -1051,11 +1064,11 @@ if (example == 0) {
 	//
     // branch prediction example
     //
-    im.setValue( 0, ADDi, 1, 0, 3);                 //      r1 = 3      // {joj}
+    //im.setValue( 0, ADDi, 1, 0, 3);                 //      r1 = 3      // {joj}
     im.setValue( 4, ADD,  0, 0, 0);                 // L:               // {joj}
     im.setValue( 8, ADD,  0, 0, 0);                 //                  // {joj}
-    im.setValue(12, SUBi, 1, 1, 1);                 //      r1 = r1-1   // {joj}
-    im.setValue(16, BNEZ, 0, 1, -12 & 0xff);        //      bnez r1, L  // {joj}
+    //im.setValue(12, SUBi, 1, 1, 1);                 //      r1 = r1-1   // {joj}
+    //im.setValue(16, BNEZ, 0, 1, -12 & 0xff);        //      bnez r1, L  // {joj}
     im.setValue(20, HALT, 0, 0, 0);                 //                  // {joj}
     setTPS(50);                                     // {joj}
 
@@ -1063,7 +1076,8 @@ if (example == 0) {
 
 	// used to fix reported errors
 
-	im.setValue( 0,   JR, 0, 0, 1);				// {joj 29/11/16}
+	//im.setValue( 0,   JR, 0, 0, 1);				// {joj 29/11/16}
+	im.setValue( 0,   B, 0, 0, 1);				// {joj 29/11/16}
 	im.setValue(32,  ADD, 1, 1, 1);				// {joj 29/11/16}
 	im.setValue(36, HALT, 0, 0, 0);				// {joj 29/11/16}
 	regFile[1].setValue(32);					// {joj 29/11/16}

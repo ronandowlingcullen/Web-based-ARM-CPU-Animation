@@ -74,7 +74,7 @@ function dlx(vplayer) {
 	const MARINE = rgba(0.375, 0.625, 0.375)
 	const LIGHT_YELLOW = rgba(1, 1, 0.75)
 	const ORANGE = 16753920
-	const WIDTH = 2020
+	const WIDTH = 2200
 	const HEIGHT = 1080
 	const maxexample = 5
 	const NO_STALL = 0
@@ -101,33 +101,32 @@ function dlx(vplayer) {
 	const ADD = 1
 	const SUB = 2
 	const AND = 3
-	const OR = 4
-	const XOR = 5
-	const SLL = 6
-	const SRL = 7
-	const SLT = 8
-	const SGT = 9
-	const SLE = 10
-	const SGE = 11
-	const ADDi = 12
-	const SUBi = 13
-	const ANDi = 14
-	const ORi = 15
-	const XORi = 16
-	const SLLi = 17
-	const SRLi = 18
-	const SLTi = 19
-	const SGTi = 20
-	const SLEi = 21
-	const SGEi = 22
-	const LD = 23
-	const ST = 24
-	const BEQZ = 25
-	const BNEZ = 26
-	const J = 27
-	const JAL = 28
-	const JR = 29
-	const JALR = 30
+	const ORR = 4
+	const EOR = 5
+	const LSL = 6
+	const LSR = 7
+	const ADC = 8
+	const BIC = 9
+	const CMN = 10
+	const CMP = 11
+	const MOV = 12
+	const MUL = 13
+	const MVN = 14
+	const RSB = 15
+	const RSC = 16
+	const SBC = 17
+	const ASR = 18
+	const ROR = 19
+	const SWP = 20
+	const TEQ = 21
+	const TST = 22
+	const LDR = 23
+	const STR = 24
+	const LDM = 25
+	const STM = 26
+	const B = 27
+	const BL = 28
+	const BX = 29
 	const HALT = 31
 	const STALL = 32
 	const EMPTY = 33
@@ -236,23 +235,23 @@ function dlx(vplayer) {
 	}
 
 	function instrIsArRR(instr) {
-		return (instr>=ADD && instr<=SGE) ? 1 : 0
+		return (instr>=ADD && instr<=ROR) ? 1 : 0
 	}
 
 	function instrIsArRI(instr) {
-		return ((instr>=ADDi) && (instr<=SGEi)) ? 1 : 0
+		return 0
 	}
 
 	function instrIsBranch(instr) {
-		return ((instr==BEQZ) || (instr==BNEZ)) ? 1 : 0
+		return (instr==BX) ? 1 : 0
 	}
 
 	function isJorJAL(instr) {
-		return ((instr==J) || (instr==JAL)) ? 1 : 0
+		return ((instr==B) || (instr==BL)) ? 1 : 0
 	}
 
 	function instrIsJumpR(instr) {
-		return ((instr==JR) || (instr==JALR)) ? 1 : 0
+		return 0
 	}
 
 	function instrIsBranchOrJump(instr) {
@@ -260,11 +259,11 @@ function dlx(vplayer) {
 	}
 
 	function instrIsJumpAndLink(instr) {
-		return ((instr==JAL) || (instr==JALR)) ? 1 : 0
+		return (instr==BL) ? 1 : 0
 	}
 
 	function instrIsLoadOrStore(instr) {
-		return ((instr==LD) || (instr==ST)) ? 1 : 0
+		return ((instr==LDR) || (instr==STR)) ? 1 : 0
 	}
 
 	function instrOpTypeRdt(instr) {
@@ -291,7 +290,7 @@ function dlx(vplayer) {
 		return OP_TYPE_IMM
 	}
 
-	function instrText(instr, rdt, rs1, rs2) {
+	function instrText(instr, rdt, rs1, rs2, instr2, rs3) {
 		if (instrIsNop(instr))
 		return sprintf("%s", $g[35][instr])
 		else 
@@ -301,26 +300,20 @@ function dlx(vplayer) {
 		if (instrIsArRI(instr))
 		return sprintf("%s R%d,R%d,%02X", $g[35][instr], rdt, rs1, rs2)
 		else 
-		if (instr==LD)
-		return sprintf("LD R%d,R%d+%02X", rdt, rs1, rs2)
+		if (instr==LDR)
+		return sprintf("LDR R%d,R%d+%02X", rdt, rs1, rs2)
 		else 
-		if (instr==ST)
-		return sprintf("ST R%d,R%d+%02X", rdt, rs1, rs2)
+		if (instr==STR)
+		return sprintf("STR R%d,R%d+%02X", rdt, rs1, rs2)
 		else 
 		if (instrIsBranch(instr))
 		return sprintf("%s R%d,%02X", $g[35][instr], rs1, rs2)
 		else 
-		if (instr==J)
+		if (instr==B)
 		return sprintf("%s %02X", $g[35][instr], rs2)
 		else 
-		if (instr==JAL)
+		if (instr==BL)
 		return sprintf("%s R%d, %02X", $g[35][instr], rdt, rs2)
-		else 
-		if (instr==JR)
-		return sprintf("%s R%d", $g[35][instr], rs2)
-		else 
-		if (instr==JALR)
-		return sprintf("%s R%d, R%d", $g[35][instr], rdt, rs2)
 		return "EMPTY"
 	}
 
@@ -332,43 +325,52 @@ function dlx(vplayer) {
 	}
 
 	function instrExecute(instr, op1, op2) {
-		if (instr==ADD || instr==ADDi)
+		if (instr==ADD)
 		return (se8(op1)+se8(op2))&255
 		else 
-		if (instr==SUB || instr==SUBi)
+		if (instr==SUB)
 		return (se8(op1)-se8(op2))&255
 		else 
-		if (instr==AND || instr==ANDi)
+		if (instr==AND)
 		return op1&op2
 		else 
-		if (instr==OR || instr==ORi)
+		if (instr==ORR)
 		return op1|op2
 		else 
-		if (instr==XOR || instr==XORi)
+		if (instr==EOR)
 		return op1^op2
 		else 
-		if (instr==SLL || instr==SLLi)
+		if (instr==LSL)
 		return (op1<<op2)&255
 		else 
-		if (instr==SRL || instr==SRLi)
+		if (instr==LSR)
 		return (op1>>op2)&255
 		else 
-		if (instr==SLT || instr==SLTi)
-		return op1<op2 ? 1 : 0
-		else 
-		if (instr==SGT || instr==SGTi)
-		return op1>op2 ? 1 : 0
-		else 
-		if (instr==SLE || instr==SLEi)
-		return op1<=op2 ? 1 : 0
-		else 
-		if (instr==SGE || instr==SGEi)
-		return op1>=op2 ? 1 : 0
-		else 
-		if (instr==LD || instr==ST)
+		if (instr==LDR || instr==STR)
 		return (se8(op1)+se8(op2))&255
 		else 
-		if (instr==JAL || instr==JALR)
+		if (instr==BIC)
+		return (op1&(~op2))
+		else 
+		if (instr==RSB)
+		return (se8(op2)-se8(op1))&255
+		else 
+		if (instr==ASR) {
+			let neg = op1>>7
+			if (op2>8)
+			op2=8
+			if (neg) {
+				op1=op1^65280
+			}
+			return (op1>>op2)&255
+		} else
+		if (instr==ROR) {
+			op2=op2%8
+			let newLeftPart = (op1<<(8-op2))&255
+			let newRightPart = (op1>>op2)&255
+			return newLeftPart+newRightPart
+		} else
+		if (instr==B || instr==BL)
 		return op2
 		else 
 		return 238
@@ -723,8 +725,8 @@ function dlx(vplayer) {
 
 	function InstructionRegister(x, y, w, h, caption) {
 		VObj.call(this)
-		this.vIns = EMPTY, this.vRdt = 0, this.vRs1 = 0, this.vRs2 = 0
-		this.nIns = EMPTY, this.nRdt = 0, this.nRs1 = 0, this.nRs2 = 0
+		this.vIns = EMPTY, this.vRdt = 0, this.vRs1 = 0, this.vRs2 = 0, this.vIns2 = EMPTY, this.vRs3 = 0
+		this.nIns = EMPTY, this.nRdt = 0, this.nRs1 = 0, this.nRs2 = 0, this.nIns2 = EMPTY, this.nRs3 = 0
 		this.txt = "EMPTY"
 		this.r1 = new Rectangle2($g[0], 0, 0, $g[1], $g[5], x, y, w, h)
 		this.r1.setRounded(2, 2)
@@ -736,11 +738,13 @@ function dlx(vplayer) {
 	}
 	InstructionRegister.prototype = Object.create(VObj.prototype)
 
-	InstructionRegister.prototype.setNewValue = function(instr, rdt, rs1, rs2) {
+	InstructionRegister.prototype.setNewValue = function(instr, rdt, rs1, rs2, instr2, rs3) {
 		this.nIns=instr
 		this.nRdt=rdt
 		this.nRs1=rs1
 		this.nRs2=rs2
+		this.nIns2=instr2
+		this.nRs3=rs3
 	}
 
 	InstructionRegister.prototype.setNewInstruction = function(i) {
@@ -748,10 +752,12 @@ function dlx(vplayer) {
 		this.nRdt=i.vRdt
 		this.nRs1=i.vRs1
 		this.nRs2=i.vRs2
+		this.nIns2=i.vIns2
+		this.nRs3=i.vRs3
 	}
 
 	InstructionRegister.prototype.getNewInstrTxt = function() {
-		return instrText(this.nIns, this.nRdt, this.nRs1, this.nRs2)
+		return instrText(this.nIns, this.nRdt, this.nRs1, this.nRs2, this.nIns2, this.nRs3)
 	}
 
 	InstructionRegister.prototype.setOpacity = function(opacity) {
@@ -763,10 +769,12 @@ function dlx(vplayer) {
 
 	InstructionRegister.prototype.reset = function() {
 		this.vIns=EMPTY
-		this.vRdt=this.vRs1=this.vRs2=0
+		this.vIns2=EMPTY
+		this.vRdt=this.vRs1=this.vRs2=this.vRs3=0
 		this.nIns=EMPTY
-		this.nRdt=this.nRs1=this.nRs2=0
-		this.txt=instrText(this.vIns, this.vRdt, this.vRs1, this.vRs2)
+		this.nIns2=EMPTY
+		this.nRdt=this.nRs1=this.nRs2=this.nRs3=0
+		this.txt=instrText(this.vIns, this.vRdt, this.vRs1, this.vRs2, this.nIns2, this.nRs3)
 		this.label.setTxt(this.txt)
 	}
 
@@ -962,43 +970,31 @@ function dlx(vplayer) {
 
 	ALU.prototype.setTxtOp = function(vIns) {
 		this.op=""
-		if (vIns==ADD || vIns==ADDi)
+		if (vIns==ADD)
 		this.op="ADD"
 		else 
-		if (vIns==SUB || vIns==SUBi)
+		if (vIns==SUB)
 		this.op="SUB"
 		else 
-		if (vIns==AND || vIns==ANDi)
+		if (vIns==AND)
 		this.op="AND"
 		else 
-		if (vIns==OR || vIns==ORi)
+		if (vIns==ORR)
 		this.op="OR"
 		else 
-		if (vIns==XOR || vIns==XORi)
+		if (vIns==EOR)
 		this.op="XOR"
 		else 
-		if (vIns==SLL || vIns==SLLi)
+		if (vIns==LSL)
 		this.op="SLL"
 		else 
-		if (vIns==SRL || vIns==SRLi)
+		if (vIns==LSR)
 		this.op="SRL"
 		else 
-		if (vIns==SLT || vIns==SLTi)
-		this.op="LT"
-		else 
-		if (vIns==SGT || vIns==SGTi)
-		this.op="GT"
-		else 
-		if (vIns==SLE || vIns==SLEi)
-		this.op="LE"
-		else 
-		if (vIns==SGE || vIns==SGEi)
-		this.op="GE"
-		else 
-		if (vIns==LD || vIns==ST)
+		if (vIns==LDR || vIns==STR)
 		this.op="ADD"
 		else 
-		if (vIns==JAL || vIns==JALR)
+		if (vIns==BL)
 		this.op="ADD"
 		this.txtOp.setTxt(this.op)
 		this.txtOp.setOpacity(1)
@@ -1495,7 +1491,7 @@ function dlx(vplayer) {
 				$g[180]=$g[95][$g[93].vRs1].value
 			}
 			$g[108].setPen(pen)
-			if (($g[93].vIns==BEQZ)==($g[180]==0)) {
+			if (($g[93].vIns==B)==($g[180]==0)) {
 				$g[178]=$g[120]
 				$g[181]=($g[94].value+$g[93].vRs2)&127
 			} else {
@@ -1557,7 +1553,7 @@ function dlx(vplayer) {
 				$g[23]=DATA_STALL
 			}
 		}
-		if (($g[30]==STORE_INTERLOCK) && ($g[93].vIns==ST)) {
+		if (($g[30]==STORE_INTERLOCK) && ($g[93].vIns==STR)) {
 			if ((instrOpTypeRdt($g[132].vIns)==OP_TYPE_REG) && ($g[132].vRdt==$g[93].vRdt))
 			$g[23]=DATA_STALL
 			if ((instrOpTypeRdt($g[154].vIns)==OP_TYPE_REG) && ($g[154].vRdt==$g[93].vRdt))
@@ -1575,7 +1571,7 @@ function dlx(vplayer) {
 			if ((instrOpTypeRdt($g[154].vIns)==OP_TYPE_REG) && ($g[154].vRdt==$g[93].vRs2))
 			$g[23]=DATA_STALL
 		}
-		if (($g[28]==LOAD_INTERLOCK) && ($g[132].vIns==LD)) {
+		if (($g[28]==LOAD_INTERLOCK) && ($g[132].vIns==LDR)) {
 			if ((instrOpTypeRs1($g[93].vIns)==OP_TYPE_REG) && ($g[93].vRs1==$g[132].vRdt))
 			$g[23]=DATA_STALL
 			if ((instrOpTypeRs2($g[93].vIns)==OP_TYPE_REG) && ($g[93].vRs2==$g[132].vRdt))
@@ -1752,33 +1748,32 @@ function dlx(vplayer) {
 				$g[35][ADD]="ADD"
 				$g[35][SUB]="SUB"
 				$g[35][AND]="AND"
-				$g[35][OR]="OR"
-				$g[35][XOR]="XOR"
-				$g[35][SLL]="SLL"
-				$g[35][SRL]="SRL"
-				$g[35][SLT]="SLT"
-				$g[35][SGT]="SGT"
-				$g[35][SLE]="SLE"
-				$g[35][SGE]="SGE"
-				$g[35][ADDi]="ADDi"
-				$g[35][SUBi]="SUBi"
-				$g[35][ANDi]="ANDi"
-				$g[35][ORi]="ORi"
-				$g[35][XORi]="XORi"
-				$g[35][SLLi]="SLLi"
-				$g[35][SRLi]="SRLi"
-				$g[35][SLTi]="SLTi"
-				$g[35][SGTi]="SGTi"
-				$g[35][SLEi]="SLEi"
-				$g[35][SGEi]="SGEi"
-				$g[35][LD]="LD"
-				$g[35][ST]="ST"
-				$g[35][BEQZ]="BEQZ"
-				$g[35][BNEZ]="BNEZ"
-				$g[35][J]="J"
-				$g[35][JAL]="JAL"
-				$g[35][JR]="JR"
-				$g[35][JALR]="JALR"
+				$g[35][ORR]="ORR"
+				$g[35][EOR]="EOR"
+				$g[35][LSL]="LSL"
+				$g[35][LSR]="LSR"
+				$g[35][ADC]="ADC"
+				$g[35][BIC]="BIC"
+				$g[35][CMN]="CMN"
+				$g[35][CMP]="CMP"
+				$g[35][MOV]="MOV"
+				$g[35][MUL]="MUL"
+				$g[35][MVN]="MVN"
+				$g[35][RSB]="RSB"
+				$g[35][RSC]="RSC"
+				$g[35][SBC]="SBC"
+				$g[35][ASR]="ASR"
+				$g[35][ROR]="ROR"
+				$g[35][SWP]="SWP"
+				$g[35][TEQ]="TEQ"
+				$g[35][TST]="TST"
+				$g[35][LDR]="LDR"
+				$g[35][STR]="STR"
+				$g[35][LDM]="LDM"
+				$g[35][STM]="STM"
+				$g[35][B]="B"
+				$g[35][BL]="BL"
+				$g[35][BX]="BX"
 				$g[35][HALT]="HALT"
 				$g[35][STALL]="STALL"
 				$g[35][EMPTY]="EMPTY"
@@ -1896,12 +1891,24 @@ function dlx(vplayer) {
 				$g[93] = new InstructionRegister(776, 771, 54, 187, "ID")
 				$g[94] = new Register(776, 463, 54, 88, TOP, "PC1")
 				new Txt($g[0], 0, HLEFT|VTOP, 1182, 88, 0, $g[15], "Register\nFile")
-				$g[95] = newArray(4)
-				$g[95][0]=new Register(952, 66, 108, 44, LEFT, "R0")
+				$g[95] = newArray(16)
+				$g[95][0]=new Register(952, 66, 32, 88, TOP, "R0")
 				$g[95][0].setFixed()
-				$g[95][1]=new Register(952, 110, 108, 44, LEFT, "R1")
-				$g[95][2]=new Register(1060, 66, 108, 44, RIGHT, "R2")
-				$g[95][3]=new Register(1060, 110, 108, 44, RIGHT, "R3")
+				$g[95][1]=new Register(984, 66, 32, 88, TOP, "R1")
+				$g[95][2]=new Register(1016, 66, 32, 88, TOP, "R2")
+				$g[95][3]=new Register(1048, 66, 32, 88, TOP, "R3")
+				$g[95][4]=new Register(1080, 66, 32, 88, TOP, "R4")
+				$g[95][5]=new Register(1112, 66, 32, 88, TOP, "R5")
+				$g[95][6]=new Register(1144, 66, 32, 88, TOP, "R6")
+				$g[95][7]=new Register(1176, 66, 32, 88, TOP, "R7")
+				$g[95][8]=new Register(1208, 66, 32, 88, TOP, "R8")
+				$g[95][9]=new Register(1240, 66, 32, 88, TOP, "R9")
+				$g[95][10]=new Register(1272, 66, 32, 88, TOP, "R10")
+				$g[95][11]=new Register(1304, 66, 32, 88, TOP, "R11")
+				$g[95][12]=new Register(1336, 66, 32, 88, TOP, "R12")
+				$g[95][13]=new Register(1368, 66, 32, 88, TOP, "SP")
+				$g[95][14]=new Register(1400, 66, 32, 88, TOP, "LR")
+				$g[95][15]=new Register(1432, 66, 32, 88, TOP, "PC")
 				$g[96] = new Component(844, 375, 135, 22, "mux 3")
 				$g[97] = new Component(830, 595, 81, 22, "ADD4")
 				$g[98] = new Component(911, 595, 81, 22, "ADDi")
@@ -2179,17 +2186,6 @@ function dlx(vplayer) {
 					$pc = 15
 					continue
 				}
-				$g[71].setValue(0, XOR, 1, 1, 1)
-				$g[71].setValue(4, BEQZ, 0, 2, 36)
-				$g[71].setValue(8, ST, 2, 0, 0)
-				$g[71].setValue(12, ANDi, 2, 2, 1)
-				$g[71].setValue(16, BEQZ, 0, 2, 8)
-				$g[71].setValue(20, ADD, 1, 1, 3)
-				$g[71].setValue(24, LD, 2, 0, 0)
-				$g[71].setValue(28, SRLi, 2, 2, 1)
-				$g[71].setValue(32, SLLi, 3, 3, 1)
-				$g[71].setValue(36, J, 0, 0, 4-36)
-				$g[71].setValue(40, ST, 1, 0, 0)
 				$g[71].setValue(44, HALT, 0, 0, 0)
 				$g[95][2].setValue(9)
 				$g[95][3].setValue(8)
@@ -2204,7 +2200,7 @@ function dlx(vplayer) {
 				$g[71].setValue(0, ADD, 1, 2, 3)
 				$g[71].setValue(4, SUB, 3, 1, 2)
 				$g[71].setValue(8, AND, 2, 1, 3)
-				$g[71].setValue(12, XOR, 2, 1, 3)
+				$g[71].setValue(12, EOR, 2, 1, 3)
 				$g[71].setValue(16, ADD, 2, 1, 0)
 				$g[71].setValue(20, HALT, 0, 0, 0)
 				$g[95][1].setValue(1)
@@ -2233,11 +2229,8 @@ function dlx(vplayer) {
 					$pc = 18
 					continue
 				}
-				$g[71].setValue(0, ADDi, 1, 0, 3)
 				$g[71].setValue(4, ADD, 0, 0, 0)
 				$g[71].setValue(8, ADD, 0, 0, 0)
-				$g[71].setValue(12, SUBi, 1, 1, 1)
-				$g[71].setValue(16, BNEZ, 0, 1, -12&255)
 				$g[71].setValue(20, HALT, 0, 0, 0)
 				setTPS(50)
 				$pc = 20
@@ -2247,7 +2240,7 @@ function dlx(vplayer) {
 					$pc = 19
 					continue
 				}
-				$g[71].setValue(0, JR, 0, 0, 1)
+				$g[71].setValue(0, B, 0, 0, 1)
 				$g[71].setValue(32, ADD, 1, 1, 1)
 				$g[71].setValue(36, HALT, 0, 0, 0)
 				$g[95][1].setValue(32)
@@ -2369,7 +2362,9 @@ function dlx(vplayer) {
 				$obj.vRdt=$obj.nRdt
 				$obj.vRs1=$obj.nRs1
 				$obj.vRs2=$obj.nRs2
-				$obj.txt=instrText($obj.vIns, $obj.vRdt, $obj.vRs1, $obj.vRs2)
+				$obj.vIns2=$obj.nIns2
+				$obj.vRs3=$obj.nRs3
+				$obj.txt=instrText($obj.vIns, $obj.vRdt, $obj.vRs1, $obj.vRs2, $obj.nIns2, $obj.nRs3)
 				$obj.label.setTxt($obj.txt)
 				$obj.r2.setBrush($g[13])
 				if (wait(16))
@@ -2624,7 +2619,7 @@ function dlx(vplayer) {
 					$pc = 82
 					continue
 				}
-				if (!($g[93].vIns==JAL)) {
+				if (!($g[93].vIns==BL)) {
 					$pc = 76
 					continue
 				}
@@ -2663,7 +2658,7 @@ function dlx(vplayer) {
 				$pc = 87
 				continue
 			case 82:
-				if (!($g[93].vIns==JALR)) {
+				if (!($g[93].vIns==BL)) {
 					$pc = 84
 					continue
 				}
@@ -2732,11 +2727,11 @@ function dlx(vplayer) {
 					$pc = 95
 					continue
 				}
-				$g[132].setNewValue($g[93].vIns, $g[93].vRdt, $g[93].vRs1, $g[93].vRs2)
+				$g[132].setNewValue($g[93].vIns, $g[93].vRdt, $g[93].vRs1, $g[93].vRs2, $g[93].vIns2, $g[93].vRs3)
 				$pc = 96
 				continue
 			case 95:
-				$g[132].setNewValue(STALL, 0, 0, 0)
+				$g[132].setNewValue(STALL, 0, 0, 0, STALL, 0)
 				$pc = 96
 			case 96:
 				if (wait(7))
@@ -2780,11 +2775,11 @@ function dlx(vplayer) {
 				$g[131].setTxt("R%d:%02X", $g[93].vRs1, $g[95][$g[93].vRs1].value)
 				$g[131].setOpacity(1)
 				fork(37, $g[130], 24)
-				if (!((!instrIsArRI($g[93].vIns)) && ($g[93].vIns!=LD))) {
+				if (!((!instrIsArRI($g[93].vIns)) && ($g[93].vIns!=LDR))) {
 					$pc = 105
 					continue
 				}
-				$stack[$fp+1] = ($g[93].vIns==ST) ? $g[93].vRdt : $g[93].vRs2
+				$stack[$fp+1] = ($g[93].vIns==STR) ? $g[93].vRdt : $g[93].vRs2
 				$g[129].setTxt("R%d:%02X", $stack[$fp+1], $g[95][$stack[$fp+1]].value)
 				$g[129].setOpacity(1)
 				callf(37, $g[128], 18)
@@ -2816,7 +2811,7 @@ function dlx(vplayer) {
 				return
 				$pc = 110
 			case 110:
-				$g[154].setNewValue($g[132].vIns, $g[132].vRdt, $g[132].vRs1, $g[132].vRs2)
+				$g[154].setNewValue($g[132].vIns, $g[132].vRdt, $g[132].vRs1, $g[132].vRs2, $g[132].vIns2, $g[132].vRs3)
 				if (!(instrOpTypeRdt($g[132].vIns)==OP_TYPE_REG)) {
 					$pc = 132
 					continue
@@ -2924,6 +2919,7 @@ function dlx(vplayer) {
 			case 127:
 				$pc = 128
 			case 128:
+				new Register(0, 0, 108, 44, LEFT, "PC")
 				$stack[$fp+6] = instrExecute($g[132].vIns, $stack[$fp+4], $stack[$fp+5])
 				if (!($g[132].vRdt==0)) {
 					$pc = 129
@@ -2958,7 +2954,7 @@ function dlx(vplayer) {
 			case 133:
 				$pc = 134
 			case 134:
-				if (!($g[132].vIns==ST)) {
+				if (!($g[132].vIns==STR)) {
 					$pc = 141
 					continue
 				}
@@ -3004,7 +3000,7 @@ function dlx(vplayer) {
 				$pc = 142
 			case 142:
 				fork(37, $g[139], 64)
-				if (!($g[132].vIns==ST)) {
+				if (!($g[132].vIns==STR)) {
 					$pc = 143
 					continue
 				}
@@ -3037,7 +3033,7 @@ function dlx(vplayer) {
 				return
 				$pc = 147
 			case 147:
-				if (!($g[132].vIns==ST)) {
+				if (!($g[132].vIns==STR)) {
 					$pc = 148
 					continue
 				}
@@ -3077,7 +3073,7 @@ function dlx(vplayer) {
 				fork(35, $g[155])
 				$pc = 153
 			case 153:
-				if (!($g[154].nIns==ST)) {
+				if (!($g[154].nIns==STR)) {
 					$pc = 154
 					continue
 				}
@@ -3088,12 +3084,12 @@ function dlx(vplayer) {
 				return
 				$pc = 155
 			case 155:
-				$g[165].setNewValue($g[154].vIns, $g[154].vRdt, $g[154].vRs1, $g[154].vRs2)
-				if (!((instrOpTypeRdt($g[154].vIns)==OP_TYPE_REG) && ($g[154].vIns!=ST))) {
+				$g[165].setNewValue($g[154].vIns, $g[154].vRdt, $g[154].vRs1, $g[154].vRs2, $g[154].vIns2, $g[154].vRs3)
+				if (!((instrOpTypeRdt($g[154].vIns)==OP_TYPE_REG) && ($g[154].vIns!=STR))) {
 					$pc = 158
 					continue
 				}
-				if (!($g[154].vIns==LD)) {
+				if (!($g[154].vIns==LDR)) {
 					$pc = 156
 					continue
 				}
@@ -3114,7 +3110,7 @@ function dlx(vplayer) {
 				$pc = 159
 			case 159:
 				fork(37, $g[159], 64)
-				if (!($g[154].vIns==ST)) {
+				if (!($g[154].vIns==STR)) {
 					$pc = 162
 					continue
 				}
@@ -3133,7 +3129,7 @@ function dlx(vplayer) {
 					$pc = 169
 					continue
 				}
-				if (!($g[154].vIns==LD)) {
+				if (!($g[154].vIns==LDR)) {
 					$pc = 165
 					continue
 				}
@@ -3164,7 +3160,7 @@ function dlx(vplayer) {
 			case 171:
 				enterf(0);	// wbExec
 				fork(33, $g[165])
-				if (!((instrOpTypeRdt($g[165].nIns)==OP_TYPE_REG) && ($g[165].nIns!=ST))) {
+				if (!((instrOpTypeRdt($g[165].nIns)==OP_TYPE_REG) && ($g[165].nIns!=STR))) {
 					$pc = 172
 					continue
 				}
@@ -3175,7 +3171,7 @@ function dlx(vplayer) {
 				return
 				$pc = 173
 			case 173:
-				if (!((instrOpTypeRdt($g[165].vIns)==OP_TYPE_REG) && ($g[165].vIns!=ST))) {
+				if (!((instrOpTypeRdt($g[165].vIns)==OP_TYPE_REG) && ($g[165].vIns!=STR))) {
 					$pc = 178
 					continue
 				}
@@ -3243,7 +3239,7 @@ function dlx(vplayer) {
 					$pc = 192
 					continue
 				}
-				if (!(($g[95][$g[93].vRs1].value==0)==($g[93].vIns==BEQZ))) {
+				if (!(($g[95][$g[93].vRs1].value==0)==($g[93].vIns==B))) {
 					$pc = 188
 					continue
 				}
@@ -3352,7 +3348,7 @@ function dlx(vplayer) {
 				$g[131].setTxt("R%d:%02X", $g[93].vRs1, $g[95][$g[93].vRs1].value)
 				$g[131].setOpacity(1)
 				fork(37, $g[130], 40)
-				if (!((instrOpTypeRs2($g[93].vIns)==OP_TYPE_REG) || ($g[93].vIns==ST))) {
+				if (!((instrOpTypeRs2($g[93].vIns)==OP_TYPE_REG) || ($g[93].vIns==STR))) {
 					$pc = 217
 					continue
 				}
@@ -3369,11 +3365,11 @@ function dlx(vplayer) {
 				$g[95][$g[93].vRs2].highlight($g[21])
 				$pc = 213
 			case 213:
-				if (!((!instrIsArRI($g[93].vIns)) && ($g[93].vIns!=LD))) {
+				if (!((!instrIsArRI($g[93].vIns)) && ($g[93].vIns!=LDR))) {
 					$pc = 216
 					continue
 				}
-				$stack[$fp+5] = ($g[93].vIns==ST) ? $g[93].vRdt : $g[93].vRs2
+				$stack[$fp+5] = ($g[93].vIns==STR) ? $g[93].vRdt : $g[93].vRs2
 				$g[129].setTxt("R%d:%02X", $stack[$fp+5], $g[95][$stack[$fp+5]].value)
 				$g[129].setOpacity(1)
 				callf(37, $g[128], 20)
@@ -3411,7 +3407,7 @@ function dlx(vplayer) {
 				$g[138].setTxtOp($g[93].vIns)
 				$pc = 224
 			case 224:
-				if (!($g[93].vIns==ST)) {
+				if (!($g[93].vIns==STR)) {
 					$pc = 227
 					continue
 				}
@@ -3487,7 +3483,7 @@ function dlx(vplayer) {
 			case 239:
 				$pc = 240
 			case 240:
-				if (!($g[93].vIns==LD)) {
+				if (!($g[93].vIns==LDR)) {
 					$pc = 244
 					continue
 				}
@@ -3505,7 +3501,7 @@ function dlx(vplayer) {
 				$pc = 254
 				continue
 			case 244:
-				if (!($g[93].vIns==ST)) {
+				if (!($g[93].vIns==STR)) {
 					$pc = 247
 					continue
 				}
@@ -3547,7 +3543,7 @@ function dlx(vplayer) {
 				$g[95][1].unHighlight()
 				$g[95][2].unHighlight()
 				$g[95][3].unHighlight()
-				if (!((instrOpTypeRdt($g[93].vIns)==OP_TYPE_REG) && ($g[93].vIns!=ST))) {
+				if (!((instrOpTypeRdt($g[93].vIns)==OP_TYPE_REG) && ($g[93].vIns!=STR))) {
 					$pc = 258
 					continue
 				}

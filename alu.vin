@@ -49,31 +49,50 @@ class ALU(num x, num y, num w, num h) {
 
         //debug("setTxtOp\n", op);
         op = "";
-        if (vIns == ADD || vIns == ADDi)
+        //if (vIns == ADD || vIns == ADDi)
+        //    op = "ADD"
+        //else if (vIns == SUB || vIns == SUBi)
+        //    op = "SUB"
+        //else if (vIns == AND || vIns == ANDi)
+        //    op = "AND"
+        //else if (vIns == OR || vIns == ORi)
+        //    op = "OR"
+        //else if (vIns == XOR || vIns == XORi)
+        //    op = "XOR"
+        //else if (vIns == SLL || vIns == SLLi)
+        //    op = "SLL"
+        //else if (vIns == SRL || vIns == SRLi)
+        //    op = "SRL"
+        //else if (vIns == SLT || vIns == SLTi)
+        //    op = "LT"
+        //else if (vIns == SGT || vIns == SGTi)
+        //    op = "GT"
+        //else if (vIns == SLE || vIns == SLEi)
+        //    op = "LE"
+        //else if (vIns == SGE || vIns == SGEi)
+        //    op = "GE"
+        //else if (vIns == LD || vIns == ST)          // joj
+        //    op = "ADD"
+        //else if (vIns == JAL || vIns == JALR)
+        //    op = "ADD"
+
+		if (vIns == ADD)
             op = "ADD"
-        else if (vIns == SUB || vIns == SUBi)
+        else if (vIns == SUB)
             op = "SUB"
-        else if (vIns == AND || vIns == ANDi)
+        else if (vIns == AND)
             op = "AND"
-        else if (vIns == OR || vIns == ORi)
+        else if (vIns == ORR)
             op = "OR"
-        else if (vIns == XOR || vIns == XORi)
+        else if (vIns == EOR)
             op = "XOR"
-        else if (vIns == SLL || vIns == SLLi)
+        else if (vIns == LSL)
             op = "SLL"
-        else if (vIns == SRL || vIns == SRLi)
+        else if (vIns == LSR)
             op = "SRL"
-        else if (vIns == SLT || vIns == SLTi)
-            op = "LT"
-        else if (vIns == SGT || vIns == SGTi)
-            op = "GT"
-        else if (vIns == SLE || vIns == SLEi)
-            op = "LE"
-        else if (vIns == SGE || vIns == SGEi)
-            op = "GE"
-        else if (vIns == LD || vIns == ST)          // joj
+        else if (vIns == LDR || vIns == STR)          // joj
             op = "ADD"
-        else if (vIns == JAL || vIns == JALR)
+        else if (vIns == BL)
             op = "ADD"
 
         //debug("op = %s\n", op);
