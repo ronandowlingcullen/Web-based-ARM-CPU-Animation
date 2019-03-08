@@ -493,9 +493,9 @@ function dlx(vplayer) {
 		this.opTypeRs2=instrOpTypeRs2(this.vIns)
 		this.opTypeRs3=instrOpTypeRs2(this.vIns2)
 		if (this.opTypeRs2==OP_TYPE_REG)
-		this.vRs2=(this.vRs2%4)
+		this.vRs2=(this.vRs2%16)
 		if (this.opTypeRs3==OP_TYPE_REG)
-		this.vRs3=(this.vRs3%4)
+		this.vRs3=(this.vRs3%16)
 		if (this.opTypeRdt==OP_TYPE_UNUSED)
 		this.rdt.setTxt("-")
 		else 
@@ -603,10 +603,10 @@ function dlx(vplayer) {
 	Instruction.prototype.$eh9 = function(down, flags, x, y) {
 		if (!$g[22] && down && this.opTypeRdt!=OP_TYPE_UNUSED) {
 			if (flags&MB_LEFT) {
-				this.vRdt=(this.vRdt==3) ? 0 : this.vRdt+1
+				this.vRdt=(this.vRdt==15) ? 0 : this.vRdt+1
 			} else
 			if (flags&MB_RIGHT)
-			this.vRdt=(this.vRdt==0) ? 3 : this.vRdt-1
+			this.vRdt=(this.vRdt==0) ? 15 : this.vRdt-1
 			this.initRegs(1)
 		}
 		return 0
@@ -615,10 +615,10 @@ function dlx(vplayer) {
 	Instruction.prototype.$eh10 = function(down, flags, x, y) {
 		if (!$g[22] && down && this.opTypeRdt!=OP_TYPE_UNUSED) {
 			if (flags&MB_LEFT) {
-				this.vRs1=(this.vRs1==3) ? 0 : this.vRs1+1
+				this.vRs1=(this.vRs1==15) ? 0 : this.vRs1+1
 			} else
 			if (flags&MB_RIGHT)
-			this.vRs1=(this.vRs1==0) ? 3 : this.vRs1-1
+			this.vRs1=(this.vRs1==0) ? 15 : this.vRs1-1
 			this.initRegs(1)
 		}
 		return 0
@@ -628,7 +628,7 @@ function dlx(vplayer) {
 		if (!$g[22] && down) {
 			if (flags&MB_LEFT) {
 				if (this.opTypeRs2==OP_TYPE_REG) {
-					this.vRs2=(this.vRs2+1)%4
+					this.vRs2=(this.vRs2+1)%16
 				} else
 				if (this.opTypeRs2==OP_TYPE_IMM) {
 					this.clk=timeMS()
@@ -637,9 +637,9 @@ function dlx(vplayer) {
 			} else
 			if (flags&MB_RIGHT) {
 				if (this.opTypeRs2==OP_TYPE_REG) {
-					this.vRs2=(this.vRs2-1)%4
+					this.vRs2=(this.vRs2-1)%16
 					if (this.vRs2<0)
-					this.vRs2=4+this.vRs2
+					this.vRs2=16+this.vRs2
 				} else
 				if (this.opTypeRs2==OP_TYPE_IMM) {
 					this.clk=timeMS()
@@ -662,7 +662,7 @@ function dlx(vplayer) {
 		if (!$g[22] && down) {
 			if (flags&MB_LEFT) {
 				if (this.opTypeRs3==OP_TYPE_REG) {
-					this.vRs3=(this.vRs3+1)%4
+					this.vRs3=(this.vRs3+1)%16
 				} else
 				if (this.opTypeRs3==OP_TYPE_IMM) {
 					this.clk=timeMS()
@@ -671,9 +671,9 @@ function dlx(vplayer) {
 			} else
 			if (flags&MB_RIGHT) {
 				if (this.opTypeRs3==OP_TYPE_REG) {
-					this.vRs3=(this.vRs3-1)%4
+					this.vRs3=(this.vRs3-1)%16
 					if (this.vRs3<0)
-					this.vRs3=4+this.vRs3
+					this.vRs3=16+this.vRs3
 				} else
 				if (this.opTypeRs3==OP_TYPE_IMM) {
 					this.clk=timeMS()
