@@ -451,7 +451,7 @@ num function instrExecute(num instr, num op1, num op2, num n, num z, num c, num 
 		cpsr.setVValue(isSubV(se8(op1),se8(op2),res));
 	}
 //instrNames[MOV]	= "MOV";	// Move register or constant
-//instrNames[MUL]	= "MUL";	// Multiply
+//instrNames[MUL]	= "MUL";NB:	// Multiply ********(If S set V preserved)******************
 //instrNames[MVN]	= "MVN";	// Move negative register
 	else if (instr == RSB)
 		return (se8(op2) - se8(op1)) & 0xFF;
