@@ -63,6 +63,7 @@ Button buttonAF = Button(1155.0, 1014, 216, 44, "ALU Forwarding", BUTTON_AF);   
 Button buttonSF = Button(1398.0, 1014, 216, 44, "Store Operand\nForwarding", BUTTON_SF);    // {joj}
 Button buttonZF = Button(1641.0, 1014, 216, 44, "Zero Forwarding", BUTTON_ZF);              // {joj}
 
+
 //
 // Vivio logo
 //
@@ -196,6 +197,12 @@ regFile[12] = Register(1336.0, 66, 32, 88, TOP, "R12");
 regFile[13] = Register(1368.0, 66, 32, 88, TOP, "SP");
 regFile[14] = Register(1400.0, 66, 32, 88, TOP, "LR");
 regFile[15] = Register(1432.0, 66, 32, 88, TOP, "PC");
+
+//
+// CPSR
+//
+
+CPSR cpsr = CPSR(1490, 66, 140, 88);
 
 // Other components
 Component cMUX3 = Component(844.0, 375, 135, 22, "mux 3");                                               // {joj}
@@ -426,12 +433,12 @@ Txt(valuesLayer, HLEFT | VTOP, 1736.0, 705, 0, font, "memory\ndata-in");        
 Txt(valuesLayer, HLEFT | VTOP, 1763.0, 220, 0, font, "memory\ndata-out");       // {joj}
 
 // Memory
-Txt(0, HLEFT | VTOP, 1844.0, 77, 0, font, "Data\nCache\n(memory)"); // {joj}
+Txt(0, HLEFT | VTOP, 1884.0, 77, 0, font, "Data\nCache\n(memory)"); // {joj}
 Register memory[4];
-memory[0] = Register(1614.0, 66, 108, 44, LEFT, "M0");
-memory[1] = Register(1614.0, 110, 108, 44, LEFT, "M1");
-memory[2] = Register(1723.0, 66, 108, 44, RIGHT, "M2");
-memory[3] = Register(1723.0, 110, 108, 44, RIGHT, "M3");
+memory[0] = Register(1654.0, 66, 108, 44, LEFT, "M0");
+memory[1] = Register(1654.0, 110, 108, 44, LEFT, "M1");
+memory[2] = Register(1763.0, 66, 108, 44, RIGHT, "M2");
+memory[3] = Register(1763.0, 110, 108, 44, RIGHT, "M3");
 
 //
 // Other components
@@ -483,8 +490,8 @@ Register regOUT1 = Register(1885.0, 463, 54, 88, TOP, "O1");
 
 AnimPipe apOUT1_RF = AnimPipe();
 apOUT1_RF.addPoint(1939.0, 507);
-apOUT1_RF.addPoint(1966.0, 507);
-apOUT1_RF.addPoint(1966.0, 22);
+apOUT1_RF.addPoint(1980.0, 507);
+apOUT1_RF.addPoint(1980.0, 22);
 apOUT1_RF.addPoint(1060.0, 22);
 apOUT1_RF.addPoint(1060.0, 66);
 

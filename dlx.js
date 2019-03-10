@@ -324,7 +324,50 @@ function dlx(vplayer) {
 		return t
 	}
 
-	function instrExecute(instr, op1, op2) {
+	function isN(val) {
+		if (val&128)
+		return 1
+		else 
+		return 0
+	}
+
+	function isZ(val) {
+		if (val==0)
+		return 1
+		else 
+		return 0
+	}
+
+	function isAddC(op1, op2) {
+		if ((op1+op2)&256)
+		return 1
+		else 
+		return 0
+	}
+
+	function isSubC(op1, op2) {
+		if ((op1+op2)&256)
+		return 0
+		else 
+		return 1
+	}
+
+	function isAddV(op1, op2, res) {
+		if (((op1&128)==(op2&128)) && ((res&128)!=(op1&128)))
+		return 1
+		else 
+		return 0
+	}
+
+	function isSubV(op1, op2, res) {
+		if (((op1&128)!=(op2&128)) && ((res&128)!=(op1&128)))
+		return 1
+		else 
+		return 0
+	}
+
+	function instrExecute(instr, op1, op2, n, z, c, v) {
+		let res = 0
 		if (instr==ADD)
 		return (se8(op1)+se8(op2))&255
 		else 
@@ -349,11 +392,34 @@ function dlx(vplayer) {
 		if (instr==LDR || instr==STR)
 		return (se8(op1)+se8(op2))&255
 		else 
+		if (instr==ADC)
+		return (se8(op1)+se8(op2)+c)&255
+		else 
 		if (instr==BIC)
 		return (op1&(~op2))
 		else 
+		if (instr==CMN) {
+			res=se8(op1)+se8(op2)
+			$g[98].setNValue(isN(res))
+			$g[98].setZValue(isZ(res))
+			$g[98].setCValue(isAddC(se8(op1), se8(op2)))
+			$g[98].setVValue(isAddV(se8(op1), se8(op2), res))
+		} else
+		if (instr==CMP) {
+			res=se8(op1)-se8(op2)
+			$g[98].setNValue(isN(res))
+			$g[98].setZValue(isZ(res))
+			$g[98].setCValue(isSubC(se8(op1), se8(op2)))
+			$g[98].setVValue(isSubV(se8(op1), se8(op2), res))
+		} else
 		if (instr==RSB)
 		return (se8(op2)-se8(op1))&255
+		else 
+		if (instr==RSC)
+		return (se8(op2)-se8(op1)-1+c)&255
+		else 
+		if (instr==SBC)
+		return (se8(op1)-se8(op2)-1+c)&255
 		else 
 		if (instr==ASR) {
 			let neg = op1>>7
@@ -369,6 +435,20 @@ function dlx(vplayer) {
 			let newLeftPart = (op1<<(8-op2))&255
 			let newRightPart = (op1>>op2)&255
 			return newLeftPart+newRightPart
+		} else
+		if (instr==TEQ) {
+			res=se8(op1)^se8(op2)
+			$g[98].setNValue(isN(res))
+			$g[98].setZValue(isZ(res))
+			$g[98].setCValue(isAddC(se8(op1), se8(op2)))
+			$g[98].setVValue(isAddV(se8(op1), se8(op2), res))
+		} else
+		if (instr==TST) {
+			res=se8(op1)&se8(op2)
+			$g[98].setNValue(isN(res))
+			$g[98].setZValue(isZ(res))
+			$g[98].setCValue(isAddC(se8(op1), se8(op2)))
+			$g[98].setVValue(isAddV(se8(op1), se8(op2), res))
 		} else
 		if (instr==B || instr==BL)
 		return op2
@@ -1100,12 +1180,167 @@ function dlx(vplayer) {
 		this.label.setFont(locked ? $g[16] : $g[15])
 	}
 
+	function CPSR(x, y, w, h) {
+		VObj.call(this)
+		this.n = 0
+		this.z = 0
+		this.c = 0
+		this.v = 0
+		this.nx = x
+		this.zx = x+w/4
+		this.cx = x+2*(w/4)
+		this.vx = x+3*(w/4)
+		this.ny = y+h/3
+		this.zy = y+h/3
+		this.cy = y+h/3
+		this.vy = y+h/3
+		this.outer = new Rectangle2($g[0], 0, 0, $g[1], $g[49], x, y, w+4, h)
+		this.nLabel = new Rectangle($g[0], 0, 0, 0, 0, this.nx, y, 0, 0, w/4, h/3, 0, $g[43], "N")
+		this.zLabel = new Rectangle($g[0], 0, 0, 0, 0, this.zx, y, 0, 0, w/4, h/3, 0, $g[43], "Z")
+		this.cLabel = new Rectangle($g[0], 0, 0, 0, 0, this.cx, y, 0, 0, w/4, h/3, 0, $g[43], "C")
+		this.vLabel = new Rectangle($g[0], 0, 0, 0, 0, this.vx, y, 0, 0, w/4, h/3, 0, $g[43], "V")
+		this.nValue = new Rectangle2($g[0], $g[17], 0, 0, $g[13], this.nx+4, this.ny, (w/4)-4, 2*h/3-4, 0, $g[15], "%01X", this.n)
+		this.zValue = new Rectangle2($g[0], $g[17], 0, 0, $g[13], this.zx+4, this.zy, (w/4)-4, 2*h/3-4, 0, $g[15], "%01X", this.z)
+		this.cValue = new Rectangle2($g[0], $g[17], 0, 0, $g[13], this.cx+4, this.cy, (w/4)-4, 2*h/3-4, 0, $g[15], "%01X", this.c)
+		this.vValue = new Rectangle2($g[0], $g[17], 0, 0, $g[13], this.vx+4, this.vy, (w/4)-4, 2*h/3-4, 0, $g[15], "%01X", this.v)
+		this.nValue.addEventHandler("eventEE", this, this.$eh16)
+		this.zValue.addEventHandler("eventEE", this, this.$eh17)
+		this.cValue.addEventHandler("eventEE", this, this.$eh18)
+		this.vValue.addEventHandler("eventEE", this, this.$eh19)
+		this.nValue.addEventHandler("eventMB", this, this.$eh20)
+		this.zValue.addEventHandler("eventMB", this, this.$eh21)
+		this.cValue.addEventHandler("eventMB", this, this.$eh22)
+		this.vValue.addEventHandler("eventMB", this, this.$eh23)
+		this.hmode = 0
+	}
+	CPSR.prototype = Object.create(VObj.prototype)
+
+	CPSR.prototype.updateNValue = function() {
+		this.nValue.setTxt("%01X", this.n)
+		return 0
+	}
+
+	CPSR.prototype.updateZValue = function() {
+		this.zValue.setTxt("%01X", this.z)
+		return 0
+	}
+
+	CPSR.prototype.updateCValue = function() {
+		this.cValue.setTxt("%01X", this.c)
+		return 0
+	}
+
+	CPSR.prototype.updateVValue = function() {
+		this.vValue.setTxt("%01X", this.v)
+		return 0
+	}
+
+	CPSR.prototype.updateValues = function() {
+		this.updateNValue()
+		this.updateZValue()
+		this.updateCValue()
+		this.updateVValue()
+	}
+
+	CPSR.prototype.$eh16 = function(enter, x, y) {
+		this.nValue.setBrush(enter ? $g[12] : $g[13])
+		return 0
+	}
+
+	CPSR.prototype.$eh17 = function(enter, x, y) {
+		this.zValue.setBrush(enter ? $g[12] : $g[13])
+		return 0
+	}
+
+	CPSR.prototype.$eh18 = function(enter, x, y) {
+		this.cValue.setBrush(enter ? $g[12] : $g[13])
+		return 0
+	}
+
+	CPSR.prototype.$eh19 = function(enter, x, y) {
+		this.vValue.setBrush(enter ? $g[12] : $g[13])
+		return 0
+	}
+
+	CPSR.prototype.$eh20 = function(down, flags, x, y) {
+		if (down) {
+			if (flags) {
+				this.n=(this.n+1)%2
+			}
+			this.updateNValue()
+		}
+		return 0
+	}
+
+	CPSR.prototype.$eh21 = function(down, flags, x, y) {
+		if (down) {
+			if (flags) {
+				this.z=(this.z+1)%2
+			}
+			this.updateZValue()
+		}
+		return 0
+	}
+
+	CPSR.prototype.$eh22 = function(down, flags, x, y) {
+		if (down) {
+			if (flags) {
+				this.c=(this.c+1)%2
+			}
+			this.updateCValue()
+		}
+		return 0
+	}
+
+	CPSR.prototype.$eh23 = function(down, flags, x, y) {
+		if (down) {
+			if (flags) {
+				this.v=(this.v+1)%2
+			}
+			this.updateVValue()
+		}
+		return 0
+	}
+
+	CPSR.prototype.setNValue = function(val) {
+		this.n=val
+		this.updateNValue()
+	}
+
+	CPSR.prototype.setZValue = function(val) {
+		this.z=val
+		this.updateZValue()
+	}
+
+	CPSR.prototype.setCValue = function(val) {
+		this.c=val
+		this.updateCValue()
+	}
+
+	CPSR.prototype.setVValue = function(val) {
+		this.v=val
+		this.updateVValue()
+	}
+
+	CPSR.prototype.highlight = function(brush) {
+	}
+
+	CPSR.prototype.unHighlight = function() {
+	}
+
+	CPSR.prototype.reset = function() {
+		this.n=0
+		this.z=0
+		this.c=0
+		this.v=0
+		this.unHighlight()
+		this.updateValues()
+	}
+
 	function resetWires() {
-		$g[82].reset()
-		$g[80].reset()
-		$g[81].setOpacity(0)
-		$g[83].reset()
 		$g[84].reset()
+		$g[82].reset()
+		$g[83].setOpacity(0)
 		$g[85].reset()
 		$g[86].reset()
 		$g[87].reset()
@@ -1114,90 +1349,92 @@ function dlx(vplayer) {
 		$g[90].reset()
 		$g[91].reset()
 		$g[92].reset()
-		$g[111].reset()
-		$g[112].reset()
-		$g[113].reset()
+		$g[93].reset()
+		$g[94].reset()
 		$g[114].reset()
 		$g[115].reset()
 		$g[116].reset()
-		$g[117].setOpacity(0)
+		$g[117].reset()
 		$g[118].reset()
-		$g[119].setOpacity(0)
-		$g[120].reset()
-		$g[121].setOpacity(0)
-		$g[122].reset()
-		$g[123].setOpacity(0)
+		$g[119].reset()
+		$g[120].setOpacity(0)
+		$g[121].reset()
+		$g[122].setOpacity(0)
+		$g[123].reset()
+		$g[124].setOpacity(0)
 		$g[125].reset()
-		$g[124].reset()
-		$g[127].reset()
-		$g[128].reset()
-		$g[129].setOpacity(0)
-		$g[130].reset()
-		$g[131].setOpacity(0)
 		$g[126].setOpacity(0)
-		$g[104].setPen($g[101])
-		$g[105].setPen($g[101])
-		$g[106].setPen($g[101])
-		$g[107].setPen($g[101])
-		$g[108].setPen($g[101])
-		$g[139].reset()
-		$g[140].reset()
-		$g[141].reset()
+		$g[128].reset()
+		$g[127].reset()
+		$g[130].reset()
+		$g[131].reset()
+		$g[132].setOpacity(0)
+		$g[133].reset()
+		$g[134].setOpacity(0)
+		$g[129].setOpacity(0)
+		$g[107].setPen($g[104])
+		$g[108].setPen($g[104])
+		$g[109].setPen($g[104])
+		$g[110].setPen($g[104])
+		$g[111].setPen($g[104])
 		$g[142].reset()
 		$g[143].reset()
 		$g[144].reset()
-		$g[145].setOpacity(0)
+		$g[145].reset()
 		$g[146].reset()
 		$g[147].reset()
-		$g[148].reset()
+		$g[148].setOpacity(0)
 		$g[149].reset()
 		$g[150].reset()
 		$g[151].reset()
 		$g[152].reset()
 		$g[153].reset()
-		$g[138].txtOp.setOpacity(0)
-		$g[138].txtResult.setOpacity(0)
-		$g[159].reset()
-		$g[160].reset()
-		$g[161].reset()
+		$g[154].reset()
+		$g[155].reset()
+		$g[156].reset()
+		$g[141].txtOp.setOpacity(0)
+		$g[141].txtResult.setOpacity(0)
 		$g[162].reset()
 		$g[163].reset()
 		$g[164].reset()
+		$g[165].reset()
+		$g[166].reset()
 		$g[167].reset()
+		$g[170].reset()
 	}
 
 	function resetRegisters() {
-		$g[73].reset()
-		$g[73].setValue(124)
-		$g[94].reset()
-		$g[133].reset()
-		$g[134].reset()
-		$g[156].reset()
-		$g[155].reset()
-		$g[166].reset()
-		$g[75][0].reset()
-		$g[75][1].reset()
-		$g[76][0].reset()
-		$g[76][1].reset()
-		$g[93].reset()
-		$g[132].reset()
-		$g[154].reset()
-		$g[165].reset()
-		$g[71].setActive(124)
-		$g[155].setInvalid(1)
-		$g[155].updateLabel()
-		$g[166].setInvalid(1)
-		$g[166].updateLabel()
-		$g[75][0].setValue(-1)
-		$g[75][0].setInvalid(1)
-		$g[75][0].updateLabel()
-		$g[75][1].setValue(-1)
-		$g[75][1].setInvalid(1)
-		$g[75][1].updateLabel()
+		$g[75].reset()
+		$g[75].setValue(124)
+		$g[96].reset()
+		$g[136].reset()
+		$g[137].reset()
+		$g[159].reset()
+		$g[158].reset()
+		$g[169].reset()
+		$g[77][0].reset()
+		$g[77][1].reset()
+		$g[78][0].reset()
+		$g[78][1].reset()
+		$g[95].reset()
+		$g[135].reset()
+		$g[157].reset()
+		$g[168].reset()
+		$g[73].setActive(124)
+		$g[158].setInvalid(1)
+		$g[158].updateLabel()
+		$g[169].setInvalid(1)
+		$g[169].updateLabel()
+		$g[77][0].setValue(-1)
+		$g[77][0].setInvalid(1)
+		$g[77][0].updateLabel()
+		$g[77][1].setValue(-1)
+		$g[77][1].setInvalid(1)
+		$g[77][1].updateLabel()
 		$g[33]=0
 		$g[34]=0
-		$g[68].setTxt("%4d", 0)
-		$g[69].setTxt("%4d", 0)
+		$g[70].setTxt("%4d", 0)
+		$g[71].setTxt("%4d", 0)
 	}
 
 	function resetCircuit() {
@@ -1206,164 +1443,164 @@ function dlx(vplayer) {
 	}
 
 	function showBTB(opacity) {
-		$g[74].setOpacity(opacity)
-		$g[75][0].setOpacity(opacity)
-		$g[75][1].setOpacity(opacity)
-		$g[76][0].setOpacity(opacity)
-		$g[76][1].setOpacity(opacity)
-		$g[88].setOpacity(opacity)
-		$g[111].setOpacity(opacity)
-		$g[77].setOpacity(opacity)
-		$g[91].setOpacity(opacity)
-		$g[84].setOpacity(opacity)
-		$g[122].setOpacity(opacity)
+		$g[76].setOpacity(opacity)
+		$g[77][0].setOpacity(opacity)
+		$g[77][1].setOpacity(opacity)
+		$g[78][0].setOpacity(opacity)
+		$g[78][1].setOpacity(opacity)
+		$g[90].setOpacity(opacity)
+		$g[114].setOpacity(opacity)
+		$g[79].setOpacity(opacity)
+		$g[93].setOpacity(opacity)
+		$g[86].setOpacity(opacity)
 		$g[125].setOpacity(opacity)
-		$g[99].setOpacity(opacity)
-		$g[124].setOpacity(opacity)
+		$g[128].setOpacity(opacity)
+		$g[102].setOpacity(opacity)
+		$g[127].setOpacity(opacity)
 	}
 
 	function showALUForwarding(opacity) {
 		if (opacity==0) {
-			$g[142].setPoint(0, 1236, 452)
-			$g[142].setPoint(1, 1401, 452)
-			$g[143].setPoint(0, ($g[29]) ? 1136 : 1209, 551)
-			$g[143].setPoint(1, 1371, 551)
-			$g[144].setPoint(2, 1263, 573)
-			$g[144].setPoint(3, 1371, 573)
-			$g[142].setHead(0)
+			$g[145].setPoint(0, 1236, 452)
+			$g[145].setPoint(1, 1401, 452)
+			$g[146].setPoint(0, ($g[29]) ? 1136 : 1209, 551)
+			$g[146].setPoint(1, 1371, 551)
+			$g[147].setPoint(2, 1263, 573)
+			$g[147].setPoint(3, 1371, 573)
+			$g[145].setHead(0)
 		} else {
-			$g[142].setPoint(0, 1236, 485)
-			$g[142].setPoint(1, 1371, 485)
-			$g[143].setPoint(0, 1236, 529)
-			$g[143].setPoint(1, 1371, 529)
-			$g[144].setPoint(2, 1263, 551)
-			$g[144].setPoint(3, 1371, 551)
-			$g[142].setHead(1)
+			$g[145].setPoint(0, 1236, 485)
+			$g[145].setPoint(1, 1371, 485)
+			$g[146].setPoint(0, 1236, 529)
+			$g[146].setPoint(1, 1371, 529)
+			$g[147].setPoint(2, 1263, 551)
+			$g[147].setPoint(3, 1371, 551)
+			$g[145].setHead(1)
 		}
-		$g[135].setOpacity(opacity)
-		$g[140].setOpacity(opacity)
-		$g[141].setOpacity(opacity)
-		$g[147].setOpacity(opacity)
-		$g[146].setOpacity(opacity)
+		$g[138].setOpacity(opacity)
+		$g[143].setOpacity(opacity)
+		$g[144].setOpacity(opacity)
+		$g[150].setOpacity(opacity)
+		$g[149].setOpacity(opacity)
 	}
 
 	function showSMDRForwarding(opacity) {
 		if (opacity==0) {
-			$g[150].setPoint(1, 1209, 727)
-			$g[150].setPoint(2, 1398, 727)
-			$g[150].setHead(0)
+			$g[153].setPoint(1, 1209, 727)
+			$g[153].setPoint(2, 1398, 727)
+			$g[153].setHead(0)
 		} else {
-			$g[150].setPoint(1, 1209, 749)
-			$g[150].setPoint(2, 1371, 749)
-			$g[150].setHead(1)
+			$g[153].setPoint(1, 1209, 749)
+			$g[153].setPoint(2, 1371, 749)
+			$g[153].setHead(1)
 		}
-		$g[137].setOpacity(opacity)
-		$g[148].setOpacity(opacity)
-		$g[149].setOpacity(opacity)
+		$g[140].setOpacity(opacity)
+		$g[151].setOpacity(opacity)
+		$g[152].setOpacity(opacity)
 	}
 
 	function showZeroForwarding(opacity) {
 		if (opacity==0) {
-			$g[107].setPt(1, 1060, 298)
-			$g[107].setPt(2, 1060, 353)
+			$g[110].setPt(1, 1060, 298)
+			$g[110].setPt(2, 1060, 353)
 		} else {
-			$g[107].setPt(1, 1033, 298)
-			$g[107].setPt(2, 1033, 353)
+			$g[110].setPt(1, 1033, 298)
+			$g[110].setPt(2, 1033, 353)
 		}
+		$g[112].setOpacity(opacity)
+		$g[113].setOpacity(opacity)
+		$g[107].setOpacity(opacity)
+		$g[108].setOpacity(opacity)
 		$g[109].setOpacity(opacity)
-		$g[110].setOpacity(opacity)
-		$g[104].setOpacity(opacity)
-		$g[105].setOpacity(opacity)
-		$g[106].setOpacity(opacity)
 	}
 
 	function showPipeline(opacity) {
 		if (opacity==0) {
-			$g[90].setPoint(1, 803, 507)
-			$g[90].setPoint(2, 803, 529)
-			$g[113].setPoint(0, 803, 507)
-			$g[114].setPoint(0, 803, 507)
-			$g[92].setPoint(1, 1236, 860)
-			$g[130].setPoint(1, 1101, 452)
-			$g[130].setPoint(2, 1236, 452)
-			$g[127].setPoint(1, 1209, 551)
-			$g[150].setPoint(0, 1209, 551)
-			$g[152].setPoint(3, 1668, 507)
-			$g[153].setPoint(3, 1668, 507)
-			$g[151].setPoint(1, 1695, 727)
-			$g[161].setPoint(1, 1939, 507)
+			$g[92].setPoint(1, 803, 507)
+			$g[92].setPoint(2, 803, 529)
+			$g[116].setPoint(0, 803, 507)
+			$g[117].setPoint(0, 803, 507)
+			$g[94].setPoint(1, 1236, 860)
+			$g[133].setPoint(1, 1101, 452)
+			$g[133].setPoint(2, 1236, 452)
+			$g[130].setPoint(1, 1209, 551)
+			$g[153].setPoint(0, 1209, 551)
+			$g[155].setPoint(3, 1668, 507)
+			$g[156].setPoint(3, 1668, 507)
+			$g[154].setPoint(1, 1695, 727)
+			$g[164].setPoint(1, 1939, 507)
+			$g[94].setHead(0)
 			$g[92].setHead(0)
-			$g[90].setHead(0)
+			$g[133].setHead(0)
+			$g[145].setHead(0)
 			$g[130].setHead(0)
-			$g[142].setHead(0)
-			$g[127].setHead(0)
-			$g[150].setHead(0)
-			$g[151].setHead(0)
-			$g[152].setHead(0)
 			$g[153].setHead(0)
-			$g[161].setHead(0)
+			$g[154].setHead(0)
+			$g[155].setHead(0)
+			$g[156].setHead(0)
+			$g[164].setHead(0)
 			showBTB(opacity)
 			showALUForwarding(opacity)
 			showSMDRForwarding(opacity)
 			showZeroForwarding(opacity)
 		} else {
-			$g[90].setPoint(1, 749, 507)
-			$g[90].setPoint(2, 776, 507)
-			$g[113].setPoint(0, 803, 551)
-			$g[114].setPoint(0, 803, 551)
-			$g[92].setPoint(1, 1182, 860)
-			$g[130].setPoint(1, 1101, 463)
-			$g[130].setPoint(2, 1182, 463)
-			$g[127].setPoint(1, 1182, 551)
-			$g[150].setPoint(0, 1209, 595)
-			$g[152].setPoint(3, 1614, 507)
-			$g[153].setPoint(3, 1614, 507)
-			$g[151].setPoint(1, 1587, 727)
-			$g[161].setPoint(1, 1885, 507)
+			$g[92].setPoint(1, 749, 507)
+			$g[92].setPoint(2, 776, 507)
+			$g[116].setPoint(0, 803, 551)
+			$g[117].setPoint(0, 803, 551)
+			$g[94].setPoint(1, 1182, 860)
+			$g[133].setPoint(1, 1101, 463)
+			$g[133].setPoint(2, 1182, 463)
+			$g[130].setPoint(1, 1182, 551)
+			$g[153].setPoint(0, 1209, 595)
+			$g[155].setPoint(3, 1614, 507)
+			$g[156].setPoint(3, 1614, 507)
+			$g[154].setPoint(1, 1587, 727)
+			$g[164].setPoint(1, 1885, 507)
+			$g[94].setHead(1)
 			$g[92].setHead(1)
-			$g[90].setHead(1)
+			$g[133].setHead(1)
+			$g[145].setHead(1)
 			$g[130].setHead(1)
-			$g[142].setHead(1)
-			$g[127].setHead(1)
-			$g[150].setHead(1)
-			$g[151].setHead(1)
-			$g[152].setHead(1)
 			$g[153].setHead(1)
-			$g[161].setHead(1)
+			$g[154].setHead(1)
+			$g[155].setHead(1)
+			$g[156].setHead(1)
+			$g[164].setHead(1)
 			showBTB($g[27]==BRANCH_PREDICTION ? 1 : 0)
 			showALUForwarding($g[29]==ALU_FORWARDING ? 1 : 0)
 			showSMDRForwarding($g[30]==FORWARDING_TO_SMDR ? 1 : 0)
 			showZeroForwarding($g[31]==ZERO_FORWARDING ? 1 : 0)
 		}
-		$g[89].setOpacity(opacity)
-		$g[79].setOpacity(opacity)
-		$g[86].setOpacity(opacity)
-		$g[94].setOpacity(opacity)
-		$g[132].setOpacity(opacity)
-		$g[154].setOpacity(opacity)
-		$g[165].setOpacity(opacity)
-		$g[139].setOpacity(opacity)
+		$g[91].setOpacity(opacity)
+		$g[81].setOpacity(opacity)
+		$g[88].setOpacity(opacity)
+		$g[96].setOpacity(opacity)
+		$g[135].setOpacity(opacity)
+		$g[157].setOpacity(opacity)
+		$g[168].setOpacity(opacity)
+		$g[142].setOpacity(opacity)
+		$g[162].setOpacity(opacity)
+		$g[136].setOpacity(opacity)
+		$g[137].setOpacity(opacity)
+		$g[158].setOpacity(opacity)
+		$g[169].setOpacity(opacity)
 		$g[159].setOpacity(opacity)
-		$g[133].setOpacity(opacity)
-		$g[134].setOpacity(opacity)
-		$g[155].setOpacity(opacity)
-		$g[166].setOpacity(opacity)
-		$g[156].setOpacity(opacity)
-		$g[61].label.setOpacity(opacity)
-		$g[62].label.setOpacity(opacity)
 		$g[63].label.setOpacity(opacity)
 		$g[64].label.setOpacity(opacity)
 		$g[65].label.setOpacity(opacity)
+		$g[66].label.setOpacity(opacity)
+		$g[67].label.setOpacity(opacity)
 	}
 
 	function setPEMode(mode) {
 		$g[26]=mode
 		if ($g[26]==0) {
-			$g[60].setCaption("Pipelining Enabled")
+			$g[62].setCaption("Pipelining Enabled")
 			showPipeline(1)
 		} else
 		if ($g[26]==1) {
-			$g[60].setCaption("Pipelining Disabled")
+			$g[62].setCaption("Pipelining Disabled")
 			showPipeline(0)
 		}
 		setArg("peMode", $g[26].toString())
@@ -1372,15 +1609,15 @@ function dlx(vplayer) {
 	function setBPMode(mode) {
 		$g[27]=mode
 		if ($g[27]==0) {
-			$g[61].setCaption("Branch Prediction")
+			$g[63].setCaption("Branch Prediction")
 			showBTB(1)
 		} else
 		if ($g[27]==1) {
-			$g[61].setCaption("Branch Interlock")
+			$g[63].setCaption("Branch Interlock")
 			showBTB(0)
 		} else
 		if ($g[27]==2) {
-			$g[61].setCaption("Delayed Branches")
+			$g[63].setCaption("Delayed Branches")
 			showBTB(0)
 		}
 		setArg("bpMode", $g[27].toString())
@@ -1389,10 +1626,10 @@ function dlx(vplayer) {
 	function setLIMode(mode) {
 		$g[28]=mode
 		if ($g[28]==0) {
-			$g[62].setCaption("Load Interlock")
+			$g[64].setCaption("Load Interlock")
 		} else
 		if ($g[28]==1) {
-			$g[62].setCaption("No Load Interlock")
+			$g[64].setCaption("No Load Interlock")
 		}
 		setArg("liMode", $g[28].toString())
 	}
@@ -1400,15 +1637,15 @@ function dlx(vplayer) {
 	function setAFMode(mode) {
 		$g[29]=mode
 		if ($g[29]==0) {
-			$g[63].setCaption("ALU Forwarding")
+			$g[65].setCaption("ALU Forwarding")
 			showALUForwarding(1)
 		} else
 		if ($g[29]==1) {
-			$g[63].setCaption("ALU Interlock")
+			$g[65].setCaption("ALU Interlock")
 			showALUForwarding(0)
 		} else
 		if ($g[29]==2) {
-			$g[63].setCaption("No ALU Interlock")
+			$g[65].setCaption("No ALU Interlock")
 			showALUForwarding(0)
 		}
 		setArg("afMode", $g[29].toString())
@@ -1417,15 +1654,15 @@ function dlx(vplayer) {
 	function setSFMode(mode) {
 		$g[30]=mode
 		if ($g[30]==0) {
-			$g[64].setCaption("Store Operand\nForwarding")
+			$g[66].setCaption("Store Operand\nForwarding")
 			showSMDRForwarding(1)
 		} else
 		if ($g[30]==1) {
-			$g[64].setCaption("Store Interlock")
+			$g[66].setCaption("Store Interlock")
 			showSMDRForwarding(0)
 		} else
 		if ($g[30]==2) {
-			$g[64].setCaption("No Store Interlock")
+			$g[66].setCaption("No Store Interlock")
 			showSMDRForwarding(0)
 		}
 		setArg("sfMode", $g[30].toString())
@@ -1434,25 +1671,25 @@ function dlx(vplayer) {
 	function setZFMode(mode) {
 		$g[31]=mode
 		if ($g[31]==0) {
-			$g[65].setCaption("Zero Forwarding")
+			$g[67].setCaption("Zero Forwarding")
 			showZeroForwarding(1)
 		} else
 		if ($g[31]==1) {
-			$g[65].setCaption("Zero Interlock")
+			$g[67].setCaption("Zero Interlock")
 			showZeroForwarding(0)
 		} else
 		if ($g[31]==2) {
-			$g[65].setCaption("No Zero Interlock")
+			$g[67].setCaption("No Zero Interlock")
 			showZeroForwarding(0)
 		}
 		setArg("zfMode", $g[31].toString())
 	}
 
-	function $eh16(enter, x, y) {
-		$g[176].setBrush(enter ? $g[9] : $g[13])
+	function $eh24(enter, x, y) {
+		$g[179].setBrush(enter ? $g[9] : $g[13])
 	}
 
-	function $eh17(down, flags, x, y) {
+	function $eh25(down, flags, x, y) {
 		if (down && (flags&MB_LEFT)) {
 			setArg("help", "0")
 			$g[20].setOpacity(0)
@@ -1462,75 +1699,75 @@ function dlx(vplayer) {
 
 	function btbIndex(pc) {
 		for (let lp1 = 0; lp1<2; lp1++)
-		if ($g[75][lp1].value==pc)
+		if ($g[77][lp1].value==pc)
 		return lp1
 		return -1
 	}
 
 	function calcNewPC() {
-		if (instrIsBranch($g[93].vIns)) {
-			let pen = $g[102]
+		if (instrIsBranch($g[95].vIns)) {
+			let pen = $g[105]
 			if ($g[31]==ZERO_FORWARDING) {
-				if (($g[132].vRdt==$g[93].vRs1) && (instrOpTypeRdt($g[132].vIns)==OP_TYPE_REG) && instrIsLoadOrStore($g[132].vIns)==0) {
-					$g[104].setPen(pen)
-					$g[180]=$g[155].newValue
-				} else
-				if ($g[155].tagMatches($g[93].vRs1)) {
-					$g[105].setPen(pen)
-					$g[180]=$g[155].value
-				} else {
-					$g[177]=$g[83]
+				if (($g[135].vRdt==$g[95].vRs1) && (instrOpTypeRdt($g[135].vIns)==OP_TYPE_REG) && instrIsLoadOrStore($g[135].vIns)==0) {
 					$g[107].setPen(pen)
-					$g[180]=$g[95][$g[93].vRs1].value
-					$g[131].setTxt("R%d:%02X", $g[93].vRs1, $g[180])
-					$g[131].setOpacity(1)
-					fork(37, $g[130], 24)
+					$g[183]=$g[158].newValue
+				} else
+				if ($g[158].tagMatches($g[95].vRs1)) {
+					$g[108].setPen(pen)
+					$g[183]=$g[158].value
+				} else {
+					$g[180]=$g[85]
+					$g[110].setPen(pen)
+					$g[183]=$g[97][$g[95].vRs1].value
+					$g[134].setTxt("R%d:%02X", $g[95].vRs1, $g[183])
+					$g[134].setOpacity(1)
+					fork(37, $g[133], 24)
 				}
 			} else {
-				$g[107].setPen(pen)
-				$g[180]=$g[95][$g[93].vRs1].value
+				$g[110].setPen(pen)
+				$g[183]=$g[97][$g[95].vRs1].value
 			}
-			$g[108].setPen(pen)
-			if (($g[93].vIns==B)==($g[180]==0)) {
-				$g[178]=$g[120]
-				$g[181]=($g[94].value+$g[93].vRs2)&127
+			$g[111].setPen(pen)
+			if (($g[95].vIns==B)==($g[183]==0)) {
+				$g[181]=$g[123]
+				$g[184]=($g[96].value+$g[95].vRs2)&127
 			} else {
-				$g[178]=$g[118]
-				$g[181]=($g[94].value+4)&127
+				$g[181]=$g[121]
+				$g[184]=($g[96].value+4)&127
 			}
-			$g[182]=$g[83]
-			$g[179]=$g[122]
+			$g[185]=$g[85]
+			$g[182]=$g[125]
 		} else
-		if (isJorJAL($g[93].vIns)) {
-			$g[178]=$g[120]
-			$g[179]=$g[122]
-			$g[181]=($g[94].value+$g[93].vRs2)&127
-			$g[182]=$g[83]
+		if (isJorJAL($g[95].vIns)) {
+			$g[181]=$g[123]
+			$g[182]=$g[125]
+			$g[184]=($g[96].value+$g[95].vRs2)&127
+			$g[185]=$g[85]
 		} else
-		if (instrIsJumpR($g[93].vIns)) {
-			$g[181]=($g[95][$g[93].vRs2].value)&127
-			$g[182]=$g[85]
-			$g[179]=$g[125]
+		if (instrIsJumpR($g[95].vIns)) {
+			$g[184]=($g[97][$g[95].vRs2].value)&127
+			$g[185]=$g[87]
+			$g[182]=$g[128]
 		}
 	}
 
 	function updBTB() {
-		if ($g[181]!=$g[73].value) {
-			$g[73].setNewValue($g[181])
-			$g[177]=$g[182]
+		if ($g[184]!=$g[75].value) {
+			$g[75].setNewValue($g[184])
+			$g[180]=$g[185]
 			if ($g[27]==BRANCH_PREDICTION) {
-				if ($g[181]==$g[94].value+4) {
-					if (btbIndex($g[94].value)>=0)
-					$g[75][btbIndex($g[94].value)].setInvalid(1)
+				if ($g[184]==$g[96].value+4) {
+					if (btbIndex($g[96].value)>=0)
+					$g[77][btbIndex($g[96].value)].setInvalid(1)
 				} else {
-					if (btbIndex($g[94].value)>=0)
-					$g[24]=btbIndex($g[94].value)
+					if (btbIndex($g[96].value)>=0)
+					$g[24]=btbIndex($g[96].value)
 					else 
 					$g[24]=($g[24]) ? 0 : 1
-					$g[75][$g[24]].setNewValue($g[94].value)
-					$g[75][$g[24]].setInvalid(0)
-					$g[75][$g[24]].useTag=0
-					$g[76][$g[24]].setNewValue($g[181])
+					$g[77][$g[24]].setNewValue($g[96].value)
+					$g[77][$g[24]].setInvalid(0)
+					$g[77][$g[24]].useTag=0
+					$g[78][$g[24]].setNewValue($g[184])
 				}
 			}
 		}
@@ -1540,66 +1777,66 @@ function dlx(vplayer) {
 		$g[23]=NO_STALL
 		$g[25]=0
 		if ($g[29]==ALU_INTERLOCK) {
-			if (instrOpTypeRdt($g[132].vIns)==OP_TYPE_REG) {
-				if ((instrOpTypeRs1($g[93].vIns)==OP_TYPE_REG) && ($g[93].vRs1==$g[132].vRdt))
+			if (instrOpTypeRdt($g[135].vIns)==OP_TYPE_REG) {
+				if ((instrOpTypeRs1($g[95].vIns)==OP_TYPE_REG) && ($g[95].vRs1==$g[135].vRdt))
 				$g[23]=DATA_STALL
-				if ((instrOpTypeRs2($g[93].vIns)==OP_TYPE_REG) && ($g[93].vRs2==$g[132].vRdt))
-				$g[23]=DATA_STALL
-			}
-			if (instrOpTypeRdt($g[154].vIns)==OP_TYPE_REG) {
-				if ((instrOpTypeRs1($g[93].vIns)==OP_TYPE_REG) && ($g[93].vRs1==$g[154].vRdt))
-				$g[23]=DATA_STALL
-				if ((instrOpTypeRs2($g[93].vIns)==OP_TYPE_REG) && ($g[93].vRs2==$g[154].vRdt))
+				if ((instrOpTypeRs2($g[95].vIns)==OP_TYPE_REG) && ($g[95].vRs2==$g[135].vRdt))
 				$g[23]=DATA_STALL
 			}
+			if (instrOpTypeRdt($g[157].vIns)==OP_TYPE_REG) {
+				if ((instrOpTypeRs1($g[95].vIns)==OP_TYPE_REG) && ($g[95].vRs1==$g[157].vRdt))
+				$g[23]=DATA_STALL
+				if ((instrOpTypeRs2($g[95].vIns)==OP_TYPE_REG) && ($g[95].vRs2==$g[157].vRdt))
+				$g[23]=DATA_STALL
+			}
 		}
-		if (($g[30]==STORE_INTERLOCK) && ($g[93].vIns==STR)) {
-			if ((instrOpTypeRdt($g[132].vIns)==OP_TYPE_REG) && ($g[132].vRdt==$g[93].vRdt))
+		if (($g[30]==STORE_INTERLOCK) && ($g[95].vIns==STR)) {
+			if ((instrOpTypeRdt($g[135].vIns)==OP_TYPE_REG) && ($g[135].vRdt==$g[95].vRdt))
 			$g[23]=DATA_STALL
-			if ((instrOpTypeRdt($g[154].vIns)==OP_TYPE_REG) && ($g[154].vRdt==$g[93].vRdt))
-			$g[23]=DATA_STALL
-		}
-		if (($g[31]==ZERO_INTERLOCK) && instrIsBranch($g[93].vIns)) {
-			if ((instrOpTypeRdt($g[132].vIns)==OP_TYPE_REG) && ($g[132].vRdt==$g[93].vRs1))
-			$g[23]=DATA_STALL
-			if ((instrOpTypeRdt($g[154].vIns)==OP_TYPE_REG) && ($g[154].vRdt==$g[93].vRs1))
-			$g[23]=DATA_STALL
-		}
-		if (instrIsJumpR($g[93].vIns)) {
-			if ((instrOpTypeRdt($g[132].vIns)==OP_TYPE_REG) && ($g[132].vRdt==$g[93].vRs2))
-			$g[23]=DATA_STALL
-			if ((instrOpTypeRdt($g[154].vIns)==OP_TYPE_REG) && ($g[154].vRdt==$g[93].vRs2))
+			if ((instrOpTypeRdt($g[157].vIns)==OP_TYPE_REG) && ($g[157].vRdt==$g[95].vRdt))
 			$g[23]=DATA_STALL
 		}
-		if (($g[28]==LOAD_INTERLOCK) && ($g[132].vIns==LDR)) {
-			if ((instrOpTypeRs1($g[93].vIns)==OP_TYPE_REG) && ($g[93].vRs1==$g[132].vRdt))
+		if (($g[31]==ZERO_INTERLOCK) && instrIsBranch($g[95].vIns)) {
+			if ((instrOpTypeRdt($g[135].vIns)==OP_TYPE_REG) && ($g[135].vRdt==$g[95].vRs1))
 			$g[23]=DATA_STALL
-			if ((instrOpTypeRs2($g[93].vIns)==OP_TYPE_REG) && ($g[93].vRs2==$g[132].vRdt))
+			if ((instrOpTypeRdt($g[157].vIns)==OP_TYPE_REG) && ($g[157].vRdt==$g[95].vRs1))
 			$g[23]=DATA_STALL
 		}
-		if (($g[23]==NO_STALL) && ($g[27]!=DELAYED_BRANCHES) && instrIsBranchOrJump($g[93].vIns) && ($g[181]!=$g[73].value)) {
+		if (instrIsJumpR($g[95].vIns)) {
+			if ((instrOpTypeRdt($g[135].vIns)==OP_TYPE_REG) && ($g[135].vRdt==$g[95].vRs2))
+			$g[23]=DATA_STALL
+			if ((instrOpTypeRdt($g[157].vIns)==OP_TYPE_REG) && ($g[157].vRdt==$g[95].vRs2))
+			$g[23]=DATA_STALL
+		}
+		if (($g[28]==LOAD_INTERLOCK) && ($g[135].vIns==LDR)) {
+			if ((instrOpTypeRs1($g[95].vIns)==OP_TYPE_REG) && ($g[95].vRs1==$g[135].vRdt))
+			$g[23]=DATA_STALL
+			if ((instrOpTypeRs2($g[95].vIns)==OP_TYPE_REG) && ($g[95].vRs2==$g[135].vRdt))
+			$g[23]=DATA_STALL
+		}
+		if (($g[23]==NO_STALL) && ($g[27]!=DELAYED_BRANCHES) && instrIsBranchOrJump($g[95].vIns) && ($g[184]!=$g[75].value)) {
 			$g[25]=1
 			$g[23]=CTRL_STALL
 		}
 		if ($g[23]==DATA_STALL) {
-			$g[72].setStall(1, 0)
+			$g[74].setStall(1, 0)
 		} else
 		if ($g[23]==CTRL_STALL) {
-			$g[72].setStall(1, 1)
+			$g[74].setStall(1, 1)
 		}
 	}
 
 	function setlocked() {
 		let b_locked = $g[32] || $g[22]
-		$g[60].showLocked(b_locked)
-		$g[61].showLocked(b_locked)
 		$g[62].showLocked(b_locked)
 		$g[63].showLocked(b_locked)
 		$g[64].showLocked(b_locked)
 		$g[65].showLocked(b_locked)
+		$g[66].showLocked(b_locked)
+		$g[67].showLocked(b_locked)
 	}
 
-	function $eh18(down, flags, x, y) {
+	function $eh26(down, flags, x, y) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setPEMode(($g[26]+1)%2)
 			resetCircuit()
@@ -1607,7 +1844,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh19(down, flags, x, y) {
+	function $eh27(down, flags, x, y) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setBPMode(($g[27]+1)%3)
 			resetCircuit()
@@ -1615,7 +1852,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh20(down, flags, x, y) {
+	function $eh28(down, flags, x, y) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setLIMode(($g[28]+1)%2)
 			resetCircuit()
@@ -1623,7 +1860,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh21(down, flags, x, y) {
+	function $eh29(down, flags, x, y) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setAFMode(($g[29]+1)%3)
 			resetCircuit()
@@ -1631,7 +1868,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh22(down, flags, $2, $3) {
+	function $eh30(down, flags, $2, $3) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setSFMode(($g[30]+1)%3)
 			resetCircuit()
@@ -1639,7 +1876,7 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh23(down, flags, $2, $3) {
+	function $eh31(down, flags, $2, $3) {
 		if (down && (flags&MB_LEFT) && (!$g[32]) && (!$g[22])) {
 			setZFMode(($g[31]+1)%3)
 			resetCircuit()
@@ -1647,22 +1884,22 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh24(down, flags, x, y) {
+	function $eh32(down, flags, x, y) {
 		if (down && (flags&MB_LEFT)) {
 			let lp1, opcode, reg
 			let instr
 			let s = "saveanim.php?state="
 			for (lp1=0; lp1<32; lp1++) {
-				instr=$g[71].instruction[lp1]
+				instr=$g[73].instruction[lp1]
 				opcode=(instr.vIns<<24)|(instr.vRdt<<16)|(instr.vRs1<<8)|(instr.vRs2)
 				s=sprintf("%si%d='0x%08X' ", s, lp1, opcode)
 			}
 			for (lp1=0; lp1<4; lp1++) {
-				reg=$g[95][lp1].value
+				reg=$g[97][lp1].value
 				s=sprintf("%sr%d='0x%02X' ", s, lp1, reg)
 			}
 			for (lp1=0; lp1<4; lp1++) {
-				reg=$g[157][lp1].value
+				reg=$g[160][lp1].value
 				s=sprintf("%sm%d='0x%02X' ", s, lp1, reg)
 			}
 			s=sprintf("%speMode='%d' bpMode='%d' liMode='%d' afMode='%d' sfMode='%d' zfMode='%d'", s, $g[26], $g[27], $g[28], $g[29], $g[30], $g[31])
@@ -1671,24 +1908,24 @@ function dlx(vplayer) {
 		return 0
 	}
 
-	function $eh25(down, flags, x, y) {
+	function $eh33(down, flags, x, y) {
 		if (down && (flags&MB_LEFT))
 		getURL("https://www.scss.tcd.ie/Jeremy.Jones/VivioJS/vivio.htm")
 		return 0
 	}
 
-	function $eh26(down, flags, $2, $3) {
+	function $eh34(down, flags, $2, $3) {
 		if (down && (flags&MB_LEFT))
 		getURL("showanim.php")
 	}
 
-	function $eh27(enter, x, y) {
-		$g[70].setBrush(enter ? $g[8] : $g[12])
-		$g[70].setTxtPen(enter ? $g[3] : $g[1])
+	function $eh35(enter, x, y) {
+		$g[72].setBrush(enter ? $g[8] : $g[12])
+		$g[72].setTxtPen(enter ? $g[3] : $g[1])
 		return 0
 	}
 
-	function $eh28(down, flags, x, y) {
+	function $eh36(down, flags, x, y) {
 		if (down && (flags&MB_LEFT)) {
 			$g[14]=($g[14]==maxexample) ? 0 : $g[14]+1
 			setArg("example", $g[14].toString())
@@ -1790,371 +2027,374 @@ function dlx(vplayer) {
 				$g[46] = new SolidPen(SOLID, 1, ORANGE, ROUND_START|ROUND_JOIN|ROUND_END)
 				$g[47] = new SolidBrush(WHITE)
 				$g[48] = new SolidBrush(GRAY224)
-				$g[49] = getArg("name", "")
-				if (!($g[49]!="")) {
+				$g[49] = new SolidBrush(PURPLE)
+				$g[50] = new SolidBrush(WHITE)
+				$g[51] = getArg("name", "")
+				if (!($g[51]!="")) {
 					$pc = 1
 					continue
 				}
-				$g[49]=sprintf(":  %s", $g[49])
+				$g[51]=sprintf(":  %s", $g[51])
 				$pc = 1
 			case 1:
-				$g[50] = new Font("Calibri", 54, SMALLCAPS|ITALIC)
-				$g[51] = new Rectangle2($g[0], 0, HLEFT, 0, new SolidBrush(DARK_BLUE), 27, 27, 911, 66, $g[4], $g[50], sprintf(" MIPS Animation %s", $g[49]))
-				$g[52] = new SolidPen(DASH, 3, DARK_BLUE, ROUND_START|ROUND_JOIN|ROUND_END)
-				new Line2($g[0], 0, ABSOLUTE, $g[52], 425, 176, 1993, 176)
-				new Line2($g[0], 0, ABSOLUTE, $g[52], 425, 970, 1993, 970)
-				new Line2($g[0], 0, ABSOLUTE, $g[52], 425, 176, 425, 970)
-				$g[53] = new Line2($g[0], 0, ABSOLUTE, $g[52], 749, 176, 749, 970)
-				$g[54] = new Line2($g[0], 0, ABSOLUTE, $g[52], 1155, 176, 1155, 970)
-				$g[55] = new Line2($g[0], 0, ABSOLUTE, $g[52], 1560, 176, 1560, 970)
-				$g[56] = new Line2($g[0], 0, ABSOLUTE, $g[52], 1858, 176, 1858, 970)
-				new Line2($g[0], 0, ABSOLUTE, $g[52], 1993, 176, 1993, 970)
-				$g[57] = new SolidPen(DOT, THIN, BLACK)
-				new Line2($g[0], 0, ABSOLUTE, $g[57], 27, 992, 1993, 992)
-				$g[58] = new Font("Calibri", 27, BOLD)
-				$g[59] = new Button(54, 1014, 216, 54, "Save Configuration", BUTTON_SP)
-				$g[60] = new Button(425, 1014, 216, 44, "Pipelining Enabled", BUTTON_PE)
-				$g[61] = new Button(668, 1014, 216, 44, "Branch Prediction", BUTTON_BP)
-				$g[62] = new Button(911, 1014, 216, 44, "Load Interlock", BUTTON_LI)
-				$g[63] = new Button(1155, 1014, 216, 44, "ALU Forwarding", BUTTON_AF)
-				$g[64] = new Button(1398, 1014, 216, 44, "Store Operand\nForwarding", BUTTON_SF)
-				$g[65] = new Button(1641, 1014, 216, 44, "Zero Forwarding", BUTTON_ZF)
-				$g[66] = new Image($g[0], 0, 0, 0, "vivio.png", 1885, 1014, 0, 0, LOGOW, LOGOH)
+				$g[52] = new Font("Calibri", 54, SMALLCAPS|ITALIC)
+				$g[53] = new Rectangle2($g[0], 0, HLEFT, 0, new SolidBrush(DARK_BLUE), 27, 27, 911, 66, $g[4], $g[52], sprintf(" MIPS Animation %s", $g[51]))
+				$g[54] = new SolidPen(DASH, 3, DARK_BLUE, ROUND_START|ROUND_JOIN|ROUND_END)
+				new Line2($g[0], 0, ABSOLUTE, $g[54], 425, 176, 1993, 176)
+				new Line2($g[0], 0, ABSOLUTE, $g[54], 425, 970, 1993, 970)
+				new Line2($g[0], 0, ABSOLUTE, $g[54], 425, 176, 425, 970)
+				$g[55] = new Line2($g[0], 0, ABSOLUTE, $g[54], 749, 176, 749, 970)
+				$g[56] = new Line2($g[0], 0, ABSOLUTE, $g[54], 1155, 176, 1155, 970)
+				$g[57] = new Line2($g[0], 0, ABSOLUTE, $g[54], 1560, 176, 1560, 970)
+				$g[58] = new Line2($g[0], 0, ABSOLUTE, $g[54], 1858, 176, 1858, 970)
+				new Line2($g[0], 0, ABSOLUTE, $g[54], 1993, 176, 1993, 970)
+				$g[59] = new SolidPen(DOT, THIN, BLACK)
+				new Line2($g[0], 0, ABSOLUTE, $g[59], 27, 992, 1993, 992)
+				$g[60] = new Font("Calibri", 27, BOLD)
+				$g[61] = new Button(54, 1014, 216, 54, "Save Configuration", BUTTON_SP)
+				$g[62] = new Button(425, 1014, 216, 44, "Pipelining Enabled", BUTTON_PE)
+				$g[63] = new Button(668, 1014, 216, 44, "Branch Prediction", BUTTON_BP)
+				$g[64] = new Button(911, 1014, 216, 44, "Load Interlock", BUTTON_LI)
+				$g[65] = new Button(1155, 1014, 216, 44, "ALU Forwarding", BUTTON_AF)
+				$g[66] = new Button(1398, 1014, 216, 44, "Store Operand\nForwarding", BUTTON_SF)
+				$g[67] = new Button(1641, 1014, 216, 44, "Zero Forwarding", BUTTON_ZF)
+				$g[68] = new Image($g[0], 0, 0, 0, "vivio.png", 1885, 1014, 0, 0, LOGOW, LOGOH)
 				new Txt($g[0], 0, HLEFT|VTOP, 27, 101, $g[2], $g[15], "instructions executed:")
-				$g[67] = new Txt($g[0], 0, HLEFT|VTOP, 27, 123, $g[2], $g[15], "ticks:")
-				$g[68] = new Txt($g[0], 0, HLEFT|VTOP, 243, 101, $g[3], $g[15], "0")
-				$g[69] = new Txt($g[0], 0, HLEFT|VTOP, 243, 123, $g[3], $g[15], "0")
-				$g[70] = new Rectangle2($g[0], 0, 0, 0, 0, 27, 150, 270, 27, 0, $g[15], "Instruction Cache")
-				$g[71] = new InstructionMemory(27, 176, 370, 705)
-				$g[72] = new AnimatedClock($g[0], 54, 904, 216, 66)
-				$g[73] = new Register(641, 463, 54, 88, TOP, "PC")
-				$g[74] = new Rectangle2($g[0], 0, 0, 0, 0, 506, 187, 216, 22, 0, $g[15], "Branch Target Buffer")
-				$g[75] = newArray(2)
-				$g[75][0]=new Register(506, 220, 108, 44, LEFT, "PC")
-				$g[75][1]=new Register(506, 264, 108, 44, LEFT, "PC")
-				$g[76] = newArray(2)
-				$g[76][0]=new Register(614, 220, 108, 44, RIGHT, "PPC")
-				$g[76][1]=new Register(614, 264, 108, 44, RIGHT, "PPC")
-				$g[77] = new Component(641, 375, 81, 22, "mux 2")
-				$g[78] = new Component(560, 452, 27, 110, "mux 1")
-				$g[79] = new Component(533, 595, 54, 22, "+4")
-				$g[80] = new AnimPipe()
-				$g[80].addPoint(397, 860)
-				$g[80].addPoint(776, 860)
-				$g[81] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 587, 8130, -81, -13, 130, 26, $g[4], $g[15])
-				$g[81].setRounded(2, 2)
+				$g[69] = new Txt($g[0], 0, HLEFT|VTOP, 27, 123, $g[2], $g[15], "ticks:")
+				$g[70] = new Txt($g[0], 0, HLEFT|VTOP, 243, 101, $g[3], $g[15], "0")
+				$g[71] = new Txt($g[0], 0, HLEFT|VTOP, 243, 123, $g[3], $g[15], "0")
+				$g[72] = new Rectangle2($g[0], 0, 0, 0, 0, 27, 150, 270, 27, 0, $g[15], "Instruction Cache")
+				$g[73] = new InstructionMemory(27, 176, 370, 705)
+				$g[74] = new AnimatedClock($g[0], 54, 904, 216, 66)
+				$g[75] = new Register(641, 463, 54, 88, TOP, "PC")
+				$g[76] = new Rectangle2($g[0], 0, 0, 0, 0, 506, 187, 216, 22, 0, $g[15], "Branch Target Buffer")
+				$g[77] = newArray(2)
+				$g[77][0]=new Register(506, 220, 108, 44, LEFT, "PC")
+				$g[77][1]=new Register(506, 264, 108, 44, LEFT, "PC")
+				$g[78] = newArray(2)
+				$g[78][0]=new Register(614, 220, 108, 44, RIGHT, "PPC")
+				$g[78][1]=new Register(614, 264, 108, 44, RIGHT, "PPC")
+				$g[79] = new Component(641, 375, 81, 22, "mux 2")
+				$g[80] = new Component(560, 452, 27, 110, "mux 1")
+				$g[81] = new Component(533, 595, 54, 22, "+4")
 				$g[82] = new AnimPipe()
-				$g[82].addPoint(668, 551)
-				$g[82].addPoint(668, 705)
-				$g[82].addPoint(397, 705)
-				$g[83] = new AnimPipe()
-				$g[83].addPoint(911, 375)
-				$g[83].addPoint(911, 353)
-				$g[83].addPoint(506, 353)
-				$g[83].addPoint(506, 474)
-				$g[83].addPoint(560, 474)
+				$g[82].addPoint(397, 860)
+				$g[82].addPoint(776, 860)
+				$g[83] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 587, 8130, -81, -13, 130, 26, $g[4], $g[15])
+				$g[83].setRounded(2, 2)
 				$g[84] = new AnimPipe()
-				$g[84].addPoint(506, 264)
-				$g[84].addPoint(479, 264)
-				$g[84].addPoint(479, 496)
-				$g[84].addPoint(560, 496)
+				$g[84].addPoint(668, 551)
+				$g[84].addPoint(668, 705)
+				$g[84].addPoint(397, 705)
 				$g[85] = new AnimPipe()
-				$g[85].addPoint(952, 110)
-				$g[85].addPoint(452, 110)
-				$g[85].addPoint(452, 518)
-				$g[85].addPoint(560, 518)
+				$g[85].addPoint(911, 375)
+				$g[85].addPoint(911, 353)
+				$g[85].addPoint(506, 353)
+				$g[85].addPoint(506, 474)
+				$g[85].addPoint(560, 474)
 				$g[86] = new AnimPipe()
-				$g[86].addPoint(533, 606)
-				$g[86].addPoint(506, 606)
-				$g[86].addPoint(506, 540)
-				$g[86].addPoint(560, 540)
+				$g[86].addPoint(506, 264)
+				$g[86].addPoint(479, 264)
+				$g[86].addPoint(479, 496)
+				$g[86].addPoint(560, 496)
 				$g[87] = new AnimPipe()
-				$g[87].addPoint(587, 507)
-				$g[87].addPoint(641, 507)
+				$g[87].addPoint(952, 110)
+				$g[87].addPoint(452, 110)
+				$g[87].addPoint(452, 518)
+				$g[87].addPoint(560, 518)
 				$g[88] = new AnimPipe()
-				$g[88].addPoint(668, 462)
-				$g[88].addPoint(668, 397)
+				$g[88].addPoint(533, 606)
+				$g[88].addPoint(506, 606)
+				$g[88].addPoint(506, 540)
+				$g[88].addPoint(560, 540)
 				$g[89] = new AnimPipe()
-				$g[89].addPoint(668, 551)
-				$g[89].addPoint(668, 606)
-				$g[89].addPoint(587, 606)
+				$g[89].addPoint(587, 507)
+				$g[89].addPoint(641, 507)
 				$g[90] = new AnimPipe()
-				$g[90].addPoint(695, 507)
-				$g[90].addPoint(749, 507)
-				$g[90].addPoint(776, 507)
+				$g[90].addPoint(668, 462)
+				$g[90].addPoint(668, 397)
 				$g[91] = new AnimPipe()
-				$g[91].addPoint(681, 375)
-				$g[91].addPoint(681, 309)
+				$g[91].addPoint(668, 551)
+				$g[91].addPoint(668, 606)
+				$g[91].addPoint(587, 606)
 				$g[92] = new AnimPipe()
-				$g[92].addPoint(830, 860)
-				$g[92].addPoint(1182, 860)
-				$g[93] = new InstructionRegister(776, 771, 54, 187, "ID")
-				$g[94] = new Register(776, 463, 54, 88, TOP, "PC1")
+				$g[92].addPoint(695, 507)
+				$g[92].addPoint(749, 507)
+				$g[92].addPoint(776, 507)
+				$g[93] = new AnimPipe()
+				$g[93].addPoint(681, 375)
+				$g[93].addPoint(681, 309)
+				$g[94] = new AnimPipe()
+				$g[94].addPoint(830, 860)
+				$g[94].addPoint(1182, 860)
+				$g[95] = new InstructionRegister(776, 771, 54, 187, "ID")
+				$g[96] = new Register(776, 463, 54, 88, TOP, "PC1")
 				new Txt($g[0], 0, HLEFT|VTOP, 1182, 88, 0, $g[15], "Register\nFile")
-				$g[95] = newArray(16)
-				$g[95][0]=new Register(952, 66, 32, 88, TOP, "R0")
-				$g[95][0].setFixed()
-				$g[95][1]=new Register(984, 66, 32, 88, TOP, "R1")
-				$g[95][2]=new Register(1016, 66, 32, 88, TOP, "R2")
-				$g[95][3]=new Register(1048, 66, 32, 88, TOP, "R3")
-				$g[95][4]=new Register(1080, 66, 32, 88, TOP, "R4")
-				$g[95][5]=new Register(1112, 66, 32, 88, TOP, "R5")
-				$g[95][6]=new Register(1144, 66, 32, 88, TOP, "R6")
-				$g[95][7]=new Register(1176, 66, 32, 88, TOP, "R7")
-				$g[95][8]=new Register(1208, 66, 32, 88, TOP, "R8")
-				$g[95][9]=new Register(1240, 66, 32, 88, TOP, "R9")
-				$g[95][10]=new Register(1272, 66, 32, 88, TOP, "R10")
-				$g[95][11]=new Register(1304, 66, 32, 88, TOP, "R11")
-				$g[95][12]=new Register(1336, 66, 32, 88, TOP, "R12")
-				$g[95][13]=new Register(1368, 66, 32, 88, TOP, "SP")
-				$g[95][14]=new Register(1400, 66, 32, 88, TOP, "LR")
-				$g[95][15]=new Register(1432, 66, 32, 88, TOP, "PC")
-				$g[96] = new Component(844, 375, 135, 22, "mux 3")
-				$g[97] = new Component(830, 595, 81, 22, "ADD4")
-				$g[98] = new Component(911, 595, 81, 22, "ADDi")
-				$g[99] = new Component(776, 220, 27, 88, "mux 4")
-				$g[100] = new Component(1101, 518, 27, 66, "mux 5")
+				$g[97] = newArray(16)
+				$g[97][0]=new Register(952, 66, 32, 88, TOP, "R0")
+				$g[97][0].setFixed()
+				$g[97][1]=new Register(984, 66, 32, 88, TOP, "R1")
+				$g[97][2]=new Register(1016, 66, 32, 88, TOP, "R2")
+				$g[97][3]=new Register(1048, 66, 32, 88, TOP, "R3")
+				$g[97][4]=new Register(1080, 66, 32, 88, TOP, "R4")
+				$g[97][5]=new Register(1112, 66, 32, 88, TOP, "R5")
+				$g[97][6]=new Register(1144, 66, 32, 88, TOP, "R6")
+				$g[97][7]=new Register(1176, 66, 32, 88, TOP, "R7")
+				$g[97][8]=new Register(1208, 66, 32, 88, TOP, "R8")
+				$g[97][9]=new Register(1240, 66, 32, 88, TOP, "R9")
+				$g[97][10]=new Register(1272, 66, 32, 88, TOP, "R10")
+				$g[97][11]=new Register(1304, 66, 32, 88, TOP, "R11")
+				$g[97][12]=new Register(1336, 66, 32, 88, TOP, "R12")
+				$g[97][13]=new Register(1368, 66, 32, 88, TOP, "SP")
+				$g[97][14]=new Register(1400, 66, 32, 88, TOP, "LR")
+				$g[97][15]=new Register(1432, 66, 32, 88, TOP, "PC")
+				$g[98] = new CPSR(1490, 66, 140, 88)
+				$g[99] = new Component(844, 375, 135, 22, "mux 3")
+				$g[100] = new Component(830, 595, 81, 22, "ADD4")
+				$g[101] = new Component(911, 595, 81, 22, "ADDi")
+				$g[102] = new Component(776, 220, 27, 88, "mux 4")
+				$g[103] = new Component(1101, 518, 27, 66, "mux 5")
 				new Rectangle2($g[0], 0, 0, 0, 0, 857, 661, 54, 22, 0, $g[15], "4")
-				$g[101] = new SolidPen(SOLID, 0, PURPLE, ARROW60_END)
-				$g[102] = new SolidPen(SOLID, 5, RED, ARROW60_END)
-				$g[103] = new SolidPen(SOLID, THICK, BLACK)
-				$g[104] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 1582, 507, 1582, 331, 1087, 331, 1087, 353)
-				$g[105] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 1847, 507, 1847, 320, 1074, 320, 1074, 353)
-				$g[106] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 1966, 309, 1060, 309, 1060, 353)
-				$g[107] = new Line($g[0], $g[17], ABSOLUTE, $g[101], 0, 0, 1101, 298, 1033, 298, 1033, 353)
-				$g[108] = new Line2($g[0], $g[17], ABSOLUTE, $g[101], 1060, 353, 1060, 386, 979, 386)
-				$g[109] = new Line2($g[0], $g[17], ABSOLUTE, $g[103], 1030, 353, 1090, 353)
-				$g[110] = new Txt($g[0], $g[17], HLEFT|VTOP, 1036, 357, 0, $g[15], "zero")
-				$g[111] = new AnimPipe()
-				$g[111].addPoint(803, 463)
-				$g[111].addPoint(803, 441)
-				$g[111].addPoint(695, 441)
-				$g[111].addPoint(695, 397)
-				$g[112] = new AnimPipe()
-				$g[112].addPoint(871, 595)
-				$g[112].addPoint(871, 562)
-				$g[112].addPoint(1101, 562)
-				$g[113] = new AnimPipe()
-				$g[113].addPoint(803, 551)
-				$g[113].addPoint(803, 705)
-				$g[113].addPoint(857, 705)
-				$g[113].addPoint(857, 617)
+				$g[104] = new SolidPen(SOLID, 0, PURPLE, ARROW60_END)
+				$g[105] = new SolidPen(SOLID, 5, RED, ARROW60_END)
+				$g[106] = new SolidPen(SOLID, THICK, BLACK)
+				$g[107] = new Line2($g[0], $g[17], ABSOLUTE, $g[104], 1582, 507, 1582, 331, 1087, 331, 1087, 353)
+				$g[108] = new Line2($g[0], $g[17], ABSOLUTE, $g[104], 1847, 507, 1847, 320, 1074, 320, 1074, 353)
+				$g[109] = new Line2($g[0], $g[17], ABSOLUTE, $g[104], 1966, 309, 1060, 309, 1060, 353)
+				$g[110] = new Line($g[0], $g[17], ABSOLUTE, $g[104], 0, 0, 1101, 298, 1033, 298, 1033, 353)
+				$g[111] = new Line2($g[0], $g[17], ABSOLUTE, $g[104], 1060, 353, 1060, 386, 979, 386)
+				$g[112] = new Line2($g[0], $g[17], ABSOLUTE, $g[106], 1030, 353, 1090, 353)
+				$g[113] = new Txt($g[0], $g[17], HLEFT|VTOP, 1036, 357, 0, $g[15], "zero")
 				$g[114] = new AnimPipe()
-				$g[114].addPoint(803, 551)
-				$g[114].addPoint(803, 705)
-				$g[114].addPoint(938, 705)
-				$g[114].addPoint(938, 617)
+				$g[114].addPoint(803, 463)
+				$g[114].addPoint(803, 441)
+				$g[114].addPoint(695, 441)
+				$g[114].addPoint(695, 397)
 				$g[115] = new AnimPipe()
-				$g[115].addPoint(884, 661)
-				$g[115].addPoint(884, 617)
+				$g[115].addPoint(871, 595)
+				$g[115].addPoint(871, 562)
+				$g[115].addPoint(1101, 562)
 				$g[116] = new AnimPipe()
-				$g[116].addPoint(830, 860)
-				$g[116].addPoint(965, 860)
-				$g[116].addPoint(965, 617)
-				$g[117] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 8235, 829, -32, -13, 65, 32, $g[4], $g[15])
-				$g[117].setRounded(2, 2)
+				$g[116].addPoint(803, 551)
+				$g[116].addPoint(803, 705)
+				$g[116].addPoint(857, 705)
+				$g[116].addPoint(857, 617)
+				$g[117] = new AnimPipe()
+				$g[117].addPoint(803, 551)
+				$g[117].addPoint(803, 705)
+				$g[117].addPoint(938, 705)
+				$g[117].addPoint(938, 617)
 				$g[118] = new AnimPipe()
-				$g[118].addPoint(871, 595)
-				$g[118].addPoint(871, 397)
-				$g[119] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 871, 441, -32, -13, 65, 32, $g[4], $g[15])
-				$g[119].setRounded(2, 2)
-				$g[120] = new AnimPipe()
-				$g[120].addPoint(952, 595)
-				$g[120].addPoint(952, 397)
-				$g[121] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 952, 441, -32, -13, 65, 32, $g[4], $g[15])
-				$g[121].setRounded(2, 2)
-				$g[122] = new AnimPipe()
-				$g[122].addPoint(911, 375)
-				$g[122].addPoint(911, 287)
-				$g[122].addPoint(803, 287)
-				$g[123] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 911, 353, -32, -13, 65, 32, $g[4], $g[15])
-				$g[123].setRounded(2, 2)
-				$g[124] = new AnimPipe()
-				$g[124].addPoint(776, 264)
-				$g[124].addPoint(722, 264)
+				$g[118].addPoint(884, 661)
+				$g[118].addPoint(884, 617)
+				$g[119] = new AnimPipe()
+				$g[119].addPoint(830, 860)
+				$g[119].addPoint(965, 860)
+				$g[119].addPoint(965, 617)
+				$g[120] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 8235, 829, -32, -13, 65, 32, $g[4], $g[15])
+				$g[120].setRounded(2, 2)
+				$g[121] = new AnimPipe()
+				$g[121].addPoint(871, 595)
+				$g[121].addPoint(871, 397)
+				$g[122] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 871, 441, -32, -13, 65, 32, $g[4], $g[15])
+				$g[122].setRounded(2, 2)
+				$g[123] = new AnimPipe()
+				$g[123].addPoint(952, 595)
+				$g[123].addPoint(952, 397)
+				$g[124] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 952, 441, -32, -13, 65, 32, $g[4], $g[15])
+				$g[124].setRounded(2, 2)
 				$g[125] = new AnimPipe()
-				$g[125].addPoint(952, 110)
-				$g[125].addPoint(911, 110)
-				$g[125].addPoint(911, 242)
-				$g[125].addPoint(803, 242)
-				$g[126] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 911, 97, -32, 0, 65, 32, $g[4], $g[15])
+				$g[125].addPoint(911, 375)
+				$g[125].addPoint(911, 287)
+				$g[125].addPoint(803, 287)
+				$g[126] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 911, 353, -32, -13, 65, 32, $g[4], $g[15])
+				$g[126].setRounded(2, 2)
 				$g[127] = new AnimPipe()
-				$g[127].addPoint(1128, 551)
-				$g[127].addPoint(1182, 551)
+				$g[127].addPoint(776, 264)
+				$g[127].addPoint(722, 264)
 				$g[128] = new AnimPipe()
-				$g[128].addPoint(1019, 154)
-				$g[128].addPoint(1019, 540)
-				$g[128].addPoint(1101, 540)
-				$g[129] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 1019, 181, -32, 0, 65, 32, $g[4], $g[15], "R0:0")
-				$g[129].setRounded(2, 2)
+				$g[128].addPoint(952, 110)
+				$g[128].addPoint(911, 110)
+				$g[128].addPoint(911, 242)
+				$g[128].addPoint(803, 242)
+				$g[129] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 911, 97, -32, 0, 65, 32, $g[4], $g[15])
 				$g[130] = new AnimPipe()
-				$g[130].addPoint(1101, 154)
-				$g[130].addPoint(1101, 463)
-				$g[130].addPoint(1182, 463)
-				$g[131] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 1101, 181, -32, 0, 65, 32, $g[4], $g[15], "R0:0")
-				$g[131].setRounded(2, 2)
-				$g[132] = new InstructionRegister(1182, 771, 54, 187, "EX")
-				$g[133] = new Register(1182, 419, 54, 88, TOP, "A")
-				$g[134] = new Register(1182, 507, 54, 88, BOTTOM, "B")
-				$g[135] = new Component(1371, 397, 27, 110, "mux 6")
-				$g[136] = new Component(1371, 507, 27, 110, "mux 7")
-				$g[137] = new Component(1371, 683, 27, 88, "mux 8")
-				$g[138] = new ALU(1425, 419, 108, 176)
-				$g[139] = new AnimPipe()
-				$g[139].addPoint(1236, 860)
-				$g[139].addPoint(1614, 860)
-				$g[140] = new AnimPipe()
-				$g[140].addPoint(1641, 463)
-				$g[140].addPoint(1641, 375)
-				$g[140].addPoint(1317, 375)
-				$g[140].addPoint(1317, 419)
-				$g[140].addPoint(1371, 419)
-				$g[141] = new AnimPipe()
-				$g[141].addPoint(1912, 463)
-				$g[141].addPoint(1912, 353)
-				$g[141].addPoint(1290, 353)
-				$g[141].addPoint(1290, 441)
-				$g[141].addPoint(1371, 441)
+				$g[130].addPoint(1128, 551)
+				$g[130].addPoint(1182, 551)
+				$g[131] = new AnimPipe()
+				$g[131].addPoint(1019, 154)
+				$g[131].addPoint(1019, 540)
+				$g[131].addPoint(1101, 540)
+				$g[132] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 1019, 181, -32, 0, 65, 32, $g[4], $g[15], "R0:0")
+				$g[132].setRounded(2, 2)
+				$g[133] = new AnimPipe()
+				$g[133].addPoint(1101, 154)
+				$g[133].addPoint(1101, 463)
+				$g[133].addPoint(1182, 463)
+				$g[134] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 1101, 181, -32, 0, 65, 32, $g[4], $g[15], "R0:0")
+				$g[134].setRounded(2, 2)
+				$g[135] = new InstructionRegister(1182, 771, 54, 187, "EX")
+				$g[136] = new Register(1182, 419, 54, 88, TOP, "A")
+				$g[137] = new Register(1182, 507, 54, 88, BOTTOM, "B")
+				$g[138] = new Component(1371, 397, 27, 110, "mux 6")
+				$g[139] = new Component(1371, 507, 27, 110, "mux 7")
+				$g[140] = new Component(1371, 683, 27, 88, "mux 8")
+				$g[141] = new ALU(1425, 419, 108, 176)
 				$g[142] = new AnimPipe()
-				$g[142].addPoint(1236, 485)
-				$g[142].addPoint(1371, 485)
+				$g[142].addPoint(1236, 860)
+				$g[142].addPoint(1614, 860)
 				$g[143] = new AnimPipe()
-				$g[143].addPoint(1236, 529)
-				$g[143].addPoint(1371, 529)
+				$g[143].addPoint(1641, 463)
+				$g[143].addPoint(1641, 375)
+				$g[143].addPoint(1317, 375)
+				$g[143].addPoint(1317, 419)
+				$g[143].addPoint(1371, 419)
 				$g[144] = new AnimPipe()
-				$g[144].addPoint(1236, 860)
-				$g[144].addPoint(1263, 860)
-				$g[144].addPoint(1263, 551)
-				$g[144].addPoint(1371, 551)
-				$g[145] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 1268, 816, -27, 0, 54, 26, $g[4], $g[15], "IMM")
-				$g[145].setRounded(2, 2)
+				$g[144].addPoint(1912, 463)
+				$g[144].addPoint(1912, 353)
+				$g[144].addPoint(1290, 353)
+				$g[144].addPoint(1290, 441)
+				$g[144].addPoint(1371, 441)
+				$g[145] = new AnimPipe()
+				$g[145].addPoint(1236, 485)
+				$g[145].addPoint(1371, 485)
 				$g[146] = new AnimPipe()
-				$g[146].addPoint(1912, 551)
-				$g[146].addPoint(1912, 661)
-				$g[146].addPoint(1290, 661)
-				$g[146].addPoint(1290, 573)
-				$g[146].addPoint(1371, 573)
+				$g[146].addPoint(1236, 529)
+				$g[146].addPoint(1371, 529)
 				$g[147] = new AnimPipe()
-				$g[147].addPoint(1641, 551)
-				$g[147].addPoint(1641, 639)
-				$g[147].addPoint(1317, 639)
-				$g[147].addPoint(1317, 595)
-				$g[147].addPoint(1371, 595)
-				$g[148] = new AnimPipe()
-				$g[148].addPoint(1641, 551)
-				$g[148].addPoint(1641, 639)
-				$g[148].addPoint(1317, 639)
-				$g[148].addPoint(1317, 705)
-				$g[148].addPoint(1371, 705)
+				$g[147].addPoint(1236, 860)
+				$g[147].addPoint(1263, 860)
+				$g[147].addPoint(1263, 551)
+				$g[147].addPoint(1371, 551)
+				$g[148] = new Rectangle($g[0], $g[19], 0, 0, $g[11], 1268, 816, -27, 0, 54, 26, $g[4], $g[15], "IMM")
+				$g[148].setRounded(2, 2)
 				$g[149] = new AnimPipe()
 				$g[149].addPoint(1912, 551)
 				$g[149].addPoint(1912, 661)
 				$g[149].addPoint(1290, 661)
-				$g[149].addPoint(1290, 727)
-				$g[149].addPoint(1371, 727)
+				$g[149].addPoint(1290, 573)
+				$g[149].addPoint(1371, 573)
 				$g[150] = new AnimPipe()
-				$g[150].addPoint(1209, 595)
-				$g[150].addPoint(1209, 749)
-				$g[150].addPoint(1371, 749)
+				$g[150].addPoint(1641, 551)
+				$g[150].addPoint(1641, 639)
+				$g[150].addPoint(1317, 639)
+				$g[150].addPoint(1317, 595)
+				$g[150].addPoint(1371, 595)
 				$g[151] = new AnimPipe()
-				$g[151].addPoint(1398, 727)
-				$g[151].addPoint(1587, 727)
+				$g[151].addPoint(1641, 551)
+				$g[151].addPoint(1641, 639)
+				$g[151].addPoint(1317, 639)
+				$g[151].addPoint(1317, 705)
+				$g[151].addPoint(1371, 705)
 				$g[152] = new AnimPipe()
-				$g[152].addPoint(1398, 452)
-				$g[152].addPoint(1425, 452)
-				$g[152].addPoint(1560, 507)
-				$g[152].addPoint(1614, 507)
+				$g[152].addPoint(1912, 551)
+				$g[152].addPoint(1912, 661)
+				$g[152].addPoint(1290, 661)
+				$g[152].addPoint(1290, 727)
+				$g[152].addPoint(1371, 727)
 				$g[153] = new AnimPipe()
-				$g[153].addPoint(1398, 562)
-				$g[153].addPoint(1425, 562)
-				$g[153].addPoint(1560, 507)
-				$g[153].addPoint(1614, 507)
-				$g[154] = new InstructionRegister(1614, 771, 54, 187, "MA")
-				$g[155] = new Register(1614, 463, 54, 88, TOP, "O0")
-				$g[156] = new Register(1587, 705, 108, 44, RIGHT, "SMR")
+				$g[153].addPoint(1209, 595)
+				$g[153].addPoint(1209, 749)
+				$g[153].addPoint(1371, 749)
+				$g[154] = new AnimPipe()
+				$g[154].addPoint(1398, 727)
+				$g[154].addPoint(1587, 727)
+				$g[155] = new AnimPipe()
+				$g[155].addPoint(1398, 452)
+				$g[155].addPoint(1425, 452)
+				$g[155].addPoint(1560, 507)
+				$g[155].addPoint(1614, 507)
+				$g[156] = new AnimPipe()
+				$g[156].addPoint(1398, 562)
+				$g[156].addPoint(1425, 562)
+				$g[156].addPoint(1560, 507)
+				$g[156].addPoint(1614, 507)
+				$g[157] = new InstructionRegister(1614, 771, 54, 187, "MA")
+				$g[158] = new Register(1614, 463, 54, 88, TOP, "O0")
+				$g[159] = new Register(1587, 705, 108, 44, RIGHT, "SMR")
 				new Txt($g[0], $g[17], HLEFT|VTOP, 1595, 220, 0, $g[15], "memory\naddress")
 				new Txt($g[0], $g[17], HLEFT|VTOP, 1736, 705, 0, $g[15], "memory\ndata-in")
 				new Txt($g[0], $g[17], HLEFT|VTOP, 1763, 220, 0, $g[15], "memory\ndata-out")
-				new Txt($g[0], 0, HLEFT|VTOP, 1844, 77, 0, $g[15], "Data\nCache\n(memory)")
-				$g[157] = newArray(4)
-				$g[157][0]=new Register(1614, 66, 108, 44, LEFT, "M0")
-				$g[157][1]=new Register(1614, 110, 108, 44, LEFT, "M1")
-				$g[157][2]=new Register(1723, 66, 108, 44, RIGHT, "M2")
-				$g[157][3]=new Register(1723, 110, 108, 44, RIGHT, "M3")
-				$g[158] = new Component(1804, 463, 27, 88, "mux 9")
-				$g[159] = new AnimPipe()
-				$g[159].addPoint(1668, 860)
-				$g[159].addPoint(1885, 860)
-				$g[160] = new AnimPipe()
-				$g[160].addPoint(1668, 507)
-				$g[160].addPoint(1804, 507)
-				$g[161] = new AnimPipe()
-				$g[161].addPoint(1831, 507)
-				$g[161].addPoint(1885, 507)
+				new Txt($g[0], 0, HLEFT|VTOP, 1884, 77, 0, $g[15], "Data\nCache\n(memory)")
+				$g[160] = newArray(4)
+				$g[160][0]=new Register(1654, 66, 108, 44, LEFT, "M0")
+				$g[160][1]=new Register(1654, 110, 108, 44, LEFT, "M1")
+				$g[160][2]=new Register(1763, 66, 108, 44, RIGHT, "M2")
+				$g[160][3]=new Register(1763, 110, 108, 44, RIGHT, "M3")
+				$g[161] = new Component(1804, 463, 27, 88, "mux 9")
 				$g[162] = new AnimPipe()
-				$g[162].addPoint(1668, 507)
-				$g[162].addPoint(1695, 507)
-				$g[162].addPoint(1695, 154)
+				$g[162].addPoint(1668, 860)
+				$g[162].addPoint(1885, 860)
 				$g[163] = new AnimPipe()
-				$g[163].addPoint(1695, 727)
-				$g[163].addPoint(1723, 727)
-				$g[163].addPoint(1723, 154)
+				$g[163].addPoint(1668, 507)
+				$g[163].addPoint(1804, 507)
 				$g[164] = new AnimPipe()
-				$g[164].addPoint(1750, 154)
-				$g[164].addPoint(1750, 485)
-				$g[164].addPoint(1804, 485)
-				$g[165] = new InstructionRegister(1885, 771, 54, 187, "WB")
-				$g[166] = new Register(1885, 463, 54, 88, TOP, "O1")
+				$g[164].addPoint(1831, 507)
+				$g[164].addPoint(1885, 507)
+				$g[165] = new AnimPipe()
+				$g[165].addPoint(1668, 507)
+				$g[165].addPoint(1695, 507)
+				$g[165].addPoint(1695, 154)
+				$g[166] = new AnimPipe()
+				$g[166].addPoint(1695, 727)
+				$g[166].addPoint(1723, 727)
+				$g[166].addPoint(1723, 154)
 				$g[167] = new AnimPipe()
-				$g[167].addPoint(1939, 507)
-				$g[167].addPoint(1966, 507)
-				$g[167].addPoint(1966, 22)
-				$g[167].addPoint(1060, 22)
-				$g[167].addPoint(1060, 66)
-				$g[138].txtResult.moveToFront()
+				$g[167].addPoint(1750, 154)
+				$g[167].addPoint(1750, 485)
+				$g[167].addPoint(1804, 485)
+				$g[168] = new InstructionRegister(1885, 771, 54, 187, "WB")
+				$g[169] = new Register(1885, 463, 54, 88, TOP, "O1")
+				$g[170] = new AnimPipe()
+				$g[170].addPoint(1939, 507)
+				$g[170].addPoint(1980, 507)
+				$g[170].addPoint(1980, 22)
+				$g[170].addPoint(1060, 22)
+				$g[170].addPoint(1060, 66)
+				$g[141].txtResult.moveToFront()
 				resetCircuit()
-				$g[170] = ""
-				$g[168]=0
+				$g[173] = ""
+				$g[171]=0
 				$pc = 2
 			case 2:
-				if (!($g[168]<32)) {
+				if (!($g[171]<32)) {
 					$pc = 4
 					continue
 				}
-				$g[71].setOpcode(4*$g[168], 0)
+				$g[73].setOpcode(4*$g[171], 0)
 				$pc = 3
 			case 3:
-				$g[168]++
+				$g[171]++
 				$pc = 2
 				continue
 			case 4:
-				$g[168]=0
+				$g[171]=0
 				$pc = 5
 			case 5:
-				if (!($g[168]<4)) {
+				if (!($g[171]<4)) {
 					$pc = 7
 					continue
 				}
-				$g[170]=sprintf("r%d", $g[168])
-				$g[95][$g[168]].setValue(getArgAsNum($g[170], 0))
+				$g[173]=sprintf("r%d", $g[171])
+				$g[97][$g[171]].setValue(getArgAsNum($g[173], 0))
 				$pc = 6
 			case 6:
-				$g[168]++
+				$g[171]++
 				$pc = 5
 				continue
 			case 7:
-				$g[168]=0
+				$g[171]=0
 				$pc = 8
 			case 8:
-				if (!($g[168]<4)) {
+				if (!($g[171]<4)) {
 					$pc = 10
 					continue
 				}
-				$g[170]=sprintf("m%d", $g[168])
-				$g[157][$g[168]].setValue(getArgAsNum($g[170], 0))
+				$g[173]=sprintf("m%d", $g[171])
+				$g[160][$g[171]].setValue(getArgAsNum($g[173], 0))
 				$pc = 9
 			case 9:
-				$g[168]++
+				$g[171]++
 				$pc = 8
 				continue
 			case 10:
@@ -2164,18 +2404,18 @@ function dlx(vplayer) {
 					$pc = 14
 					continue
 				}
-				$g[168]=0
+				$g[171]=0
 				$pc = 11
 			case 11:
-				if (!($g[168]<32)) {
+				if (!($g[171]<32)) {
 					$pc = 13
 					continue
 				}
-				$g[170]=sprintf("i%d", $g[168])
-				$g[71].setOpcode(4*$g[168], getArgAsNum($g[170], 0))
+				$g[173]=sprintf("i%d", $g[171])
+				$g[73].setOpcode(4*$g[171], getArgAsNum($g[173], 0))
 				$pc = 12
 			case 12:
-				$g[168]++
+				$g[171]++
 				$pc = 11
 				continue
 			case 13:
@@ -2186,9 +2426,9 @@ function dlx(vplayer) {
 					$pc = 15
 					continue
 				}
-				$g[71].setValue(44, HALT, 0, 0, 0)
-				$g[95][2].setValue(9)
-				$g[95][3].setValue(8)
+				$g[73].setValue(44, HALT, 0, 0, 0)
+				$g[97][2].setValue(9)
+				$g[97][3].setValue(8)
 				setTPS(100)
 				$pc = 23
 				continue
@@ -2197,14 +2437,14 @@ function dlx(vplayer) {
 					$pc = 16
 					continue
 				}
-				$g[71].setValue(0, ADD, 1, 2, 3)
-				$g[71].setValue(4, SUB, 3, 1, 2)
-				$g[71].setValue(8, AND, 2, 1, 3)
-				$g[71].setValue(12, EOR, 2, 1, 3)
-				$g[71].setValue(16, ADD, 2, 1, 0)
-				$g[71].setValue(20, HALT, 0, 0, 0)
-				$g[95][1].setValue(1)
-				$g[95][2].setValue(2)
+				$g[73].setValue(0, ADD, 1, 2, 3)
+				$g[73].setValue(4, SUB, 3, 1, 2)
+				$g[73].setValue(8, AND, 2, 1, 3)
+				$g[73].setValue(12, EOR, 2, 1, 3)
+				$g[73].setValue(16, ADD, 2, 1, 0)
+				$g[73].setValue(20, HALT, 0, 0, 0)
+				$g[97][1].setValue(1)
+				$g[97][2].setValue(2)
 				setTPS(50)
 				$pc = 22
 				continue
@@ -2213,14 +2453,14 @@ function dlx(vplayer) {
 					$pc = 17
 					continue
 				}
-				$g[71].setValue(0, ADD, 1, 1, 2)
-				$g[71].setValue(4, ADD, 2, 1, 2)
-				$g[71].setValue(8, ADD, 1, 1, 2)
-				$g[71].setValue(12, ADD, 2, 1, 2)
-				$g[71].setValue(16, ADD, 1, 1, 2)
-				$g[71].setValue(20, HALT, 0, 0, 0)
-				$g[95][1].setValue(1)
-				$g[95][2].setValue(2)
+				$g[73].setValue(0, ADD, 1, 1, 2)
+				$g[73].setValue(4, ADD, 2, 1, 2)
+				$g[73].setValue(8, ADD, 1, 1, 2)
+				$g[73].setValue(12, ADD, 2, 1, 2)
+				$g[73].setValue(16, ADD, 1, 1, 2)
+				$g[73].setValue(20, HALT, 0, 0, 0)
+				$g[97][1].setValue(1)
+				$g[97][2].setValue(2)
 				setTPS(50)
 				$pc = 21
 				continue
@@ -2229,9 +2469,9 @@ function dlx(vplayer) {
 					$pc = 18
 					continue
 				}
-				$g[71].setValue(4, ADD, 0, 0, 0)
-				$g[71].setValue(8, ADD, 0, 0, 0)
-				$g[71].setValue(20, HALT, 0, 0, 0)
+				$g[73].setValue(4, ADD, 0, 0, 0)
+				$g[73].setValue(8, ADD, 0, 0, 0)
+				$g[73].setValue(20, HALT, 0, 0, 0)
 				setTPS(50)
 				$pc = 20
 				continue
@@ -2240,10 +2480,10 @@ function dlx(vplayer) {
 					$pc = 19
 					continue
 				}
-				$g[71].setValue(0, B, 0, 0, 1)
-				$g[71].setValue(32, ADD, 1, 1, 1)
-				$g[71].setValue(36, HALT, 0, 0, 0)
-				$g[95][1].setValue(32)
+				$g[73].setValue(0, B, 0, 0, 1)
+				$g[73].setValue(32, ADD, 1, 1, 1)
+				$g[73].setValue(36, HALT, 0, 0, 0)
+				$g[97][1].setValue(32)
 				$pc = 19
 			case 19:
 				$pc = 20
@@ -2260,25 +2500,25 @@ function dlx(vplayer) {
 					$pc = 28
 					continue
 				}
-				$g[168]=0
+				$g[171]=0
 				$pc = 25
 			case 25:
-				if (!($g[168]<32)) {
+				if (!($g[171]<32)) {
 					$pc = 27
 					continue
 				}
-				$g[170]=sprintf("i%d", $g[168])
-				setArg($g[170], $g[71].getOpcode($g[168]*4).toString())
+				$g[173]=sprintf("i%d", $g[171])
+				setArg($g[173], $g[73].getOpcode($g[171]*4).toString())
 				$pc = 26
 			case 26:
-				$g[168]++
+				$g[171]++
 				$pc = 25
 				continue
 			case 27:
 				$g[14]=($g[14]>maxexample) ? 0 : $g[14]
 				$pc = 28
 			case 28:
-				$g[171] = getArgAsNum("haltOnHalt", 1)
+				$g[174] = getArgAsNum("haltOnHalt", 1)
 				$g[27]=getArgAsNum("bpMode", 0)
 				setBPMode($g[27])
 				$g[28]=getArgAsNum("liMode", 0)
@@ -2292,65 +2532,65 @@ function dlx(vplayer) {
 				$g[26]=getArgAsNum("peMode", 0)
 				setPEMode($g[26])
 				$g[22]=getArgAsNum("locked", 0)
-				$g[172] = getArgAsNum("help", 1)
-				$g[173] = new Rectangle2($g[0], $g[20], 0, 0, $g[12], 0, 0, WIDTH, HEIGHT)
-				$g[173].setOpacity(0.5)
-				$g[173].setRounded(10, 10)
-				$g[174] = new SolidPen(SOLID, 5, RED, ROUND_START|ROUND_JOIN|ROUND_END)
-				$g[175] = new Font("Arial", 32, BOLD)
-				new Txt($g[0], $g[20], HLEFT|VTOP, 32, 639, $g[174], $g[175], "LEFT CLICK on animation background to start and stop clock.\n\nSHIFT LEFT CLICK on background to execute \"single MIPS clock cycle\".")
+				$g[175] = getArgAsNum("help", 1)
+				$g[176] = new Rectangle2($g[0], $g[20], 0, 0, $g[12], 0, 0, WIDTH, HEIGHT)
+				$g[176].setOpacity(0.5)
+				$g[176].setRounded(10, 10)
+				$g[177] = new SolidPen(SOLID, 5, RED, ROUND_START|ROUND_JOIN|ROUND_END)
+				$g[178] = new Font("Arial", 32, BOLD)
+				new Txt($g[0], $g[20], HLEFT|VTOP, 32, 639, $g[177], $g[178], "LEFT CLICK on animation background to start and stop clock.\n\nSHIFT LEFT CLICK on background to execute \"single MIPS clock cycle\".")
 				if (!(!$g[22])) {
 					$pc = 29
 					continue
 				}
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 44, 184, 176, 10)
-				$g[173].setRounded(5, 5)
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 55, 427, 66, 10)
-				$g[173].setRounded(5, 5)
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 132, 427, 31, 10)
-				$g[173].setRounded(5, 5)
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 168, 427, 31, 10)
-				$g[173].setRounded(5, 5)
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 203, 427, 31, 10)
-				$g[173].setRounded(5, 5)
-				new Txt($g[0], $g[20], HLEFT|VTOP, 397, 132, $g[174], $g[175], "LEFT CLICK to change\ninitial program.")
-				new Txt($g[0], $g[20], HLEFT|VTOP, 397, 231, $g[174], $g[175], "LEFT or RIGHT CLICK to \"rotate\"\ninstructions and operands.\nHold and release to reset value.")
+				$g[176]=new Rectangle2($g[0], $g[20], 0, $g[177], 0, 44, 184, 176, 10)
+				$g[176].setRounded(5, 5)
+				$g[176]=new Rectangle2($g[0], $g[20], 0, $g[177], 0, 55, 427, 66, 10)
+				$g[176].setRounded(5, 5)
+				$g[176]=new Rectangle2($g[0], $g[20], 0, $g[177], 0, 132, 427, 31, 10)
+				$g[176].setRounded(5, 5)
+				$g[176]=new Rectangle2($g[0], $g[20], 0, $g[177], 0, 168, 427, 31, 10)
+				$g[176].setRounded(5, 5)
+				$g[176]=new Rectangle2($g[0], $g[20], 0, $g[177], 0, 203, 427, 31, 10)
+				$g[176].setRounded(5, 5)
+				new Txt($g[0], $g[20], HLEFT|VTOP, 397, 132, $g[177], $g[178], "LEFT CLICK to change\ninitial program.")
+				new Txt($g[0], $g[20], HLEFT|VTOP, 397, 231, $g[177], $g[178], "LEFT or RIGHT CLICK to \"rotate\"\ninstructions and operands.\nHold and release to reset value.")
 				$pc = 29
 			case 29:
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 683, 68, 198, 50)
-				$g[173].setRounded(10, 10)
-				new Txt($g[0], $g[20], HLEFT|VTOP, 1209, 88, $g[174], $g[175], "LEFT or RIGHT CLICK register\nto increment or decrement value.")
+				$g[176]=new Rectangle2($g[0], $g[20], 0, $g[177], 0, 683, 68, 198, 50)
+				$g[176].setRounded(10, 10)
+				new Txt($g[0], $g[20], HLEFT|VTOP, 1209, 88, $g[177], $g[178], "LEFT or RIGHT CLICK register\nto increment or decrement value.")
 				if (!(!$g[22])) {
 					$pc = 30
 					continue
 				}
-				$g[173]=new Rectangle2($g[0], $g[20], 0, $g[174], 0, 242, 1330, 1212, 30)
-				$g[173].setRounded(10, 10)
-				new Txt($g[0], $g[20], HLEFT|VTOP, 587, 959, $g[174], $g[175], "LEFT CLICK on any of the buttons below to change circuit configuration.")
+				$g[176]=new Rectangle2($g[0], $g[20], 0, $g[177], 0, 242, 1330, 1212, 30)
+				$g[176].setRounded(10, 10)
+				new Txt($g[0], $g[20], HLEFT|VTOP, 587, 959, $g[177], $g[178], "LEFT CLICK on any of the buttons below to change circuit configuration.")
 				$pc = 30
 			case 30:
-				$g[176] = new Rectangle2($g[0], $g[20], 0, $g[174], $g[13], 925, 507, 270, 66, $g[174], $g[175], "CLOSE HELP")
-				$g[176].setRounded(5, 5)
-				$g[176].addEventHandler("eventEE", this, $eh16)
-				$g[176].addEventHandler("eventMB", this, $eh17)
-				if (!($g[172]==0)) {
+				$g[179] = new Rectangle2($g[0], $g[20], 0, $g[177], $g[13], 925, 507, 270, 66, $g[177], $g[178], "CLOSE HELP")
+				$g[179].setRounded(5, 5)
+				$g[179].addEventHandler("eventEE", this, $eh24)
+				$g[179].addEventHandler("eventMB", this, $eh25)
+				if (!($g[175]==0)) {
 					$pc = 31
 					continue
 				}
 				$g[20].setOpacity(0)
 				$pc = 31
 			case 31:
-				$g[60].label.addEventHandler("eventMB", this, $eh18)
-				$g[61].label.addEventHandler("eventMB", this, $eh19)
-				$g[62].label.addEventHandler("eventMB", this, $eh20)
-				$g[63].label.addEventHandler("eventMB", this, $eh21)
-				$g[64].label.addEventHandler("eventMB", this, $eh22)
-				$g[65].label.addEventHandler("eventMB", this, $eh23)
-				$g[59].label.addEventHandler("eventMB", this, $eh24)
-				$g[66].addEventHandler("eventMB", this, $eh25)
-				$g[51].addEventHandler("eventMB", this, $eh26)
-				$g[70].addEventHandler("eventEE", this, $eh27)
-				$g[70].addEventHandler("eventMB", this, $eh28)
+				$g[62].label.addEventHandler("eventMB", this, $eh26)
+				$g[63].label.addEventHandler("eventMB", this, $eh27)
+				$g[64].label.addEventHandler("eventMB", this, $eh28)
+				$g[65].label.addEventHandler("eventMB", this, $eh29)
+				$g[66].label.addEventHandler("eventMB", this, $eh30)
+				$g[67].label.addEventHandler("eventMB", this, $eh31)
+				$g[61].label.addEventHandler("eventMB", this, $eh32)
+				$g[68].addEventHandler("eventMB", this, $eh33)
+				$g[53].addEventHandler("eventMB", this, $eh34)
+				$g[72].addEventHandler("eventEE", this, $eh35)
+				$g[72].addEventHandler("eventMB", this, $eh36)
 				callf(266, $obj)
 				continue
 			case 32:
@@ -2471,38 +2711,38 @@ function dlx(vplayer) {
 					$pc = 49
 					continue
 				}
-				fork(35, $g[73])
-				$g[71].setActive($g[73].newValue)
+				fork(35, $g[75])
+				$g[73].setActive($g[75].newValue)
 				$pc = 49
 			case 49:
 				if (wait(8))
 				return
 				$pc = 50
 			case 50:
-				if (!(($g[27]==BRANCH_PREDICTION) && (btbIndex($g[73].value)!=-1))) {
+				if (!(($g[27]==BRANCH_PREDICTION) && (btbIndex($g[75].value)!=-1))) {
 					$pc = 51
 					continue
 				}
-				$g[24]=btbIndex($g[73].value)
-				$g[73].setNewValue($g[76][$g[24]].value)
-				$g[177]=$g[84]
+				$g[24]=btbIndex($g[75].value)
+				$g[75].setNewValue($g[78][$g[24]].value)
+				$g[180]=$g[86]
 				$pc = 52
 				continue
 			case 51:
-				$g[73].setNewValue(($g[73].value+4)&127)
-				$g[177]=$g[86]
+				$g[75].setNewValue(($g[75].value+4)&127)
+				$g[180]=$g[88]
 				$pc = 52
 			case 52:
-				$g[94].setNewValue($g[73].value)
-				$g[93].setNewInstruction($g[71].instruction[$g[73].value/4])
+				$g[96].setNewValue($g[75].value)
+				$g[95].setNewInstruction($g[73].instruction[$g[75].value/4])
 				if (wait(8))
 				return
 				$pc = 53
 			case 53:
-				fork(37, $g[90], 64)
-				fork(37, $g[82], 24)
-				fork(37, $g[89], 24)
-				if (!(($g[27]==BRANCH_PREDICTION) && (instrIsBranchOrJump($g[93].vIns)))) {
+				fork(37, $g[92], 64)
+				fork(37, $g[84], 24)
+				fork(37, $g[91], 24)
+				if (!(($g[27]==BRANCH_PREDICTION) && (instrIsBranchOrJump($g[95].vIns)))) {
 					$pc = 59
 					continue
 				}
@@ -2510,18 +2750,18 @@ function dlx(vplayer) {
 					$pc = 55
 					continue
 				}
-				callf(37, $g[88], 12)
+				callf(37, $g[90], 12)
 				continue
 			case 54:
 				$pc = 57
 				continue
 			case 55:
-				callf(37, $g[111], 12)
+				callf(37, $g[114], 12)
 				continue
 			case 56:
 				$pc = 57
 			case 57:
-				callf(37, $g[91], 12)
+				callf(37, $g[93], 12)
 				continue
 			case 58:
 				$pc = 61
@@ -2533,34 +2773,34 @@ function dlx(vplayer) {
 			case 60:
 				$pc = 61
 			case 61:
-				fork(37, $g[80], 40)
-				if (!(($g[27]==BRANCH_PREDICTION) && (btbIndex($g[73].value)!=-1))) {
+				fork(37, $g[82], 40)
+				if (!(($g[27]==BRANCH_PREDICTION) && (btbIndex($g[75].value)!=-1))) {
 					$pc = 62
 					continue
 				}
-				$g[75][btbIndex($g[73].value)].highlight($g[21])
-				$g[76][btbIndex($g[73].value)].highlight($g[21])
+				$g[77][btbIndex($g[75].value)].highlight($g[21])
+				$g[78][btbIndex($g[75].value)].highlight($g[21])
 				$pc = 62
 			case 62:
-				$g[81].setTxt($g[93].getNewInstrTxt())
-				if ($g[81].setOpacity(1, 16, 1, 1))
+				$g[83].setTxt($g[95].getNewInstrTxt())
+				if ($g[83].setOpacity(1, 16, 1, 1))
 				return
 				$pc = 63
 			case 63:
-				callf(37, $g[177], 16)
+				callf(37, $g[180], 16)
 				continue
 			case 64:
-				callf(37, $g[87], 8)
+				callf(37, $g[89], 8)
 				continue
 			case 65:
 				returnf(0)
 				continue
 			case 66:
 				enterf(0);	// sendBTBOperands
-				callf(37, $g[179], 18)
+				callf(37, $g[182], 18)
 				continue
 			case 67:
-				callf(37, $g[124], 6)
+				callf(37, $g[127], 6)
 				continue
 			case 68:
 				returnf(0)
@@ -2571,81 +2811,81 @@ function dlx(vplayer) {
 					$pc = 70
 					continue
 				}
-				fork(35, $g[94])
-				fork(33, $g[93])
+				fork(35, $g[96])
+				fork(33, $g[95])
 				$pc = 70
 			case 70:
 				if (!($g[25] && ($g[27]==BRANCH_PREDICTION))) {
 					$pc = 71
 					continue
 				}
-				fork(35, $g[75][$g[24]])
-				fork(35, $g[76][$g[24]])
+				fork(35, $g[77][$g[24]])
+				fork(35, $g[78][$g[24]])
 				$pc = 71
 			case 71:
 				if (wait(16))
 				return
 				$pc = 72
 			case 72:
-				fork(37, $g[92], 64)
-				if (!(instrIsBranch($g[93].vIns))) {
+				fork(37, $g[94], 64)
+				if (!(instrIsBranch($g[95].vIns))) {
 					$pc = 75
 					continue
 				}
-				fork(37, $g[113], 16)
-				fork(37, $g[115], 16)
-				fork(37, $g[114], 16)
 				fork(37, $g[116], 16)
+				fork(37, $g[118], 16)
+				fork(37, $g[117], 16)
+				fork(37, $g[119], 16)
 				if (wait(12))
 				return
 				$pc = 73
 			case 73:
-				$g[117].setTxt("%02X", $g[93].vRs2)
-				$g[117].setOpacity(1)
+				$g[120].setTxt("%02X", $g[95].vRs2)
+				$g[120].setOpacity(1)
 				if (wait(4))
 				return
 				$pc = 74
 			case 74:
-				fork(37, $g[118], 8)
-				fork(37, $g[120], 8)
-				$g[119].setTxt("%02X", ($g[94].value+4)&255)
-				$g[119].setOpacity(1, 8, 1, 0)
-				$g[121].setTxt("%02X", ($g[94].value+$g[93].vRs2)&255)
-				$g[121].setOpacity(1, 8, 1, 0)
+				fork(37, $g[121], 8)
+				fork(37, $g[123], 8)
+				$g[122].setTxt("%02X", ($g[96].value+4)&255)
+				$g[122].setOpacity(1, 8, 1, 0)
+				$g[124].setTxt("%02X", ($g[96].value+$g[95].vRs2)&255)
+				$g[124].setOpacity(1, 8, 1, 0)
 				$pc = 88
 				continue
 			case 75:
-				if (!(isJorJAL($g[93].vIns))) {
+				if (!(isJorJAL($g[95].vIns))) {
 					$pc = 82
 					continue
 				}
-				if (!($g[93].vIns==BL)) {
+				if (!($g[95].vIns==BL)) {
 					$pc = 76
 					continue
 				}
-				fork(37, $g[113], 16)
-				fork(37, $g[115], 16)
+				fork(37, $g[116], 16)
+				fork(37, $g[118], 16)
 				$pc = 76
 			case 76:
 				if (!($g[23]==NO_STALL)) {
 					$pc = 79
 					continue
 				}
-				fork(37, $g[114], 16)
-				fork(37, $g[116], 16)
+				fork(37, $g[117], 16)
+				fork(37, $g[119], 16)
 				if (wait(12))
 				return
 				$pc = 77
 			case 77:
-				$g[117].setTxt("%02X", $g[93].vRs2)
-				$g[117].setOpacity(1)
+				$g[120].setTxt("%02X", $g[95].vRs2)
+				$g[120].setOpacity(1)
 				if (wait(4))
 				return
 				$pc = 78
 			case 78:
-				fork(37, $g[120], 8)
-				$g[121].setTxt("%02X", ($g[94].value+$g[93].vRs2)&255)
-				$g[121].setOpacity(1, 8, 1, 0)
+				fork(37, $g[123], 8)
+				$g[124].setTxt("%02X", ($g[96].value+$g[95].vRs2)&255)
+				$g[124].setOpacity(1, 8, 1, 0)
 				$pc = 81
 				continue
 			case 79:
@@ -2658,12 +2898,12 @@ function dlx(vplayer) {
 				$pc = 87
 				continue
 			case 82:
-				if (!($g[93].vIns==BL)) {
+				if (!($g[95].vIns==BL)) {
 					$pc = 84
 					continue
 				}
-				fork(37, $g[113], 32)
-				fork(37, $g[115], 32)
+				fork(37, $g[116], 32)
+				fork(37, $g[118], 32)
 				if (wait(24))
 				return
 				$pc = 83
@@ -2685,30 +2925,30 @@ function dlx(vplayer) {
 				return
 				$pc = 89
 			case 89:
-				if (!(instrIsBranchOrJump($g[93].vIns))) {
+				if (!(instrIsBranchOrJump($g[95].vIns))) {
 					$pc = 90
 					continue
 				}
 				calcNewPC()
 				$pc = 90
 			case 90:
-				if (!(instrIsBranch($g[93].vIns))) {
+				if (!(instrIsBranch($g[95].vIns))) {
 					$pc = 91
 					continue
 				}
-				$g[123].setTxt("%02X", $g[181])
-				$g[123].setOpacity(1, 8, 1, 0)
+				$g[126].setTxt("%02X", $g[184])
+				$g[126].setOpacity(1, 8, 1, 0)
 				$pc = 91
 			case 91:
-				if (!(instrIsJumpR($g[93].vIns) && ($g[23]==NO_STALL))) {
+				if (!(instrIsJumpR($g[95].vIns) && ($g[23]==NO_STALL))) {
 					$pc = 92
 					continue
 				}
-				$g[126].setTxt("%02X", $g[181])
-				$g[126].setOpacity(1, 8, 1, 0)
+				$g[129].setTxt("%02X", $g[184])
+				$g[129].setOpacity(1, 8, 1, 0)
 				$pc = 92
 			case 92:
-				if (!(instrIsBranchOrJump($g[93].vIns))) {
+				if (!(instrIsBranchOrJump($g[95].vIns))) {
 					$pc = 93
 					continue
 				}
@@ -2716,7 +2956,7 @@ function dlx(vplayer) {
 				$pc = 93
 			case 93:
 				detectStall()
-				if (!(instrIsBranchOrJump($g[93].vIns) && ($g[23]!=DATA_STALL))) {
+				if (!(instrIsBranchOrJump($g[95].vIns) && ($g[23]!=DATA_STALL))) {
 					$pc = 94
 					continue
 				}
@@ -2727,65 +2967,65 @@ function dlx(vplayer) {
 					$pc = 95
 					continue
 				}
-				$g[132].setNewValue($g[93].vIns, $g[93].vRdt, $g[93].vRs1, $g[93].vRs2, $g[93].vIns2, $g[93].vRs3)
+				$g[135].setNewValue($g[95].vIns, $g[95].vRdt, $g[95].vRs1, $g[95].vRs2, $g[95].vIns2, $g[95].vRs3)
 				$pc = 96
 				continue
 			case 95:
-				$g[132].setNewValue(STALL, 0, 0, 0, STALL, 0)
+				$g[135].setNewValue(STALL, 0, 0, 0, STALL, 0)
 				$pc = 96
 			case 96:
 				if (wait(7))
 				return
 				$pc = 97
 			case 97:
-				if (!(instrOpTypeRdt($g[93].vIns)==OP_TYPE_REG)) {
+				if (!(instrOpTypeRdt($g[95].vIns)==OP_TYPE_REG)) {
 					$pc = 107
 					continue
 				}
-				if (!(instrIsJumpAndLink($g[93].vIns))) {
+				if (!(instrIsJumpAndLink($g[95].vIns))) {
 					$pc = 100
 					continue
 				}
-				$g[133].setNewValue(0)
-				$g[134].setNewValue(($g[94].value+4)&127)
-				callf(37, $g[112], 18)
+				$g[136].setNewValue(0)
+				$g[137].setNewValue(($g[96].value+4)&127)
+				callf(37, $g[115], 18)
 				continue
 			case 98:
-				callf(37, $g[127], 6)
+				callf(37, $g[130], 6)
 				continue
 			case 99:
 				$pc = 106
 				continue
 			case 100:
-				$g[95][$g[93].vRs1].highlight($g[21])
-				$g[133].setNewValue($g[95][$g[93].vRs1].value)
-				if (!(instrOpTypeRs2($g[93].vIns)==OP_TYPE_REG)) {
+				$g[97][$g[95].vRs1].highlight($g[21])
+				$g[136].setNewValue($g[97][$g[95].vRs1].value)
+				if (!(instrOpTypeRs2($g[95].vIns)==OP_TYPE_REG)) {
 					$pc = 101
 					continue
 				}
-				$g[95][$g[93].vRs2].highlight($g[21])
-				$g[134].setNewValue($g[95][$g[93].vRs2].value)
+				$g[97][$g[95].vRs2].highlight($g[21])
+				$g[137].setNewValue($g[97][$g[95].vRs2].value)
 				$pc = 102
 				continue
 			case 101:
-				$g[95][$g[93].vRdt].highlight($g[21])
-				$g[134].setNewValue($g[95][$g[93].vRdt].value)
+				$g[97][$g[95].vRdt].highlight($g[21])
+				$g[137].setNewValue($g[97][$g[95].vRdt].value)
 				$pc = 102
 			case 102:
-				$g[131].setTxt("R%d:%02X", $g[93].vRs1, $g[95][$g[93].vRs1].value)
-				$g[131].setOpacity(1)
-				fork(37, $g[130], 24)
-				if (!((!instrIsArRI($g[93].vIns)) && ($g[93].vIns!=LDR))) {
+				$g[134].setTxt("R%d:%02X", $g[95].vRs1, $g[97][$g[95].vRs1].value)
+				$g[134].setOpacity(1)
+				fork(37, $g[133], 24)
+				if (!((!instrIsArRI($g[95].vIns)) && ($g[95].vIns!=LDR))) {
 					$pc = 105
 					continue
 				}
-				$stack[$fp+1] = ($g[93].vIns==STR) ? $g[93].vRdt : $g[93].vRs2
-				$g[129].setTxt("R%d:%02X", $stack[$fp+1], $g[95][$stack[$fp+1]].value)
-				$g[129].setOpacity(1)
-				callf(37, $g[128], 18)
+				$stack[$fp+1] = ($g[95].vIns==STR) ? $g[95].vRdt : $g[95].vRs2
+				$g[132].setTxt("R%d:%02X", $stack[$fp+1], $g[97][$stack[$fp+1]].value)
+				$g[132].setOpacity(1)
+				callf(37, $g[131], 18)
 				continue
 			case 103:
-				callf(37, $g[127], 6)
+				callf(37, $g[130], 6)
 				continue
 			case 104:
 				$pc = 105
@@ -2798,25 +3038,25 @@ function dlx(vplayer) {
 				continue
 			case 108:
 				enterf(6);	// exExec
-				fork(33, $g[132])
-				if (!(!instrIsNop($g[132].nIns))) {
+				fork(33, $g[135])
+				if (!(!instrIsNop($g[135].nIns))) {
 					$pc = 109
 					continue
 				}
-				fork(35, $g[133])
-				fork(35, $g[134])
+				fork(35, $g[136])
+				fork(35, $g[137])
 				$pc = 109
 			case 109:
 				if (wait(8))
 				return
 				$pc = 110
 			case 110:
-				$g[154].setNewValue($g[132].vIns, $g[132].vRdt, $g[132].vRs1, $g[132].vRs2, $g[132].vIns2, $g[132].vRs3)
-				if (!(instrOpTypeRdt($g[132].vIns)==OP_TYPE_REG)) {
+				$g[157].setNewValue($g[135].vIns, $g[135].vRdt, $g[135].vRs1, $g[135].vRs2, $g[135].vIns2, $g[135].vRs3)
+				if (!(instrOpTypeRdt($g[135].vIns)==OP_TYPE_REG)) {
 					$pc = 132
 					continue
 				}
-				if (!(instrIsJumpAndLink($g[132].vIns))) {
+				if (!(instrIsJumpAndLink($g[135].vIns))) {
 					$pc = 111
 					continue
 				}
@@ -2829,26 +3069,26 @@ function dlx(vplayer) {
 					$pc = 116
 					continue
 				}
-				if (!($g[155].tagMatches($g[132].vRs1))) {
+				if (!($g[158].tagMatches($g[135].vRs1))) {
 					$pc = 112
 					continue
 				}
-				$stack[$fp+1]=$g[140]
-				$stack[$fp+4]=$g[155].value
+				$stack[$fp+1]=$g[143]
+				$stack[$fp+4]=$g[158].value
 				$pc = 115
 				continue
 			case 112:
-				if (!($g[166].tagMatches($g[132].vRs1))) {
+				if (!($g[169].tagMatches($g[135].vRs1))) {
 					$pc = 113
 					continue
 				}
-				$stack[$fp+1]=$g[141]
-				$stack[$fp+4]=$g[166].value
+				$stack[$fp+1]=$g[144]
+				$stack[$fp+4]=$g[169].value
 				$pc = 114
 				continue
 			case 113:
-				$stack[$fp+1]=$g[142]
-				$stack[$fp+4]=$g[133].value
+				$stack[$fp+1]=$g[145]
+				$stack[$fp+4]=$g[136].value
 				$pc = 114
 			case 114:
 				$pc = 115
@@ -2856,27 +3096,27 @@ function dlx(vplayer) {
 				$pc = 117
 				continue
 			case 116:
-				$stack[$fp+1]=$g[142]
-				$stack[$fp+4]=$g[133].value
+				$stack[$fp+1]=$g[145]
+				$stack[$fp+4]=$g[136].value
 				$pc = 117
 			case 117:
 				$pc = 118
 			case 118:
-				if (!(instrIsJumpAndLink($g[132].vIns))) {
+				if (!(instrIsJumpAndLink($g[135].vIns))) {
 					$pc = 119
 					continue
 				}
-				$stack[$fp+2]=$g[143]
-				$stack[$fp+5]=$g[134].value
+				$stack[$fp+2]=$g[146]
+				$stack[$fp+5]=$g[137].value
 				$pc = 128
 				continue
 			case 119:
-				if (!(instrOpTypeRs2($g[132].vIns)==OP_TYPE_IMM)) {
+				if (!(instrOpTypeRs2($g[135].vIns)==OP_TYPE_IMM)) {
 					$pc = 120
 					continue
 				}
-				$stack[$fp+2]=$g[144]
-				$stack[$fp+5]=$g[132].vRs2
+				$stack[$fp+2]=$g[147]
+				$stack[$fp+5]=$g[135].vRs2
 				$pc = 127
 				continue
 			case 120:
@@ -2884,26 +3124,26 @@ function dlx(vplayer) {
 					$pc = 125
 					continue
 				}
-				if (!($g[155].tagMatches($g[132].vRs2))) {
+				if (!($g[158].tagMatches($g[135].vRs2))) {
 					$pc = 121
 					continue
 				}
-				$stack[$fp+2]=$g[147]
-				$stack[$fp+5]=$g[155].value
+				$stack[$fp+2]=$g[150]
+				$stack[$fp+5]=$g[158].value
 				$pc = 124
 				continue
 			case 121:
-				if (!($g[166].tagMatches($g[132].vRs2))) {
+				if (!($g[169].tagMatches($g[135].vRs2))) {
 					$pc = 122
 					continue
 				}
-				$stack[$fp+2]=$g[146]
-				$stack[$fp+5]=$g[166].value
+				$stack[$fp+2]=$g[149]
+				$stack[$fp+5]=$g[169].value
 				$pc = 123
 				continue
 			case 122:
-				$stack[$fp+2]=$g[143]
-				$stack[$fp+5]=$g[134].value
+				$stack[$fp+2]=$g[146]
+				$stack[$fp+5]=$g[137].value
 				$pc = 123
 			case 123:
 				$pc = 124
@@ -2911,8 +3151,8 @@ function dlx(vplayer) {
 				$pc = 126
 				continue
 			case 125:
-				$stack[$fp+2]=$g[143]
-				$stack[$fp+5]=$g[134].value
+				$stack[$fp+2]=$g[146]
+				$stack[$fp+5]=$g[137].value
 				$pc = 126
 			case 126:
 				$pc = 127
@@ -2920,41 +3160,41 @@ function dlx(vplayer) {
 				$pc = 128
 			case 128:
 				new Register(0, 0, 108, 44, LEFT, "PC")
-				$stack[$fp+6] = instrExecute($g[132].vIns, $stack[$fp+4], $stack[$fp+5])
-				if (!($g[132].vRdt==0)) {
+				$stack[$fp+6] = instrExecute($g[135].vIns, $stack[$fp+4], $stack[$fp+5], $g[98].n, $g[98].z, $g[98].c, $g[98].v)
+				if (!($g[135].vRdt==0)) {
 					$pc = 129
 					continue
 				}
 				$stack[$fp+6]=0
 				$pc = 129
 			case 129:
-				$g[155].setNewValue($stack[$fp+6])
-				if (!(instrIsLoadOrStore($g[132].vIns))) {
+				$g[158].setNewValue($stack[$fp+6])
+				if (!(instrIsLoadOrStore($g[135].vIns))) {
 					$pc = 130
 					continue
 				}
-				$g[155].setNewTag(-1)
+				$g[158].setNewTag(-1)
 				$pc = 131
 				continue
 			case 130:
-				$g[155].setNewTag($g[132].vRdt)
+				$g[158].setNewTag($g[135].vRdt)
 				$pc = 131
 			case 131:
-				$g[155].setInvalid(0)
+				$g[158].setInvalid(0)
 				$pc = 134
 				continue
 			case 132:
-				if (!($g[132].vIns==NOP)) {
+				if (!($g[135].vIns==NOP)) {
 					$pc = 133
 					continue
 				}
-				$g[155].setInvalid(1)
-				$g[155].updateLabel()
+				$g[158].setInvalid(1)
+				$g[158].updateLabel()
 				$pc = 133
 			case 133:
 				$pc = 134
 			case 134:
-				if (!($g[132].vIns==STR)) {
+				if (!($g[135].vIns==STR)) {
 					$pc = 141
 					continue
 				}
@@ -2962,26 +3202,26 @@ function dlx(vplayer) {
 					$pc = 139
 					continue
 				}
-				if (!($g[155].tagMatches($g[132].vRdt))) {
+				if (!($g[158].tagMatches($g[135].vRdt))) {
 					$pc = 135
 					continue
 				}
-				$stack[$fp+3]=$g[148]
-				$g[156].setNewValue($g[155].value)
+				$stack[$fp+3]=$g[151]
+				$g[159].setNewValue($g[158].value)
 				$pc = 138
 				continue
 			case 135:
-				if (!($g[166].tagMatches($g[132].vRdt))) {
+				if (!($g[169].tagMatches($g[135].vRdt))) {
 					$pc = 136
 					continue
 				}
-				$stack[$fp+3]=$g[149]
-				$g[156].setNewValue($g[166].value)
+				$stack[$fp+3]=$g[152]
+				$g[159].setNewValue($g[169].value)
 				$pc = 137
 				continue
 			case 136:
-				$stack[$fp+3]=$g[150]
-				$g[156].setNewValue($g[134].value)
+				$stack[$fp+3]=$g[153]
+				$g[159].setNewValue($g[137].value)
 				$pc = 137
 			case 137:
 				$pc = 138
@@ -2989,8 +3229,8 @@ function dlx(vplayer) {
 				$pc = 140
 				continue
 			case 139:
-				$stack[$fp+3]=$g[150]
-				$g[156].setNewValue($g[134].value)
+				$stack[$fp+3]=$g[153]
+				$g[159].setNewValue($g[137].value)
 				$pc = 140
 			case 140:
 				$pc = 141
@@ -2999,15 +3239,15 @@ function dlx(vplayer) {
 				return
 				$pc = 142
 			case 142:
-				fork(37, $g[139], 64)
-				if (!($g[132].vIns==STR)) {
+				fork(37, $g[142], 64)
+				if (!($g[135].vIns==STR)) {
 					$pc = 143
 					continue
 				}
 				fork(37, $stack[$fp+3], 24)
 				$pc = 143
 			case 143:
-				if (!(instrOpTypeRdt($g[132].vIns)==OP_TYPE_REG)) {
+				if (!(instrOpTypeRdt($g[135].vIns)==OP_TYPE_REG)) {
 					$pc = 146
 					continue
 				}
@@ -3018,12 +3258,12 @@ function dlx(vplayer) {
 				fork(37, $stack[$fp+1], 24)
 				$pc = 144
 			case 144:
-				if (!($stack[$fp+2]==$g[144])) {
+				if (!($stack[$fp+2]==$g[147])) {
 					$pc = 145
 					continue
 				}
-				$g[145].setTxt("%02X", $stack[$fp+5])
-				$g[145].setOpacity(1)
+				$g[148].setTxt("%02X", $stack[$fp+5])
+				$g[148].setOpacity(1)
 				$pc = 145
 			case 145:
 				fork(37, $stack[$fp+2], 24)
@@ -3033,122 +3273,122 @@ function dlx(vplayer) {
 				return
 				$pc = 147
 			case 147:
-				if (!($g[132].vIns==STR)) {
+				if (!($g[135].vIns==STR)) {
 					$pc = 148
 					continue
 				}
-				fork(37, $g[151], 40)
+				fork(37, $g[154], 40)
 				$pc = 148
 			case 148:
-				if (!(instrOpTypeRdt($g[132].vIns)==OP_TYPE_REG)) {
+				if (!(instrOpTypeRdt($g[135].vIns)==OP_TYPE_REG)) {
 					$pc = 151
 					continue
 				}
-				$g[138].setTxtOp($g[132].vIns)
+				$g[141].setTxtOp($g[135].vIns)
 				if (!($stack[$fp+1]!=0)) {
 					$pc = 149
 					continue
 				}
-				fork(37, $g[152], 40)
+				fork(37, $g[155], 40)
 				$pc = 149
 			case 149:
-				fork(37, $g[153], 40)
+				fork(37, $g[156], 40)
 				if (wait(20))
 				return
 				$pc = 150
 			case 150:
-				$g[138].txtResult.setTxt("%02X", $stack[$fp+6])
-				$g[138].txtResult.setOpacity(1, 20, 1, 0)
+				$g[141].txtResult.setTxt("%02X", $stack[$fp+6])
+				$g[141].txtResult.setOpacity(1, 20, 1, 0)
 				$pc = 151
 			case 151:
 				returnf(0)
 				continue
 			case 152:
 				enterf(0);	// maExec
-				fork(33, $g[154])
-				if (!(instrOpTypeRdt($g[154].nIns)==OP_TYPE_REG)) {
+				fork(33, $g[157])
+				if (!(instrOpTypeRdt($g[157].nIns)==OP_TYPE_REG)) {
 					$pc = 153
 					continue
 				}
-				fork(35, $g[155])
+				fork(35, $g[158])
 				$pc = 153
 			case 153:
-				if (!($g[154].nIns==STR)) {
+				if (!($g[157].nIns==STR)) {
 					$pc = 154
 					continue
 				}
-				fork(35, $g[156])
+				fork(35, $g[159])
 				$pc = 154
 			case 154:
 				if (wait(8))
 				return
 				$pc = 155
 			case 155:
-				$g[165].setNewValue($g[154].vIns, $g[154].vRdt, $g[154].vRs1, $g[154].vRs2, $g[154].vIns2, $g[154].vRs3)
-				if (!((instrOpTypeRdt($g[154].vIns)==OP_TYPE_REG) && ($g[154].vIns!=STR))) {
+				$g[168].setNewValue($g[157].vIns, $g[157].vRdt, $g[157].vRs1, $g[157].vRs2, $g[157].vIns2, $g[157].vRs3)
+				if (!((instrOpTypeRdt($g[157].vIns)==OP_TYPE_REG) && ($g[157].vIns!=STR))) {
 					$pc = 158
 					continue
 				}
-				if (!($g[154].vIns==LDR)) {
+				if (!($g[157].vIns==LDR)) {
 					$pc = 156
 					continue
 				}
-				$g[166].setNewValue($g[157][$g[155].value%4].value)
-				$g[166].setNewTag($g[154].vRdt)
+				$g[169].setNewValue($g[160][$g[158].value%4].value)
+				$g[169].setNewTag($g[157].vRdt)
 				$pc = 157
 				continue
 			case 156:
-				$g[166].setNewValue($g[155].value)
-				$g[166].setNewTag($g[155].tag)
+				$g[169].setNewValue($g[158].value)
+				$g[169].setNewTag($g[158].tag)
 				$pc = 157
 			case 157:
-				$g[166].setInvalid(0)
+				$g[169].setInvalid(0)
 				$pc = 158
 			case 158:
 				if (wait(8))
 				return
 				$pc = 159
 			case 159:
-				fork(37, $g[159], 64)
-				if (!($g[154].vIns==STR)) {
+				fork(37, $g[162], 64)
+				if (!($g[157].vIns==STR)) {
 					$pc = 162
 					continue
 				}
-				$g[157][$g[155].value%4].setNewValue($g[156].value)
-				fork(37, $g[163], 24)
-				callf(37, $g[162], 24)
+				$g[160][$g[158].value%4].setNewValue($g[159].value)
+				fork(37, $g[166], 24)
+				callf(37, $g[165], 24)
 				continue
 			case 160:
-				callf(35, $g[157][$g[155].value%4])
+				callf(35, $g[160][$g[158].value%4])
 				continue
 			case 161:
 				$pc = 170
 				continue
 			case 162:
-				if (!(instrOpTypeRdt($g[154].vIns)==OP_TYPE_REG)) {
+				if (!(instrOpTypeRdt($g[157].vIns)==OP_TYPE_REG)) {
 					$pc = 169
 					continue
 				}
-				if (!($g[154].vIns==LDR)) {
+				if (!($g[157].vIns==LDR)) {
 					$pc = 165
 					continue
 				}
-				callf(37, $g[162], 24)
+				callf(37, $g[165], 24)
 				continue
 			case 163:
-				$g[157][$g[155].value%4].highlight($g[21])
-				callf(37, $g[164], 24)
+				$g[160][$g[158].value%4].highlight($g[21])
+				callf(37, $g[167], 24)
 				continue
 			case 164:
 				$pc = 167
 				continue
 			case 165:
-				callf(37, $g[160], 48)
+				callf(37, $g[163], 48)
 				continue
 			case 166:
 				$pc = 167
 			case 167:
-				callf(37, $g[161], 16)
+				callf(37, $g[164], 16)
 				continue
 			case 168:
 				$pc = 169
@@ -3159,31 +3399,31 @@ function dlx(vplayer) {
 				continue
 			case 171:
 				enterf(0);	// wbExec
-				fork(33, $g[165])
-				if (!((instrOpTypeRdt($g[165].nIns)==OP_TYPE_REG) && ($g[165].nIns!=STR))) {
+				fork(33, $g[168])
+				if (!((instrOpTypeRdt($g[168].nIns)==OP_TYPE_REG) && ($g[168].nIns!=STR))) {
 					$pc = 172
 					continue
 				}
-				fork(35, $g[166])
+				fork(35, $g[169])
 				$pc = 172
 			case 172:
 				if (wait(8))
 				return
 				$pc = 173
 			case 173:
-				if (!((instrOpTypeRdt($g[165].vIns)==OP_TYPE_REG) && ($g[165].vIns!=STR))) {
+				if (!((instrOpTypeRdt($g[168].vIns)==OP_TYPE_REG) && ($g[168].vIns!=STR))) {
 					$pc = 178
 					continue
 				}
-				$g[95][$g[166].tag].setNewValue($g[166].value)
+				$g[97][$g[169].tag].setNewValue($g[169].value)
 				if (wait(8))
 				return
 				$pc = 174
 			case 174:
-				callf(37, $g[167], 24)
+				callf(37, $g[170], 24)
 				continue
 			case 175:
-				callf(35, $g[95][$g[166].tag])
+				callf(35, $g[97][$g[169].tag])
 				continue
 			case 176:
 				if (wait(19))
@@ -3199,88 +3439,88 @@ function dlx(vplayer) {
 			case 179:
 				$pc = 180
 			case 180:
-				if (!($g[165].vIns!=STALL && $g[165].vIns!=EMPTY)) {
+				if (!($g[168].vIns!=STALL && $g[168].vIns!=EMPTY)) {
 					$pc = 181
 					continue
 				}
 				$g[33]++
-				$g[68].setTxt("%4d", $g[33])
+				$g[70].setTxt("%4d", $g[33])
 				$pc = 181
 			case 181:
 				$g[34]++
-				$g[69].setTxt("%4d", $g[34])
+				$g[71].setTxt("%4d", $g[34])
 				returnf(0)
 				continue
 			case 182:
 				enterf(0);	// nonPipelinedBranch
-				fork(37, $g[115], 24)
-				fork(37, $g[116], 24)
-				callf(37, $g[90], 12)
+				fork(37, $g[118], 24)
+				fork(37, $g[119], 24)
+				callf(37, $g[92], 12)
 				continue
 			case 183:
-				fork(37, $g[113], 12)
-				fork(37, $g[114], 12)
+				fork(37, $g[116], 12)
+				fork(37, $g[117], 12)
 				if (wait(12))
 				return
 				$pc = 184
 			case 184:
-				if (!(instrIsJumpR($g[93].vIns))) {
+				if (!(instrIsJumpR($g[95].vIns))) {
 					$pc = 186
 					continue
 				}
-				$g[73].setNewValue(($g[95][$g[93].vRs2].value)&127)
-				callf(37, $g[85], 34)
+				$g[75].setNewValue(($g[97][$g[95].vRs2].value)&127)
+				callf(37, $g[87], 34)
 				continue
 			case 185:
 				$pc = 200
 				continue
 			case 186:
-				if (!(instrIsBranch($g[93].vIns))) {
+				if (!(instrIsBranch($g[95].vIns))) {
 					$pc = 192
 					continue
 				}
-				if (!(($g[95][$g[93].vRs1].value==0)==($g[93].vIns==B))) {
+				if (!(($g[97][$g[95].vRs1].value==0)==($g[95].vIns==B))) {
 					$pc = 188
 					continue
 				}
-				callf(37, $g[120], 20)
+				callf(37, $g[123], 20)
 				continue
 			case 187:
-				$g[73].setNewValue(($g[73].value+$g[93].vRs2)&127)
+				$g[75].setNewValue(($g[75].value+$g[95].vRs2)&127)
 				$pc = 190
 				continue
 			case 188:
-				callf(37, $g[118], 20)
+				callf(37, $g[121], 20)
 				continue
 			case 189:
-				$g[73].setNewValue(($g[73].value+4)&127)
+				$g[75].setNewValue(($g[75].value+4)&127)
 				$pc = 190
 			case 190:
-				callf(37, $g[83], 14)
+				callf(37, $g[85], 14)
 				continue
 			case 191:
 				$pc = 199
 				continue
 			case 192:
-				if (!(isJorJAL($g[93].vIns))) {
+				if (!(isJorJAL($g[95].vIns))) {
 					$pc = 195
 					continue
 				}
-				$g[73].setNewValue(($g[73].value+$g[93].vRs2)&127)
-				callf(37, $g[120], 20)
+				$g[75].setNewValue(($g[75].value+$g[95].vRs2)&127)
+				callf(37, $g[123], 20)
 				continue
 			case 193:
-				callf(37, $g[83], 14)
+				callf(37, $g[85], 14)
 				continue
 			case 194:
 				$pc = 198
 				continue
 			case 195:
-				$g[73].setNewValue(($g[73].value+4)&127)
-				callf(37, $g[118], 20)
+				$g[75].setNewValue(($g[75].value+4)&127)
+				callf(37, $g[121], 20)
 				continue
 			case 196:
-				callf(37, $g[83], 14)
+				callf(37, $g[85], 14)
 				continue
 			case 197:
 				$pc = 198
@@ -3289,34 +3529,34 @@ function dlx(vplayer) {
 			case 199:
 				$pc = 200
 			case 200:
-				callf(37, $g[87], 6)
+				callf(37, $g[89], 6)
 				continue
 			case 201:
 				returnf(0)
 				continue
 			case 202:
 				enterf(5);	// execNonPipelined
-				callf(35, $g[73])
+				callf(35, $g[75])
 				continue
 			case 203:
-				$g[71].setActive($g[73].newValue)
-				callf(37, $g[82], 24)
+				$g[73].setActive($g[75].newValue)
+				callf(37, $g[84], 24)
 				continue
 			case 204:
-				callf(37, $g[80], 40)
+				callf(37, $g[82], 40)
 				continue
 			case 205:
-				$g[93].setNewInstruction($g[71].instruction[$g[73].value/4])
-				$g[81].setTxt($g[93].getNewInstrTxt())
-				$g[81].translate(60/2+70, 0, 20, 1, 0)
-				callf(33, $g[93])
+				$g[95].setNewInstruction($g[73].instruction[$g[75].value/4])
+				$g[83].setTxt($g[95].getNewInstrTxt())
+				$g[83].translate(60/2+70, 0, 20, 1, 0)
+				callf(33, $g[95])
 				continue
 			case 206:
-				if (!((instrOpTypeRs2($g[93].vIns)==OP_TYPE_IMM) && (instrOpTypeRdt($g[93].vIns)==OP_TYPE_REG))) {
+				if (!((instrOpTypeRs2($g[95].vIns)==OP_TYPE_IMM) && (instrOpTypeRdt($g[95].vIns)==OP_TYPE_REG))) {
 					$pc = 207
 					continue
 				}
-				fork(37, $g[92], 64)
+				fork(37, $g[94], 64)
 				$pc = 207
 			case 207:
 				fork(182, $obj)
@@ -3324,58 +3564,58 @@ function dlx(vplayer) {
 				return
 				$pc = 208
 			case 208:
-				if (!(instrIsJumpAndLink($g[93].vIns))) {
+				if (!(instrIsJumpAndLink($g[95].vIns))) {
 					$pc = 211
 					continue
 				}
-				callf(37, $g[112], 20)
+				callf(37, $g[115], 20)
 				continue
 			case 209:
-				callf(37, $g[127], 20)
+				callf(37, $g[130], 20)
 				continue
 			case 210:
 				$stack[$fp+1]=0
-				$stack[$fp+2]=($g[73].value+4)&127
+				$stack[$fp+2]=($g[75].value+4)&127
 				$pc = 223
 				continue
 			case 211:
-				if (!(instrOpTypeRdt($g[93].vIns)==OP_TYPE_REG)) {
+				if (!(instrOpTypeRdt($g[95].vIns)==OP_TYPE_REG)) {
 					$pc = 220
 					continue
 				}
-				$stack[$fp+1]=$g[95][$g[93].vRs1].value
-				$g[95][$g[93].vRs1].highlight($g[21])
-				$g[131].setTxt("R%d:%02X", $g[93].vRs1, $g[95][$g[93].vRs1].value)
-				$g[131].setOpacity(1)
-				fork(37, $g[130], 40)
-				if (!((instrOpTypeRs2($g[93].vIns)==OP_TYPE_REG) || ($g[93].vIns==STR))) {
+				$stack[$fp+1]=$g[97][$g[95].vRs1].value
+				$g[97][$g[95].vRs1].highlight($g[21])
+				$g[134].setTxt("R%d:%02X", $g[95].vRs1, $g[97][$g[95].vRs1].value)
+				$g[134].setOpacity(1)
+				fork(37, $g[133], 40)
+				if (!((instrOpTypeRs2($g[95].vIns)==OP_TYPE_REG) || ($g[95].vIns==STR))) {
 					$pc = 217
 					continue
 				}
-				if (!(instrOpTypeRs2($g[93].vIns)==OP_TYPE_IMM)) {
+				if (!(instrOpTypeRs2($g[95].vIns)==OP_TYPE_IMM)) {
 					$pc = 212
 					continue
 				}
-				$stack[$fp+2]=$g[95][$g[93].vRdt].value
-				$g[95][$g[93].vRdt].highlight($g[21])
+				$stack[$fp+2]=$g[97][$g[95].vRdt].value
+				$g[97][$g[95].vRdt].highlight($g[21])
 				$pc = 213
 				continue
 			case 212:
-				$stack[$fp+2]=$g[95][$g[93].vRs2].value
-				$g[95][$g[93].vRs2].highlight($g[21])
+				$stack[$fp+2]=$g[97][$g[95].vRs2].value
+				$g[97][$g[95].vRs2].highlight($g[21])
 				$pc = 213
 			case 213:
-				if (!((!instrIsArRI($g[93].vIns)) && ($g[93].vIns!=LDR))) {
+				if (!((!instrIsArRI($g[95].vIns)) && ($g[95].vIns!=LDR))) {
 					$pc = 216
 					continue
 				}
-				$stack[$fp+5] = ($g[93].vIns==STR) ? $g[93].vRdt : $g[93].vRs2
-				$g[129].setTxt("R%d:%02X", $stack[$fp+5], $g[95][$stack[$fp+5]].value)
-				$g[129].setOpacity(1)
-				callf(37, $g[128], 20)
+				$stack[$fp+5] = ($g[95].vIns==STR) ? $g[95].vRdt : $g[95].vRs2
+				$g[132].setTxt("R%d:%02X", $stack[$fp+5], $g[97][$stack[$fp+5]].value)
+				$g[132].setOpacity(1)
+				callf(37, $g[131], 20)
 				continue
 			case 214:
-				callf(37, $g[127], 20)
+				callf(37, $g[130], 20)
 				continue
 			case 215:
 				$pc = 216
@@ -3400,74 +3640,74 @@ function dlx(vplayer) {
 			case 222:
 				$pc = 223
 			case 223:
-				if (!(instrOpTypeRdt($g[93].vIns)==OP_TYPE_REG)) {
+				if (!(instrOpTypeRdt($g[95].vIns)==OP_TYPE_REG)) {
 					$pc = 224
 					continue
 				}
-				$g[138].setTxtOp($g[93].vIns)
+				$g[141].setTxtOp($g[95].vIns)
 				$pc = 224
 			case 224:
-				if (!($g[93].vIns==STR)) {
+				if (!($g[95].vIns==STR)) {
 					$pc = 227
 					continue
 				}
-				fork(37, $g[150], 40)
-				fork(37, $g[142], 40)
-				$g[145].setTxt("%02X", $g[93].vRs2)
-				$g[145].setOpacity(1)
-				callf(37, $g[144], 40)
+				fork(37, $g[153], 40)
+				fork(37, $g[145], 40)
+				$g[148].setTxt("%02X", $g[95].vRs2)
+				$g[148].setOpacity(1)
+				callf(37, $g[147], 40)
 				continue
 			case 225:
-				fork(37, $g[151], 40)
-				fork(37, $g[153], 40)
-				callf(37, $g[152], 40)
+				fork(37, $g[154], 40)
+				fork(37, $g[156], 40)
+				callf(37, $g[155], 40)
 				continue
 			case 226:
 				$stack[$fp+4]=$stack[$fp+2]
-				$stack[$fp+3]=instrExecute($g[93].vIns, $stack[$fp+1], $g[93].vRs2)
+				$stack[$fp+3]=instrExecute($g[95].vIns, $stack[$fp+1], $g[95].vRs2, $g[98].n, $g[98].z, $g[98].c, $g[98].v)
 				$pc = 240
 				continue
 			case 227:
-				if (!(instrIsJumpAndLink($g[93].vIns))) {
+				if (!(instrIsJumpAndLink($g[95].vIns))) {
 					$pc = 230
 					continue
 				}
-				callf(37, $g[143], 40)
+				callf(37, $g[146], 40)
 				continue
 			case 228:
-				callf(37, $g[153], 40)
+				callf(37, $g[156], 40)
 				continue
 			case 229:
-				$stack[$fp+3]=instrExecute($g[93].vIns, $stack[$fp+1], $stack[$fp+2])
+				$stack[$fp+3]=instrExecute($g[95].vIns, $stack[$fp+1], $stack[$fp+2], $g[98].n, $g[98].z, $g[98].c, $g[98].v)
 				$pc = 239
 				continue
 			case 230:
-				if (!(instrOpTypeRdt($g[93].vIns)==OP_TYPE_REG)) {
+				if (!(instrOpTypeRdt($g[95].vIns)==OP_TYPE_REG)) {
 					$pc = 236
 					continue
 				}
-				fork(37, $g[142], 40)
-				if (!(instrOpTypeRs2($g[93].vIns)==OP_TYPE_IMM)) {
+				fork(37, $g[145], 40)
+				if (!(instrOpTypeRs2($g[95].vIns)==OP_TYPE_IMM)) {
 					$pc = 232
 					continue
 				}
-				$g[145].setTxt("%02X", $g[93].vRs2)
-				$g[145].setOpacity(1)
-				callf(37, $g[144], 40)
+				$g[148].setTxt("%02X", $g[95].vRs2)
+				$g[148].setOpacity(1)
+				callf(37, $g[147], 40)
 				continue
 			case 231:
-				$stack[$fp+3]=instrExecute($g[93].vIns, $stack[$fp+1], $g[93].vRs2)
+				$stack[$fp+3]=instrExecute($g[95].vIns, $stack[$fp+1], $g[95].vRs2, $g[98].n, $g[98].z, $g[98].c, $g[98].v)
 				$pc = 234
 				continue
 			case 232:
-				callf(37, $g[143], 40)
+				callf(37, $g[146], 40)
 				continue
 			case 233:
-				$stack[$fp+3]=instrExecute($g[93].vIns, $stack[$fp+1], $stack[$fp+2])
+				$stack[$fp+3]=instrExecute($g[95].vIns, $stack[$fp+1], $stack[$fp+2], $g[98].n, $g[98].z, $g[98].c, $g[98].v)
 				$pc = 234
 			case 234:
-				fork(37, $g[153], 40)
-				callf(37, $g[152], 40)
+				fork(37, $g[156], 40)
+				callf(37, $g[155], 40)
 				continue
 			case 235:
 				$pc = 238
@@ -3483,47 +3723,47 @@ function dlx(vplayer) {
 			case 239:
 				$pc = 240
 			case 240:
-				if (!($g[93].vIns==LDR)) {
+				if (!($g[95].vIns==LDR)) {
 					$pc = 244
 					continue
 				}
-				callf(37, $g[162], 20)
+				callf(37, $g[165], 20)
 				continue
 			case 241:
-				$g[157][($stack[$fp+3])%4].highlight($g[21])
-				callf(37, $g[164], 20)
+				$g[160][($stack[$fp+3])%4].highlight($g[21])
+				callf(37, $g[167], 20)
 				continue
 			case 242:
-				callf(37, $g[161], 40)
+				callf(37, $g[164], 40)
 				continue
 			case 243:
-				$stack[$fp+3]=$g[157][($stack[$fp+3])%4].value
+				$stack[$fp+3]=$g[160][($stack[$fp+3])%4].value
 				$pc = 254
 				continue
 			case 244:
-				if (!($g[93].vIns==STR)) {
+				if (!($g[95].vIns==STR)) {
 					$pc = 247
 					continue
 				}
-				fork(37, $g[163], 20)
-				callf(37, $g[162], 20)
+				fork(37, $g[166], 20)
+				callf(37, $g[165], 20)
 				continue
 			case 245:
-				$g[157][($stack[$fp+3])%4].setNewValue($stack[$fp+4])
-				callf(35, $g[157][($stack[$fp+3])%4])
+				$g[160][($stack[$fp+3])%4].setNewValue($stack[$fp+4])
+				callf(35, $g[160][($stack[$fp+3])%4])
 				continue
 			case 246:
 				$pc = 253
 				continue
 			case 247:
-				if (!(instrOpTypeRdt($g[93].vIns)==OP_TYPE_REG)) {
+				if (!(instrOpTypeRdt($g[95].vIns)==OP_TYPE_REG)) {
 					$pc = 250
 					continue
 				}
-				callf(37, $g[160], 40)
+				callf(37, $g[163], 40)
 				continue
 			case 248:
-				callf(37, $g[161], 40)
+				callf(37, $g[164], 40)
 				continue
 			case 249:
 				$pc = 252
@@ -3539,19 +3779,19 @@ function dlx(vplayer) {
 			case 253:
 				$pc = 254
 			case 254:
-				$g[95][0].unHighlight()
-				$g[95][1].unHighlight()
-				$g[95][2].unHighlight()
-				$g[95][3].unHighlight()
-				if (!((instrOpTypeRdt($g[93].vIns)==OP_TYPE_REG) && ($g[93].vIns!=STR))) {
+				$g[97][0].unHighlight()
+				$g[97][1].unHighlight()
+				$g[97][2].unHighlight()
+				$g[97][3].unHighlight()
+				if (!((instrOpTypeRdt($g[95].vIns)==OP_TYPE_REG) && ($g[95].vIns!=STR))) {
 					$pc = 258
 					continue
 				}
-				callf(37, $g[167], 40)
+				callf(37, $g[170], 40)
 				continue
 			case 255:
-				$g[95][$g[93].vRdt].setNewValue($stack[$fp+3])
-				callf(35, $g[95][$g[93].vRdt])
+				$g[97][$g[95].vRdt].setNewValue($stack[$fp+3])
+				callf(35, $g[97][$g[95].vRdt])
 				continue
 			case 256:
 				if (wait(19))
@@ -3569,24 +3809,24 @@ function dlx(vplayer) {
 			case 260:
 				$g[34]+=5
 				$g[33]++
-				$g[68].setTxt("%4d", $g[33])
-				$g[69].setTxt("%4d", $g[34])
+				$g[70].setTxt("%4d", $g[33])
+				$g[71].setTxt("%4d", $g[34])
 				returnf(0)
 				continue
 			case 261:
 				enterf(0);	// exec
-				$g[95][0].unHighlight()
-				$g[95][1].unHighlight()
-				$g[95][2].unHighlight()
-				$g[95][3].unHighlight()
-				$g[157][0].unHighlight()
-				$g[157][1].unHighlight()
-				$g[157][2].unHighlight()
-				$g[157][3].unHighlight()
-				$g[75][0].unHighlight()
-				$g[75][1].unHighlight()
-				$g[76][0].unHighlight()
-				$g[76][1].unHighlight()
+				$g[97][0].unHighlight()
+				$g[97][1].unHighlight()
+				$g[97][2].unHighlight()
+				$g[97][3].unHighlight()
+				$g[160][0].unHighlight()
+				$g[160][1].unHighlight()
+				$g[160][2].unHighlight()
+				$g[160][3].unHighlight()
+				$g[77][0].unHighlight()
+				$g[77][1].unHighlight()
+				$g[78][0].unHighlight()
+				$g[78][1].unHighlight()
 				if (!($g[26]==PIPELINING_ENABLED)) {
 					$pc = 262
 					continue
@@ -3628,16 +3868,16 @@ function dlx(vplayer) {
 					$pc = 273
 					continue
 				}
-				fork(43, $g[72], ($g[26]==PIPELINING_ENABLED) ? 80 : 400)
+				fork(43, $g[74], ($g[26]==PIPELINING_ENABLED) ? 80 : 400)
 				callf(261, $obj)
 				continue
 			case 269:
-				if (!((($g[165].vIns==HALT) && ($g[26]==PIPELINING_ENABLED)) || (($g[93].vIns==HALT) && ($g[26]==PIPELINING_DISABLED)))) {
+				if (!((($g[168].vIns==HALT) && ($g[26]==PIPELINING_ENABLED)) || (($g[95].vIns==HALT) && ($g[26]==PIPELINING_DISABLED)))) {
 					$pc = 271
 					continue
 				}
 				stop()
-				if (!($g[171])) {
+				if (!($g[174])) {
 					$pc = 270
 					continue
 				}

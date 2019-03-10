@@ -554,7 +554,7 @@ function exExec() {														// {joj 14/11/17}
         }
 		
 		Register(0, 0, 108, 44, LEFT, "PC");     // {joj 1/2/06}
-        num result = instrExecute(regEX.vIns, op1, op2);
+        num result = instrExecute(regEX.vIns, op1, op2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
 
         // R0 is always 0
         if (regEX.vRdt == 0)
@@ -891,13 +891,13 @@ function execNonPipelined() {													// {joj 14/11/17}
         apMUX6_OUT0.animate(40);
 
         smdr = regB;
-        result = instrExecute(regID.vIns, regA, regID.vRs2);
+        result = instrExecute(regID.vIns, regA, regID.vRs2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
 
     } else if (instrIsJumpAndLink(regID.vIns)) {
 
         apB_MUX7.animate(40);
         apMUX7_OUT0.animate(40);
-        result = instrExecute(regID.vIns, regA, regB);
+        result = instrExecute(regID.vIns, regA, regB, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
 
     } else if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) {
 
@@ -907,10 +907,10 @@ function execNonPipelined() {													// {joj 14/11/17}
             txtEX_MUX7.setTxt("%02X", regID.vRs2);                          // {joj 29/10/06}
             txtEX_MUX7.setOpacity(1);                                     // {joj 29/10/06}
             apEX_MUX7.animate(40);
-            result = instrExecute(regID.vIns, regA, regID.vRs2);
+            result = instrExecute(regID.vIns, regA, regID.vRs2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
         } else {
             apB_MUX7.animate(40);
-            result = instrExecute(regID.vIns, regA, regB);
+            result = instrExecute(regID.vIns, regA, regB, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
         }
 
         fork(apMUX7_OUT0.animate(40));

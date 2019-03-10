@@ -336,7 +336,51 @@ num function se8(num t) {
         return t;
 }
 
-num function instrExecute(num instr, num op1, num op2) {
+
+// Check Condition Codes
+num function isN(num val){
+	if(val & 0x80)
+		return 1;
+	else
+		return 0;
+}
+
+num function isZ(num val){
+	if(val == 0)
+		return 1;
+	else
+		return 0;
+}
+
+num function isAddC(num op1, num op2){
+	if((op1 + op2) & 0x100)
+		return 1;
+	else
+		return 0;
+}
+
+num function isSubC(num op1, num op2){
+	if((op1 + op2) & 0x100)
+		return 0;
+	else
+		return 1;
+}
+
+num function isAddV(num op1, num op2, num res){
+	if(((op1 & 0x80) == (op2 & 0x80)) && ((res & 0x80) != (op1 & 0x80)))
+		return 1;
+	else
+		return 0;
+}
+
+num function isSubV(num op1, num op2, num res){
+	if(((op1 & 0x80) != (op2 & 0x80)) && ((res & 0x80) != (op1 & 0x80)))
+		return 1;
+	else
+		return 0;
+}
+
+num function instrExecute(num instr, num op1, num op2, num n, num z, num c, num v) {
 //    if (instr == ADD || instr == ADDi)
 //        return (se8(op1) + se8(op2)) & 0xFF;
 //    else if (instr == SUB || instr == SUBi)
@@ -366,6 +410,12 @@ num function instrExecute(num instr, num op1, num op2) {
 //    else
 //        return 0xEE;
 
+
+
+
+
+	num res = 0;				// Init result to zero		
+
     if (instr == ADD)
         return (se8(op1) + se8(op2)) & 0xFF;
     else if (instr == SUB)
@@ -382,21 +432,33 @@ num function instrExecute(num instr, num op1, num op2) {
         return (op1 >> op2) & 0xFF;
     else if (instr == LDR || instr == STR)                 // joj
         return (se8(op1) + se8(op2)) & 0xFF;
-
-
-//instrNames[ADC]	= "ADC";	// Add with Carry
+	else if (instr == ADC)
+        return (se8(op1) + se8(op2) + c) & 0xFF;
 	else if (instr == BIC)
 		return (op1 & (~op2));
-//instrNames[CMN]	= "CMN";	// Compare Negative
-//instrNames[CMP]	= "CMP";	// Compare
+	else if (instr == CMN) {
+		res = se8(op1) + se8(op2);
+		cpsr.setNValue(isN(res));
+		cpsr.setZValue(isZ(res));
+		cpsr.setCValue(isAddC(se8(op1),se8(op2)));
+		cpsr.setVValue(isAddV(se8(op1),se8(op2),res));
+	}
+	else if (instr == CMP) {
+		res = se8(op1) - se8(op2);
+		cpsr.setNValue(isN(res));
+		cpsr.setZValue(isZ(res));
+		cpsr.setCValue(isSubC(se8(op1),se8(op2)));
+		cpsr.setVValue(isSubV(se8(op1),se8(op2),res));
+	}
 //instrNames[MOV]	= "MOV";	// Move register or constant
 //instrNames[MUL]	= "MUL";	// Multiply
 //instrNames[MVN]	= "MVN";	// Move negative register
 	else if (instr == RSB)
 		return (se8(op2) - se8(op1)) & 0xFF;
-//instrNames[RSC]	= "RSC";	// Reverse Subtract with Carry
-//instrNames[SBC]	= "SBC";	// Subtract with Carry
-//instrNames[ASR]	= "ASR";	// Arithmetic Shift RIght
+	else if (instr == RSC)
+		return (se8(op2) - se8(op1)-1+c) & 0xFF;
+	else if (instr == SBC)
+		return (se8(op1) - se8(op2)-1+c) & 0xFF;
 	else if (instr == ASR) {
 		num neg = op1 >> 7;
 		if(op2 > 8) op2 = 8;	//If shifting by more than register size
@@ -405,7 +467,6 @@ num function instrExecute(num instr, num op1, num op2) {
 		}
 		return (op1 >> op2) & 0xFF;
 	}
-//instrNames[ROR]	= "ROR";	// Rotate Right
 	else if (instr == ROR) {
 		op2 = op2 % 8;		//modulo by max shift to remove need for loop
 		num newLeftPart = (op1 << (8 - op2)) & 0xFF;
@@ -413,8 +474,20 @@ num function instrExecute(num instr, num op1, num op2) {
 		return newLeftPart + newRightPart;
 	}
 //instrNames[SWP]	= "SWP";	// Swap register with memory
-//instrNames[TEQ]	= "TEQ";	// Test bitwise equality
-//instrNames[TST]	= "TST";	// Test bits
+	else if (instr == TEQ) {
+		res = se8(op1) ^ se8(op2);
+		cpsr.setNValue(isN(res));
+		cpsr.setZValue(isZ(res));
+		cpsr.setCValue(isAddC(se8(op1),se8(op2)));
+		cpsr.setVValue(isAddV(se8(op1),se8(op2),res));
+	}
+	else if (instr == TST) {
+		res = se8(op1) & se8(op2);
+		cpsr.setNValue(isN(res));
+		cpsr.setZValue(isZ(res));
+		cpsr.setCValue(isAddC(se8(op1),se8(op2)));
+		cpsr.setVValue(isAddV(se8(op1),se8(op2),res));
+	}
 //instrNames[LDM]	= "LDM";   // Load multiple registers
 //instrNames[STM]	= "STM";   // Store Multiple
 //instrNames[BX]	= "BX";   // Branch and Exchange

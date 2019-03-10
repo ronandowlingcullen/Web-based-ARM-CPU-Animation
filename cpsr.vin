@@ -1,0 +1,201 @@
+//
+// sample .vin file
+//
+
+Brush cpsrBrush = SolidBrush(PURPLE);
+Brush cpsrValueBrush = SolidBrush(WHITE);
+
+class CPSR(num x, num y, num w, num h) {
+
+    num n = 0;
+	num z = 0;
+	num c = 0;
+	num v = 0;
+	
+	//Co-ordinates of n,z,c and v parts
+	num nx = x;
+	num zx = x + w/4;
+	num cx = x + 2*(w/4);
+	num vx = x + 3*(w/4);
+
+	num ny = y + h/3;
+	num zy = y + h/3;
+	num cy = y + h/3;
+	num vy = y + h/3;
+
+    // Outer Rectangle
+	Rectangle outer = Rectangle2(0, 0, blackPen, cpsrBrush, x, y, w+4, h);		//Draw outer rectangle
+	
+	// Labels
+	Rectangle nLabel = Rectangle(0, 0, 0, 0, nx, y, 0, 0, w/4, h/3, 0, componentFont, "N");
+	Rectangle zLabel = Rectangle(0, 0, 0, 0, zx, y, 0, 0, w/4, h/3, 0, componentFont, "Z");
+	Rectangle cLabel = Rectangle(0, 0, 0, 0, cx, y, 0, 0, w/4, h/3, 0, componentFont, "C");
+	Rectangle vLabel = Rectangle(0, 0, 0, 0, vx, y, 0, 0, w/4, h/3, 0, componentFont, "V");
+	
+	// Values
+    Rectangle nValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, nx+4, ny, (w/4)-4, 2*h/3-4, 0, font, "%01X", n);
+    Rectangle zValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, zx+4, zy, (w/4)-4, 2*h/3-4, 0, font, "%01X", z);
+    Rectangle cValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, cx+4, cy, (w/4)-4, 2*h/3-4, 0, font, "%01X", c);
+    Rectangle vValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, vx+4, vy, (w/4)-4, 2*h/3-4, 0, font, "%01X", v);
+
+    //
+    // setOpacity
+    // May need this
+
+	//
+    // update Values
+    //
+    num function updateNValue() {								// {joj 24/9/17}
+        nValue.setTxt("%01X", n);
+		return 0;
+    }
+
+    num function updateZValue() {								// {joj 24/9/17}
+        zValue.setTxt("%01X", z);
+		return 0;
+    }
+
+    num function updateCValue() {								// {joj 24/9/17}
+        cValue.setTxt("%01X", c);
+		return 0;
+    }
+
+    num function updateVValue() {								// {joj 24/9/17}
+        vValue.setTxt("%01X", v);
+		return 0;
+    }
+
+	num function updateValues() {
+		updateNValue();
+		updateZValue();
+		updateCValue();
+		updateVValue();
+	}
+		
+		
+		
+
+	//
+    // mouse enter exit event handlers for each n,z,c and v
+    //
+    when nValue ~> eventEE(num enter, num x, num y) {			// {joj 24/10/17}
+        nValue.setBrush(enter ? whiteBrush : yellowBrush);	// {joj 7/10/16}
+		return 0;
+    }
+
+    when zValue ~> eventEE(num enter, num x, num y) {			// {joj 24/10/17}
+        zValue.setBrush(enter ? whiteBrush : yellowBrush);	// {joj 7/10/16}
+		return 0;
+    }
+
+    when cValue ~> eventEE(num enter, num x, num y) {			// {joj 24/10/17}
+        cValue.setBrush(enter ? whiteBrush : yellowBrush);	// {joj 7/10/16}
+		return 0;
+    }
+
+    when vValue ~> eventEE(num enter, num x, num y) {			// {joj 24/10/17}
+        vValue.setBrush(enter ? whiteBrush : yellowBrush);	// {joj 7/10/16}
+		return 0;
+    }
+
+    //
+    // mouse left button event handler
+    //
+    when nValue ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/10/17}
+        if (down) {
+			if (flags) {
+            	n = (n + 1) % 2;
+			}
+            updateNValue();
+        }
+		return 0;
+    }
+
+    when zValue ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/10/17}
+        if (down) {
+			if (flags) {
+            	z = (z + 1) % 2;
+			}
+            updateZValue();
+        }
+		return 0;
+    }
+
+    when cValue ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/10/17}
+        if (down) {
+			if (flags) {
+            	c = (c + 1) % 2;
+			}
+            updateCValue();
+        }
+		return 0;
+    }
+
+    when vValue ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/10/17}
+        if (down) {
+			if (flags) {
+            	v = (v + 1) % 2;
+			}
+            updateVValue();
+        }
+		return 0;
+    }
+
+    //
+    // set values
+    //
+    function setNValue(num val) {
+        n = val;
+        updateNValue();
+    }
+
+    function setZValue(num val) {
+        z = val;
+        updateZValue();
+    }
+
+    function setCValue(num val) {
+        c = val;
+        updateCValue();
+    }
+
+    function setVValue(num val) {
+        v = val;
+        updateVValue();
+    }
+
+    num hmode = 0;
+
+    //
+    // highlight
+    //
+    function highlight(Brush brush) {
+        //Might need
+    }
+
+    //
+    // unHighlight
+    //
+    function unHighlight() {
+		//Might need
+    }
+
+    //
+    // reset
+    //
+    function reset() {
+    	n = 0;
+		z = 0;
+		c = 0;
+		v = 0;
+        unHighlight();
+        updateValues();
+    }
+
+	
+
+}
+
+
+
+

@@ -61,6 +61,7 @@
 #include "animatedpipe.vin"
 #include "animatedclock.vin"
 #include "button.vin"
+#include "cpsr.vin"
 #include "schematic.vin"
 #include "execution.vin"
 #include "buttonhandlers.vin"
