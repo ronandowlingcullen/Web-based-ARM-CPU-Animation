@@ -24,102 +24,103 @@
 //
 
 // Number of instructions (excluding "stall" instruction)
-const num MAX_INSTR = 31;
+const num MAX_INSTR = 54;
 
 // No-op
 const num NOP = 0;
 
-// Arithmetic instructions (register-register)
-//const num ADD   = 1;    // Add
-//const num SUB   = 2;    // Subtract
-//const num AND   = 3;    // Logical AND
-//const num OR    = 4;    // Logical OR
-//const num XOR   = 5;    // Logical exclusive OR
-//const num SLL   = 6;    // Logical shift left
-//const num SRL   = 7;    // Logical shift right
-//const num SLT   = 8;    // Set if less than
-//const num SGT   = 9;    // Set if greater than
-//const num SLE   = 10;   // Set if less or equal
-//const num SGE   = 11;   // Set if greater or equal
+// Arithmetic/Logical/Shifting instructions (register-register)
+
 const num ADD   = 1;    // Add
-const num SUB   = 2;    // Subtract
-const num AND   = 3;    // Logical AND
-const num ORR   = 4;    // Logical OR
-const num EOR	= 5;	// Exclusive OR
-const num LSL	= 6;	// Logical Shift Left
-const num LSR	= 7;	// Logical Shift Right
+const num ADC	= 2;	// Add with Carry
+const num SUB   = 3;    // Subtract
+const num SBC	= 4;	// Subtract with Carry
+const num RSB	= 5;	// Reverse Subtract
+const num RSC	= 6;	// Reverse Subtract with Carry
+const num MUL	= 7;	// Multiply
 
-const num ADC	= 8;	// Add with Carry
-const num BIC	= 9;	// Bit Clear
-const num CMN	= 10;	// Compare Negative
-const num CMP	= 11;	// Compare
-const num MOV	= 12;	// Move register or constant
-const num MUL	= 13;	// Multiply
-const num MVN	= 14;	// Move negative register
-const num RSB	= 15;	// Reverse Subtract
-const num RSC	= 16;	// Reverse Subtract with Carry
-const num SBC	= 17;	// Subtract with Carry
-const num ASR	= 18;	// Arithmetic Shift RIght
-const num ROR	= 19;	// Rotate Right
+const num AND   = 8;    // Logical AND
+const num ORR   = 9;    // Logical OR
+const num EOR	= 10;	// Exclusive OR
+const num BIC	= 11;	// Bit Clear
+
+const num LSL	= 12;	// Logical Shift Left
+const num LSR	= 13;	// Logical Shift Right
+const num ASR	= 14;	// Arithmetic Shift RIght
+const num ROR	= 15;	// Rotate Right
 
 
+// Arithmetic/Logical/Shifting instructions (register-immediate)
 
 
-const num SWP	= 20;	// Swap register with memory
-const num TEQ	= 21;	// Test bitwise equality
-const num TST	= 22;	// Test bits
+const num ADDi  = 16;    // Add
+const num ADCi	= 17;	// Add with Carry
+const num SUBi  = 18;    // Subtract
+const num SBCi	= 19;	// Subtract with Carry
+const num RSBi	= 20;	// Reverse Subtract
+const num RSCi	= 21;	// Reverse Subtract with Carry
+const num MULi	= 22;	// Multiply
+
+const num ANDi  = 23;    // Logical AND
+const num ORRi  = 24;    // Logical OR
+const num EORi	= 25;	// Exclusive OR
+const num BICi	= 26;	// Bit Clear
+
+const num LSLi	= 27;	// Logical Shift Left
+const num LSRi	= 28;	// Logical Shift Right
+const num ASRi	= 29;	// Arithmetic Shift RIght
+const num RORi	= 30;	// Rotate Right
 
 
-// Arithmetic instructions (register-immediate)
-//const num ADDi  = 12;
-//const num SUBi  = 13;
-//const num ANDi  = 14;
-//const num ORi   = 15;
-//const num XORi  = 16;
-//const num SLLi  = 17;
-//const num SRLi  = 18;
-//const num SLTi  = 19;
-//const num SGTi  = 20;
-//const num SLEi  = 21;
-//const num SGEi  = 22;
+// Comparisons (register - register)
+const num CMN	= 31;	// Compare Negative
+const num CMP	= 32;	// Compare
+const num TEQ	= 33;	// Test bitwise equality
+const num TST	= 34;	// Test bits
 
-// Load/store instructions
-//const num LD    = 23;   // Load             // joj
-//const num ST    = 24;   // Store            // joj
-const num LDR	= 23;   // Load register from memory
-const num STR	= 24;   // Store register to memory
-const num LDM	= 25;   // Load multiple registers
-const num STM	= 26;   // Store Multiple
+// Comparisons (register - immediate)
+const num CMNi	= 35;	// Compare Negative
+const num CMPi	= 36;	// Compare
+const num TEQi	= 37;	// Test bitwise equality
+const num TSTi	= 38;	// Test bits
 
 
-// Control instructions
-//const num BEQZ  = 25;   // Branch if equal to zero
-//const num BNEZ  = 26;   // Branch if not equal to zero
-//const num J     = 27;   // Jump
-//const num JAL   = 28;   // Jump and link
-//const num JR    = 29;   // Jump register
-//const num JALR  = 30;   // Jump and link register
+
+// Load/store instructions (register - register)
+const num MOV	= 39;	// Move register or constant
+const num MVN	= 40;	// Move negative register
+const num LDR	= 41;   // Load register from memory
+const num STR	= 42;   // Store register to memory
+const num SWP	= 43;	// Swap register with memory
+
+// Load/store instructions (register - immediate)
+const num MOVi	= 44;	// Move register or constant
+const num MVNi	= 45;	// Move negative register
+const num LDRi	= 46;   // Load register from memory
+const num STRi	= 47;   // Store register to memory
 
 
-const num B		= 27;   // Branch
-const num BL	= 28;   // Branch with Link
-const num BX	= 29;   // Branch and Exchange
+// Control instructions (register - register)
+const num B		= 48;   // Branch
+const num BL	= 49;   // Branch with Link
 
-
+// Control instructions (register - immediate)
+const num Bi	= 50;   // Branch
+const num BLi	= 51;   // Branch with Link
 
 
 // Halt
-const num HALT  = 31;   // Stop running
+const num HALT  = 52;   // Stop running
 
 // "Stall" and "Empty" instruction (aliases for NOP)
-const num STALL = 32;
-const num EMPTY = 33;
+const num STALL = 53;
+const num EMPTY = 54;
 
 //
 // Instruction names
 //
 
-string instrNames[34];
+string instrNames[55];
 
 // NOP
 instrNames[NOP] = "NOP";
@@ -162,35 +163,80 @@ instrNames[NOP] = "NOP";
 //instrNames[JR]      = "JR";     // Jump register
 //instrNames[JALR]    = "JALR";   // Jump and link register
 
-instrNames[ADD]	= "ADD";    // Add
-instrNames[SUB]	= "SUB";    // Subtract
-instrNames[AND]	= "AND";    // Logical AND
-instrNames[ORR]	= "ORR";    // Logical OR
-instrNames[EOR]	= "EOR";	// Exclusive OR
-instrNames[LSL]	= "LSL";	// Logical Shift Left
-instrNames[LSR]	= "LSR";	// Logical Shift Right
+instrNames[ADD] = "ADD";    // Add
 instrNames[ADC]	= "ADC";	// Add with Carry
-instrNames[BIC]	= "BIC";	// Bit Clear
-instrNames[CMN]	= "CMN";	// Compare Negative
-instrNames[CMP]	= "CMP";	// Compare
-instrNames[MOV]	= "MOV";	// Move register or constant
-instrNames[MUL]	= "MUL";	// Multiply
-instrNames[MVN]	= "MVN";	// Move negative register
+instrNames[SUB] = "SUB";    // Subtract
+instrNames[SBC]	= "SBC";	// Subtract with Carry
 instrNames[RSB]	= "RSB";	// Reverse Subtract
 instrNames[RSC]	= "RSC";	// Reverse Subtract with Carry
-instrNames[SBC]	= "SBC";	// Subtract with Carry
+instrNames[MUL]	= "MUL";	// Multiply
+
+instrNames[AND] = "AND";    // Logical AND
+instrNames[ORR] = "ORR";    // Logical OR
+instrNames[EOR]	= "EOR";	// Exclusive OR
+instrNames[BIC]	= "BIC";	// Bit Clear
+instrNames[LSL]	= "LSL";	// Logical Shift Left
+instrNames[LSR]	= "LSR";	// Logical Shift Right
 instrNames[ASR]	= "ASR";	// Arithmetic Shift RIght
 instrNames[ROR]	= "ROR";	// Rotate Right
-instrNames[SWP]	= "SWP";	// Swap register with memory
+
+
+// Arithmetic/Logical/Shifting instructions (register-immediate)
+
+
+instrNames[ADDi] = "ADD(i)";    // Add
+instrNames[ADCi] = "ADC(i)";	// Add with Carry
+instrNames[SUBi] = "SUB(i)";    // Subtract
+instrNames[SBCi] = "SBC(i)";	// Subtract with Carry
+instrNames[RSBi] = "RSB(i)";	// Reverse Subtract
+instrNames[RSCi] = "RSC(i)";	// Reverse Subtract with Carry
+instrNames[MULi] = "MUL(i)";	// Multiply
+
+instrNames[ANDi] = "AND(i)";    // Logical AND
+instrNames[ORRi] = "ORR(i)";    // Logical OR
+instrNames[EORi] = "EOR(i)";	// Exclusive OR
+instrNames[BICi] = "BIC(i)";	// Bit Clear
+
+instrNames[LSLi] = "LSL(i)";	// Logical Shift Left
+instrNames[LSRi] = "LSR(i)";	// Logical Shift Right
+instrNames[ASRi] = "ASR(i)";	// Arithmetic Shift RIght
+instrNames[RORi] = "ROR(i)";	// Rotate Right
+
+
+// Comparisons (register - register)
+instrNames[CMN]	= "CMN";	// Compare Negative
+instrNames[CMP]	= "CMP";	// Compare
 instrNames[TEQ]	= "TEQ";	// Test bitwise equality
 instrNames[TST]	= "TST";	// Test bits
+
+// Comparisons (register - immediate)
+instrNames[CMNi]	= "CMN(i)";	// Compare Negative
+instrNames[CMPi]	= "CMP(i)";	// Compare
+instrNames[TEQi]	= "TEQ(i)";	// Test bitwise equality
+instrNames[TSTi]	= "TST(i)";	// Test bits
+
+
+// Load/store instructions (register - register)
+instrNames[MOV]	= "MOV";	// Move register or constant
+instrNames[MVN]	= "MVN";	// Move negative register
 instrNames[LDR]	= "LDR";   // Load register from memory
 instrNames[STR]	= "STR";   // Store register to memory
-instrNames[LDM]	= "LDM";   // Load multiple registers
-instrNames[STM]	= "STM";   // Store Multiple
+instrNames[SWP]	= "SWP";	// Swap register with memory
+
+// Load/store instructions (register - immediate)
+instrNames[MOVi]	= "MOV(i)";	// Move register or constant
+instrNames[MVNi]	= "MVN(i)";	// Move negative register
+instrNames[LDRi]	= "LDR(i)";   // Load register from memory
+instrNames[STRi]	= "STR(i)";   // Store register to memory
+
+
+// Control instructions (register - register)
 instrNames[B]	= "B";   // Branch
 instrNames[BL]	= "BL";   // Branch with Link
-instrNames[BX]	= "BX";   // Branch and Exchange
+
+// Control instructions (register - register)
+instrNames[Bi]	= "B(i)";   // Branch
+instrNames[BLi]	= "BL(i)";   // Branch with Link
 
 
 // Halt
@@ -212,40 +258,57 @@ num function instrIsArRR(num instr) {
 	return (instr >= ADD && instr <= ROR) ? 1 : 0;
 }
 
-//-------Commenting out for the miinute
 num function instrIsArRI(num instr) {
-    //return ((instr >= ADDi) && (instr <= SGEi)) ? 1 : 0;	// {joj 28/10/06}
+    return ((instr >= ADDi) && (instr <= RORi)) ? 1 : 0;	// {joj 28/10/06}
 	return 0;
 }
 
 num function instrIsBranch(num instr) {
     //return ((instr == BEQZ) || (instr == BNEZ)) ? 1 : 0;    // {joj 28/10/06}
-	return (instr == BX) ? 1 : 0;
+	return (instr >= B && instr <= BLi) ? 1 : 0;
 }
 
-num function isJorJAL(num instr) {							// {joj 3/11/12}
-    //return ((instr == J) || (instr == JAL)) ? 1 : 0;        // {joj 28/10/06}
-	return ((instr == B) || (instr == BL)) ? 1 : 0;
-}
+//num function isJorJAL(num instr) {							// {joj 3/11/12}
+//    //return ((instr == J) || (instr == JAL)) ? 1 : 0;        // {joj 28/10/06}
+//	return ((instr == B) || (instr == BL)) ? 1 : 0;
+//}
 
-num function instrIsJumpR(num instr) {						
+//num function instrIsJumpR(num instr) {						
     //return ((instr == JR) || (instr == JALR)) ? 1 : 0;		// {joj 28/10/06}
-	return 0;
-}
+//	return 0;
+//}
 
-num function instrIsBranchOrJump(num instr) {
-    return (instrIsBranch(instr) || isJorJAL(instr) || instrIsJumpR(instr)) ? 1 : 0;    // {joj 28/10/06}
-}
+//num function instrIsBranchOrJump(num instr) {
+//    return (instrIsBranch(instr) || isJorJAL(instr) || instrIsJumpR(instr)) ? 1 : 0;    // {joj 28/10/06}
+//}
 
-num function instrIsJumpAndLink(num instr) {
+//num function instrIsJumpAndLink(num instr) {
     //return ((instr == JAL) || (instr == JALR)) ? 1 : 0;     // {joj 28/10/06}
-    return (instr == BL) ? 1 : 0;     // {joj 28/10/06}
-}
+//    return (instr == BL) ? 1 : 0;     // {joj 28/10/06}
+//}
 
 num function instrIsLoadOrStore(num instr) {
     //return ((instr == LD) || (instr == ST)) ? 1 : 0;            // {joj 28/10/06}
     return ((instr == LDR) || (instr == STR)) ? 1 : 0;            // {joj 28/10/06}
 }
+
+// My ones
+// Shift immediate
+
+num function instrIsShI(num instr) {
+	return (instr >= LSLi && instr <= RORi) ? 1 : 0;
+}
+
+// instructions with no destination register Register - Register
+num function instrHasNoDstRR(num instr) {
+	return ((instr >= CMN && instr <= TST) || (instr >= MOV && instr <= SWP) || instrIsBranch(instr)) ? 1 : 0;
+}
+
+// instructions with no destination register Register - Immediate
+num function instrHasNoDstRI(num instr) {
+	return ((instr >= CMNi && instr <= TSTi) || (instr >= MOVi && instr <= STRi) || instrIsBranch(instr)) ? 1 : 0;
+}
+
 
 //
 // Instruction operand types
@@ -255,26 +318,37 @@ const num OP_TYPE_REG = 1;
 const num OP_TYPE_IMM = 2;
 
 num function instrOpTypeRdt(num instr) {
-    if (instrIsArRR(instr) || instrIsArRI(instr) || instrIsJumpAndLink(instr) || instrIsLoadOrStore(instr))
-        return OP_TYPE_REG;
-    else
+    if (instrIsNop(instr) || instrHasNoDstRR(instr) || instrHasNoDstRI(instr))
         return OP_TYPE_UNUSED;
+    else
+        return OP_TYPE_REG;
 }
 
 num function instrOpTypeRs1(num instr) {
-    if (instrIsNop(instr) || instrIsJumpR(instr) || isJorJAL(instr))
+    if (instrIsNop(instr))
         return OP_TYPE_UNUSED;
+	else if (instr == Bi || instr == BLi)
+		return OP_TYPE_IMM;
     else
         return OP_TYPE_REG;
 }
 
 num function instrOpTypeRs2(num instr) {
-    if (instrIsNop(instr))
+    if (instrIsNop(instr) || instrIsBranch(instr))
         return OP_TYPE_UNUSED;
-    else if (instrIsArRR(instr) || instrIsJumpR(instr))
+    else if (instrIsArRR(instr) || instrHasNoDstRR(instr))
         return OP_TYPE_REG;
     else
         return OP_TYPE_IMM;
+}
+
+num function instrOpTypeRs3(num instr2) {
+    if (instrIsNop(instr2))
+        return OP_TYPE_UNUSED;
+    else if (instrIsShI(instr2))
+        return OP_TYPE_IMM;
+    else
+        return OP_TYPE_REG;
 }
 
 //
@@ -416,34 +490,34 @@ num function instrExecute(num instr, num op1, num op2, num n, num z, num c, num 
 
 	num res = 0;				// Init result to zero		
 
-    if (instr == ADD)
+    if (instr == ADD || instr == ADDi)
         return (se8(op1) + se8(op2)) & 0xFF;
-    else if (instr == SUB)
+    else if (instr == SUB || instr == SUBi)
         return (se8(op1) - se8(op2)) & 0xFF;
-    else if (instr == AND)
+    else if (instr == AND || instr == ANDi)
         return op1 & op2;
-    else if (instr == ORR)
+    else if (instr == ORR || instr == ORRi)
         return op1 | op2;
-    else if (instr == EOR)
+    else if (instr == EOR || instr == EORi)
         return op1 ^ op2;
-    else if (instr == LSL)
+    else if (instr == LSL || instr == LSLi)
         return (op1 << op2) & 0xFF;
-    else if (instr == LSR)
+    else if (instr == LSR || instr == LSRi)
         return (op1 >> op2) & 0xFF;
-    else if (instr == LDR || instr == STR)                 // joj
+    else if (instr == LDR || instr == LDRi || instr == STR || instr == STRi)                 // joj
         return (se8(op1) + se8(op2)) & 0xFF;
-	else if (instr == ADC)
+	else if (instr == ADC || instr == ADCi)
         return (se8(op1) + se8(op2) + c) & 0xFF;
-	else if (instr == BIC)
+	else if (instr == BIC || instr == BICi)
 		return (op1 & (~op2));
-	else if (instr == CMN) {
+	else if (instr == CMN || instr == CMNi) {
 		res = se8(op1) + se8(op2);
 		cpsr.setNValue(isN(res));
 		cpsr.setZValue(isZ(res));
 		cpsr.setCValue(isAddC(se8(op1),se8(op2)));
 		cpsr.setVValue(isAddV(se8(op1),se8(op2),res));
 	}
-	else if (instr == CMP) {
+	else if (instr == CMP || instr == CMPi) {
 		res = se8(op1) - se8(op2);
 		cpsr.setNValue(isN(res));
 		cpsr.setZValue(isZ(res));
@@ -453,13 +527,13 @@ num function instrExecute(num instr, num op1, num op2, num n, num z, num c, num 
 //instrNames[MOV]	= "MOV";	// Move register or constant
 //instrNames[MUL]	= "MUL";NB:	// Multiply ********(If S set V preserved)******************
 //instrNames[MVN]	= "MVN";	// Move negative register
-	else if (instr == RSB)
+	else if (instr == RSB || instr == RSBi)
 		return (se8(op2) - se8(op1)) & 0xFF;
-	else if (instr == RSC)
+	else if (instr == RSC || instr == RSCi)
 		return (se8(op2) - se8(op1)-1+c) & 0xFF;
-	else if (instr == SBC)
+	else if (instr == SBC || instr == SBCi)
 		return (se8(op1) - se8(op2)-1+c) & 0xFF;
-	else if (instr == ASR) {
+	else if (instr == ASR || instr == ASRi) {
 		num neg = op1 >> 7;
 		if(op2 > 8) op2 = 8;	//If shifting by more than register size
 		if(neg){
@@ -467,34 +541,27 @@ num function instrExecute(num instr, num op1, num op2, num n, num z, num c, num 
 		}
 		return (op1 >> op2) & 0xFF;
 	}
-	else if (instr == ROR) {
+	else if (instr == ROR || instr == RORi) {
 		op2 = op2 % 8;		//modulo by max shift to remove need for loop
 		num newLeftPart = (op1 << (8 - op2)) & 0xFF;
 		num newRightPart = (op1 >> op2) & 0xFF;
 		return newLeftPart + newRightPart;
 	}
 //instrNames[SWP]	= "SWP";	// Swap register with memory
-	else if (instr == TEQ) {
+	else if (instr == TEQ || instr == TEQi) {
 		res = se8(op1) ^ se8(op2);
 		cpsr.setNValue(isN(res));
 		cpsr.setZValue(isZ(res));
 		cpsr.setCValue(isAddC(se8(op1),se8(op2)));
 		cpsr.setVValue(isAddV(se8(op1),se8(op2),res));
 	}
-	else if (instr == TST) {
+	else if (instr == TST || instr == TSTi) {
 		res = se8(op1) & se8(op2);
 		cpsr.setNValue(isN(res));
 		cpsr.setZValue(isZ(res));
 		cpsr.setCValue(isAddC(se8(op1),se8(op2)));
 		cpsr.setVValue(isAddV(se8(op1),se8(op2),res));
 	}
-//instrNames[LDM]	= "LDM";   // Load multiple registers
-//instrNames[STM]	= "STM";   // Store Multiple
-//instrNames[BX]	= "BX";   // Branch and Exchange
-
-
-
-
     else if (instr == B || instr == BL)
         return op2;
     else

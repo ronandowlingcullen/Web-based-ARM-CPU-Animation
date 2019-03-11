@@ -71,7 +71,7 @@ function ifExec() {																// {joj 24/9/17}
  	fork(apPC_IM.animate(24));
    	fork(apPC_ADD4.animate(24));
 
-    if ((bpMode == BRANCH_PREDICTION) && (instrIsBranchOrJump(regID.vIns))) {	// {joj 1/2/06}
+    if ((bpMode == BRANCH_PREDICTION) && (instrIsBranch(regID.vIns))) {	// {joj 1/2/06}
 		if (stall == CTRL_STALL) {												// {joj 3/11/12}
 			apPC_MUX2.animate(12);												// {joj 3/11/12}
 		} else {																// {joj 3/11/12}
@@ -150,23 +150,23 @@ function calcNewPC() {
         newMux1Src = apMUX3_MUX1;
         mux4Src = apMUX3_MUX4;
 
-    } else if (isJorJAL(regID.vIns)) {
+    }// else if (isJorJAL(regID.vIns)) {		//-----May need to fix this----------------------
 
         // unconditional relative jump
-        mux3Src = apADDi_MUX3;
-        mux4Src = apMUX3_MUX4;
-        newPC = (regPC1.value + regID.vRs2) & 0x7F;
-        newMux1Src = apMUX3_MUX1;
+    //    mux3Src = apADDi_MUX3;
+    //    mux4Src = apMUX3_MUX4;
+    //    newPC = (regPC1.value + regID.vRs2) & 0x7F;
+    //    newMux1Src = apMUX3_MUX1;
 
-    } else if (instrIsJumpR(regID.vIns)) {
+    //} else if (instrIsJumpR(regID.vIns)) {
 
         // (Unconditional) indirect jump
         // MUX3 (and hence mux3Src) unused
-        newPC = (regFile[regID.vRs2].value) & 0x7F;
-        newMux1Src = apRF_MUX1;
-        mux4Src = apRF_MUX4;
+    //    newPC = (regFile[regID.vRs2].value) & 0x7F;
+    //    newMux1Src = apRF_MUX1;
+    //    mux4Src = apRF_MUX4;
 
-    }
+    //}
 }
 
 function updBTB() {
@@ -265,13 +265,13 @@ function detectStall() {
             stall = DATA_STALL;
     }
 
-    // RAW hazard (indirect jumps)
-    if (instrIsJumpR(regID.vIns)) {
-        if ((instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) && (regEX.vRdt == regID.vRs2))
-            stall = DATA_STALL;
-        if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG) && (regMA.vRdt == regID.vRs2))
-            stall = DATA_STALL;
-    }
+    // RAW hazard (indirect jumps)		//--------------------May Need to Fix this------------------------
+    //if (instrIsJumpR(regID.vIns)) {
+    //    if ((instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) && (regEX.vRdt == regID.vRs2))
+    //        stall = DATA_STALL;
+    //    if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG) && (regMA.vRdt == regID.vRs2))
+    //        stall = DATA_STALL;
+    //}
 
     // Load hazards
     //if ((liMode == LOAD_INTERLOCK) && (regEX.vIns == LD)) {     // {joj}
@@ -284,7 +284,7 @@ function detectStall() {
 
     // control hazards (real detection for control hazards is done in calcNewPC)
     //if ((stall == NO_STALL) && (bpMode != DELAYED_BRANCHES) && instrIsBranchOrJump(regID.vIns) && branchMissPredict) {	// {joj 1/2/06}
-	if ((stall == NO_STALL) && (bpMode != DELAYED_BRANCHES) && instrIsBranchOrJump(regID.vIns) && (newPC != regPC.value)) {	// {joj 9/12/16}
+	if ((stall == NO_STALL) && (bpMode != DELAYED_BRANCHES) && instrIsBranch(regID.vIns) && (newPC != regPC.value)) {	// {joj 9/12/16}
 		updateBTB = 1;
         stall = CTRL_STALL;
     }
@@ -342,33 +342,33 @@ function idExec() {																// {joj 14/11/17}
 		txtADDi_MUX3.setOpacity(1, 8, 1, 0);                              		// {joj 29/10/06}
 
 	//
-	// J, JAL
+	// J, JAL			//-----------May Need to Fix this----------------------------------
 	//
-	} else if (isJorJAL(regID.vIns)) {											// {joj 3/11/12}
+	//} else if (isJorJAL(regID.vIns)) {											// {joj 3/11/12}
 	
 		//if (regID.vIns == JAL) {												// {joj 4/11/12}
-		if (regID.vIns == BL) {												// {joj 4/11/12}
-			fork(apPC1_ADD4.animate(16));										// {joj 4/11/12}
-    		fork(ap4_ADD4.animate(16));                            				// {joj 4/11/12}
-		}
+		//if (regID.vIns == BL) {												// {joj 4/11/12}
+		//	fork(apPC1_ADD4.animate(16));										// {joj 4/11/12}
+    	//	fork(ap4_ADD4.animate(16));                            				// {joj 4/11/12}
+		//}
 		
-		if (stall == NO_STALL) {												// {joj 4/11/12}
+		//if (stall == NO_STALL) {												// {joj 4/11/12}
 		
-			fork(apPC1_ADDi.animate(16));                          				// {joj 4/11/12}
-        	fork(apID_ADDi.animate(16));                           				// {joj 4/11/12}
-        	wait(12);                                           				// {joj 4/11/12}
-        	txtID_ADDi.setTxt("%02X", regID.vRs2);                      		// {joj 4/11/12}
-        	txtID_ADDi.setOpacity(1);                                 			// {joj 4/11/12}
-        	wait(4);                                                   			// {joj 4/11/12}
-			fork(apADDi_MUX3.animate(8));                                  		// {joj 4/11/12}
-			txtADDi_MUX3.setTxt("%02X", (regPC1.value + regID.vRs2) & 0xff);	// {joj 4/11/12}
-        	txtADDi_MUX3.setOpacity(1, 8, 1, 0);          						// {joj 4/11/12}
+		//	fork(apPC1_ADDi.animate(16));                          				// {joj 4/11/12}
+        //	fork(apID_ADDi.animate(16));                           				// {joj 4/11/12}
+        //	wait(12);                                           				// {joj 4/11/12}
+        //	txtID_ADDi.setTxt("%02X", regID.vRs2);                      		// {joj 4/11/12}
+        //	txtID_ADDi.setOpacity(1);                                 			// {joj 4/11/12}
+        //	wait(4);                                                   			// {joj 4/11/12}
+		//	fork(apADDi_MUX3.animate(8));                                  		// {joj 4/11/12}
+		//	txtADDi_MUX3.setTxt("%02X", (regPC1.value + regID.vRs2) & 0xff);	// {joj 4/11/12}
+        //	txtADDi_MUX3.setOpacity(1, 8, 1, 0);          						// {joj 4/11/12}
 		
-		} else {																// {joj 4/11/12}
+		//} else {																// {joj 4/11/12}
 		
-			wait(24);															// {joj 4/11/12}
+		//	wait(24);															// {joj 4/11/12}
 			
-		}																		// {joj 4/11/12}
+		//}																		// {joj 4/11/12}
 		
 	//
 	// JALR
@@ -391,7 +391,7 @@ function idExec() {																// {joj 14/11/17}
     //
     // second half of the clock cycle
     //
-    if (instrIsBranchOrJump(regID.vIns))
+    if (instrIsBranch(regID.vIns))
         calcNewPC();
 	
 	//if (instrIsBranch(regID.vIns) && (stall == NO_STALL)) {					// {joj 3/11/12}
@@ -400,18 +400,19 @@ function idExec() {																// {joj 14/11/17}
 		txtMUX3_MUX4.setOpacity(1, 8, 1, 0);                           			// {joj 3/11/12}
 	}																			// {joj 3/11/12}
 	
-	if (instrIsJumpR(regID.vIns) && (stall == NO_STALL)) {						// {joj 4/11/12}
-		txtRF_MUX1.setTxt("%02X", newPC); 										// {joj 4/11/12}
-		txtRF_MUX1.setOpacity(1, 8, 1, 0);                           			// {joj 4/11/12}
-	}
+	//----------May Need to Fix This
+	//if (instrIsJumpR(regID.vIns) && (stall == NO_STALL)) {						// {joj 4/11/12}
+	//	txtRF_MUX1.setTxt("%02X", newPC); 										// {joj 4/11/12}
+	//	txtRF_MUX1.setOpacity(1, 8, 1, 0);                           			// {joj 4/11/12}
+	//}
 
 	//if (instrIsBranchOrJump(regID.vIns) && (stall == NO_STALL))				// {joj 4/11/12}
-	if (instrIsBranchOrJump(regID.vIns))										// {joj 9/12/16}
+	if (instrIsBranch(regID.vIns))										// {joj 9/12/16}
        fork(sendBTBOperands());
 	
     detectStall();
 	//debug("stall=%d", stall);
-	if (instrIsBranchOrJump(regID.vIns) && (stall != DATA_STALL))				// {joj 10/12/16}
+	if (instrIsBranch(regID.vIns) && (stall != DATA_STALL))				// {joj 10/12/16}
 		updBTB();																// {joj 9/12/16}
 
     if (stall == NO_STALL) {
@@ -425,15 +426,16 @@ function idExec() {																// {joj 14/11/17}
     // Send source registers to A and B
 
     if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) {
+		
+		//-------------------May Need to Fix This
+        //if (instrIsJumpAndLink(regID.vIns)) {
 
-        if (instrIsJumpAndLink(regID.vIns)) {
+        //    regA.setNewValue(0);
+        //    regB.setNewValue((regPC1.value + 4) & 0x7F);
+        //    apADD4_MUX5.animate(18);
+        //    apMUX5_B.animate(6);
 
-            regA.setNewValue(0);
-            regB.setNewValue((regPC1.value + 4) & 0x7F);
-            apADD4_MUX5.animate(18);
-            apMUX5_B.animate(6);
-
-        } else {
+        //} else {
 
             regFile[regID.vRs1].highlight(bhighlight);                             // {joj}
             regA.setNewValue(regFile[regID.vRs1].value);
@@ -468,7 +470,7 @@ function idExec() {																// {joj 14/11/17}
                 apMUX5_B.animate(6);                               		// {joj}
             }
 
-        }
+        //}
 
     }
 
@@ -496,13 +498,15 @@ function exExec() {														// {joj 14/11/17}
     if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) {
 
         // select correct source for operand 1
+		
+		//------------------May need to fix this--------------
+        //if (instrIsJumpAndLink(regEX.vIns)) {
 
-        if (instrIsJumpAndLink(regEX.vIns)) {
+        //    mux6Src = 0;    // Do not use MUX6 at all
+        //    op1 = 0;
 
-            mux6Src = 0;    // Do not use MUX6 at all
-            op1 = 0;
-
-        } else if (afMode == ALU_FORWARDING) {
+        //} else 
+		if (afMode == ALU_FORWARDING) {
 
             if (regOUT0.tagMatches(regEX.vRs1)) {
                 mux6Src = apOUT0_MUX6;
@@ -523,12 +527,14 @@ function exExec() {														// {joj 14/11/17}
         }
 
         // Choose correct source for operand 2
-        if (instrIsJumpAndLink(regEX.vIns)) {
+        //----------------------May Need to Fix This---------------------
+		//if (instrIsJumpAndLink(regEX.vIns)) {
 
-            mux7Src = apB_MUX7;
-            op2 = regB.value;
+        //    mux7Src = apB_MUX7;
+        //    op2 = regB.value;
 
-        } else if (instrOpTypeRs2(regEX.vIns) == OP_TYPE_IMM) {
+        //} else 
+		if (instrOpTypeRs2(regEX.vIns) == OP_TYPE_IMM) {
 
             mux7Src = apEX_MUX7;
             op2 = regEX.vRs2;
@@ -755,10 +761,12 @@ function nonPipelinedBranch() {										// {joj 14/11/11}
     fork(apPC1_ADDi.animate(12));									// {joj 2/11/12}
 	wait(12);														// {joj 2/11/12}
 
-    if (instrIsJumpR(regID.vIns)) {
-        regPC.setNewValue((regFile[regID.vRs2].value) & 0x7F);
-        apRF_MUX1.animate(34);
-    } else if (instrIsBranch(regID.vIns)) {
+    //-------------May Need to Fix This ----------------------------------
+	//if (instrIsJumpR(regID.vIns)) {
+    //    regPC.setNewValue((regFile[regID.vRs2].value) & 0x7F);
+    //    apRF_MUX1.animate(34);
+    //} else 
+	if (instrIsBranch(regID.vIns)) {
 //        if ((regFile[regID.vRs1].value == 0) == (regID.vIns == BEQZ)) {
         if ((regFile[regID.vRs1].value == 0) == (regID.vIns == B)) {
             apADDi_MUX3.animate(20);
@@ -768,10 +776,10 @@ function nonPipelinedBranch() {										// {joj 14/11/11}
             regPC.setNewValue((regPC.value + 4) & 0x7F);
         }
         apMUX3_MUX1.animate(14);
-    } else if (isJorJAL(regID.vIns)) {
-        regPC.setNewValue((regPC.value + regID.vRs2) & 0x7F);
-        apADDi_MUX3.animate(20);
-        apMUX3_MUX1.animate(14);
+    //} else if (isJorJAL(regID.vIns)) {	//-----------------And this------------------
+    //    regPC.setNewValue((regPC.value + regID.vRs2) & 0x7F);
+    //    apADDi_MUX3.animate(20);
+    //    apMUX3_MUX1.animate(14);
     } else {
         regPC.setNewValue((regPC.value + 4) & 0x7F);
         apADD4_MUX3.animate(20);
@@ -816,14 +824,16 @@ function execNonPipelined() {													// {joj 14/11/17}
 
     /// Second half of the clock cycle
 
-    if (instrIsJumpAndLink(regID.vIns)) {
+	//----------------May need to fix this-------------------------------
+    //if (instrIsJumpAndLink(regID.vIns)) {
 
-        apADD4_MUX5.animate(20);
-        apMUX5_B.animate(20);
-        regA = 0;
-        regB = (regPC.value + 4) & 0x7F;
+    //    apADD4_MUX5.animate(20);
+    //    apMUX5_B.animate(20);
+    //    regA = 0;
+    //    regB = (regPC.value + 4) & 0x7F;
 
-    } else if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) {
+    //} else 
+	if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) {
 
         regA = regFile[regID.vRs1].value;
         regFile[regID.vRs1].highlight(bhighlight);                                 // {joj}
@@ -893,11 +903,12 @@ function execNonPipelined() {													// {joj 14/11/17}
         smdr = regB;
         result = instrExecute(regID.vIns, regA, regID.vRs2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
 
-    } else if (instrIsJumpAndLink(regID.vIns)) {
+	//-----------------------May Need to Fix This-------------------------------
+    //} else if (instrIsJumpAndLink(regID.vIns)) {
 
-        apB_MUX7.animate(40);
-        apMUX7_OUT0.animate(40);
-        result = instrExecute(regID.vIns, regA, regB, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
+    //    apB_MUX7.animate(40);
+    //    apMUX7_OUT0.animate(40);
+    //    result = instrExecute(regID.vIns, regA, regB, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
 
     } else if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) {
 

@@ -50,10 +50,10 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
     Brush brush = SolidBrush(WHITE);
     Rectangle adr = Rectangle2(valuesLayer, 0, 0, brush, x, y, fw, h, 0, font, "%02X", addr);
     Rectangle ins = Rectangle2(valuesLayer, HLEFT, 0, brush, x + fw, y, 2 * fw, h, insPen, font, " NOP"); // {joj 25/7/10}
-    Rectangle rdt = Rectangle2(valuesLayer, 0, 0, brush, x + 3 * fw, y, fw, h, rdtPen, font, "-");
-    Rectangle rs1 = Rectangle2(valuesLayer, 0, 0, brush, x + 4 * fw, y, fw, h, rs1Pen, font, "-");
-    Rectangle rs2 = Rectangle2(valuesLayer, 0, 0, brush, x + 5 * fw, y, fw, h, rs2Pen, font, "-");
-    Rectangle ins2 = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 6 * fw, y, 2 * fw, h, insPen, font, " NOP");
+    Rectangle rdt = Rectangle2(valuesLayer, 0, 0, brush, x + 2.5 * fw, y, fw, h, rdtPen, font, "-");
+    Rectangle rs1 = Rectangle2(valuesLayer, 0, 0, brush, x + 3.5 * fw, y, fw, h, rs1Pen, font, "-");
+    Rectangle rs2 = Rectangle2(valuesLayer, 0, 0, brush, x + 4.5 * fw, y, fw, h, rs2Pen, font, "-");
+    Rectangle ins2 = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 5.5 * fw, y, 2 * fw, h, insPen, font, " NOP");
     Rectangle rs3 = Rectangle2(valuesLayer, 0, 0, brush, x + 7 * fw, y, fw, h, rs2Pen, font, "-");
 
     Rectangle dot = Rectangle2(valuesLayer, 0, 0, redBrush, x+fw*0.8, y+2, h/2, h/2);	// {joj 30/10/06}
@@ -149,7 +149,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         opTypeRdt = instrOpTypeRdt(vIns);
         opTypeRs1 = instrOpTypeRs1(vIns);
         opTypeRs2 = instrOpTypeRs2(vIns);
-        opTypeRs3 = instrOpTypeRs2(vIns2);
+        opTypeRs3 = instrOpTypeRs3(vIns2);
 
         if (opTypeRs2 == OP_TYPE_REG)
             vRs2 = (vRs2 % 16);
@@ -157,8 +157,16 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         if (opTypeRs3 == OP_TYPE_REG)
             vRs3 = (vRs3 % 16);
 
-        if (opTypeRdt == OP_TYPE_UNUSED) rdt.setTxt("-") else rdt.setTxt("R%d", vRdt);
-        if (opTypeRs1 == OP_TYPE_UNUSED) rs1.setTxt("-") else rs1.setTxt("R%d", vRs1);
+		
+        if (opTypeRdt == OP_TYPE_UNUSED) rdt.setTxt("-") else rdt.setTxt("R%d", vRdt);		
+
+        if (opTypeRs1 == OP_TYPE_UNUSED){
+			rs1.setTxt("-");
+		} else if (opTypeRs1 == OP_TYPE_IMM) {
+			rs1.setTxt("%02X", vRs1);
+		} else {
+			rs1.setTxt("R%d", vRs1);
+		}
 
         if (opTypeRs2 == OP_TYPE_UNUSED)
             rs2.setTxt("-")
@@ -169,12 +177,12 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 
         if (opTypeRs3 == OP_TYPE_UNUSED)
             rs3.setTxt("-")
-        else if (opTypeRs2 == OP_TYPE_REG)
+        else if (opTypeRs3 == OP_TYPE_REG)
             rs3.setTxt("R%d", vRs3)
         else
             rs3.setTxt("%02X", vRs3);
 
-        if (instrIsBranch(vIns) || isJorJAL(vIns)) {
+        if (instrIsBranch(vIns) ) { //|| isJorJAL(vIns)) { //-------------------May need to fix--------------------------
             if (vRs2 & 0x80) {
                 // Jump up
                 offset = (se8(vRs2)/4)*h + h/2;					// relative
@@ -243,10 +251,27 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         if (!lockCircuit) {
             if (down) {
                 clk = timeMS();
+				//Special functionallity so only shift operations possible
 				if (flags & MB_LEFT) {
-                	vIns2 = (vIns2 == MAX_INSTR) ? 0 : vIns2 + 1;
+					if(vIns2 == 0) { //Jump to shift instructions
+						vIns2 = LSL;
+					} else if(vIns2 == RORi) { //loop back to start
+						vIns2 = 0;
+					} else if (vIns2 == ROR) { //Jump to  immediate shift ops
+						vIns2 = LSLi;
+					} else {
+						vIns2 = vIns2 + 1;
+					}
 				} else if (flags & MB_RIGHT) {
- 					vIns2 = (vIns2 == 0) ? MAX_INSTR : vIns2 - 1;
+					if(vIns2 == 0) {
+						vIns2 = RORi;
+ 					} else if(vIns2 == LSL) { //loop back to start
+						vIns2 = 0;
+					} else if (vIns2 == LSLi) { //Jump to  immediate shift ops
+						vIns2 = ROR;
+					} else {
+						vIns2 = vIns2 - 1;
+					}
 				}
             } else {
                 clk = clk + 500;
