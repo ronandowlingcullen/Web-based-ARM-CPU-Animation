@@ -301,12 +301,22 @@ num function instrIsShI(num instr) {
 
 // instructions with no destination register Register - Register
 num function instrHasNoDstRR(num instr) {
-	return ((instr >= CMN && instr <= TST) || (instr >= MOV && instr <= SWP) || instrIsBranch(instr)) ? 1 : 0;
+	return ((instr >= CMN && instr <= TST)|| instrIsBranch(instr)) ? 1 : 0;
 }
 
 // instructions with no destination register Register - Immediate
 num function instrHasNoDstRI(num instr) {
-	return ((instr >= CMNi && instr <= TSTi) || (instr >= MOVi && instr <= STRi) || instrIsBranch(instr)) ? 1 : 0;
+	return ((instr >= CMNi && instr <= TSTi) || instrIsBranch(instr)) ? 1 : 0;
+}
+
+// instructions with no op2 Register - Register
+num function instrHasNoOp1RR(num instr) {
+	return ((instr >= MOV && instr <= SWP)) ? 1 : 0;
+}
+
+// instructions with no op2 Register - Immediate
+num function instrHasNoOp1RI(num instr) {
+	return ((instr >= MOVi && instr <= STRi)) ? 1 : 0;
 }
 
 
@@ -325,7 +335,7 @@ num function instrOpTypeRdt(num instr) {
 }
 
 num function instrOpTypeRs1(num instr) {
-    if (instrIsNop(instr))
+    if (instrIsNop(instr) || instrHasNoOp1RR(instr) ||  instrHasNoOp1RI(instr))
         return OP_TYPE_UNUSED;
 	else if (instr == Bi || instr == BLi)
 		return OP_TYPE_IMM;
@@ -336,7 +346,7 @@ num function instrOpTypeRs1(num instr) {
 num function instrOpTypeRs2(num instr) {
     if (instrIsNop(instr) || instrIsBranch(instr))
         return OP_TYPE_UNUSED;
-    else if (instrIsArRR(instr) || instrHasNoDstRR(instr))
+    else if (instrIsArRR(instr) || instrHasNoDstRR(instr)  ||  instrHasNoOp1RR(instr))
         return OP_TYPE_REG;
     else
         return OP_TYPE_IMM;
@@ -524,9 +534,15 @@ num function instrExecute(num instr, num op1, num op2, num n, num z, num c, num 
 		cpsr.setCValue(isSubC(se8(op1),se8(op2)));
 		cpsr.setVValue(isSubV(se8(op1),se8(op2),res));
 	}
-//instrNames[MOV]	= "MOV";	// Move register or constant
-//instrNames[MUL]	= "MUL";NB:	// Multiply ********(If S set V preserved)******************
-//instrNames[MVN]	= "MVN";	// Move negative register
+	else if (instr == MOV || instr == MOVi) {
+		return((op2) & 0xFF);
+	}
+	else if (instr == MUL || instr == MULi) { // Multiply ********(If S set V preserved)******************
+		return((op1 * op2) & 0xFF);
+	}
+	else if (instr == MVN || instr == MVNi) {
+		return((~op2) & 0xFF);
+	}
 	else if (instr == RSB || instr == RSBi)
 		return (se8(op2) - se8(op1)) & 0xFF;
 	else if (instr == RSC || instr == RSCi)

@@ -295,7 +295,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
     }
 
 	when rs1 ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/10/17}
-        if (!lockCircuit && down && opTypeRdt != OP_TYPE_UNUSED) {
+        if (!lockCircuit && down) {
             if (flags & MB_LEFT) {
  				vRs1 = (vRs1 == 15) ? 0 : vRs1 + 1;
             } else if (flags & MB_RIGHT)

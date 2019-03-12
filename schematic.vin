@@ -181,7 +181,7 @@ Register regPC1 = Register(776.0, 463, 54, 88, TOP, "PC1");
 // Register file
 Txt(0, HLEFT | VTOP, 1182.0, 88, 0, font, "Register\nFile");		// {joj}
 Register regFile[16];
-regFile[0] = Register(952.0, 66, 32, 88, TOP, "R0"); regFile[0].setFixed();                  // {joj 29/10/06}
+regFile[0] = Register(952.0, 66, 32, 88, TOP, "R0"); //regFile[0].setFixed();                  // {joj 29/10/06}
 regFile[1] = Register(984.0, 66, 32, 88, TOP, "R1");
 regFile[2] = Register(1016.0, 66, 32, 88, TOP, "R2");
 regFile[3] = Register(1048.0, 66, 32, 88, TOP, "R3");

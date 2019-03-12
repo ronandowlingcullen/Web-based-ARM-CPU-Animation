@@ -425,7 +425,7 @@ function idExec() {																// {joj 14/11/17}
 
     // Send source registers to A and B
 
-    if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) {
+    if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG || instrHasNoDstRR(regID.vIns) || instrHasNoDstRI(regID.vIns)) { //Rdt is type reg or it's a compare instruction
 		
 		//-------------------May Need to Fix This
         //if (instrIsJumpAndLink(regID.vIns)) {
@@ -438,7 +438,8 @@ function idExec() {																// {joj 14/11/17}
         //} else {
 
             regFile[regID.vRs1].highlight(bhighlight);                             // {joj}
-            regA.setNewValue(regFile[regID.vRs1].value);
+            if(instrOpTypeRs1(regID.vIns) != OP_TYPE_UNUSED)	//Don't set if not in use
+				regA.setNewValue(regFile[regID.vRs1].value);
 
             // decision facilitated by the opcode format and does not need a MUX
             if (instrOpTypeRs2(regID.vIns) == OP_TYPE_REG) {
@@ -449,9 +450,11 @@ function idExec() {																// {joj 14/11/17}
                 regB.setNewValue(regFile[regID.vRdt].value);
             }
 
-            txtRF_A.setTxt("R%d:%02X", regID.vRs1, regFile[regID.vRs1].value);      // {joj 29/10/06}
-            txtRF_A.setOpacity(1);													// {joj}
-            fork(apRF_A.animate(24));
+			if(instrOpTypeRs1(regID.vIns) != OP_TYPE_UNUSED) {	//Don't animate if not in use
+            	txtRF_A.setTxt("R%d:%02X", regID.vRs1, regFile[regID.vRs1].value);      // {joj 29/10/06}
+            	txtRF_A.setOpacity(1);													// {joj}
+				fork(apRF_A.animate(24));
+			}
 
             //
             // read Register file B port
@@ -461,7 +464,7 @@ function idExec() {																// {joj 14/11/17}
             // otherwise read source 2 register
             //
             //if ((!instrIsArRI(regID.vIns)) && (regID.vIns != LD)) {     // {joj 28/10/06}
-            if ((!instrIsArRI(regID.vIns)) && (regID.vIns != LDR)) {     // {joj 28/10/06}
+            if ((!instrIsArRI(regID.vIns)) && (regID.vIns != LDR) && (!instrHasNoOp1RI(regID.vIns))) {     // {joj 28/10/06}
                 //num vr = (regID.vIns == ST) ? regID.vRdt : regID.vRs2;  // {joj 28/10/06}
                 num vr = (regID.vIns == STR) ? regID.vRdt : regID.vRs2;  // {joj 28/10/06}
                 txtRF_MUX5.setTxt("R%d:%02X", vr, regFile[vr].value);   // {joj 29/10/06}
@@ -495,7 +498,7 @@ function exExec() {														// {joj 14/11/17}
 
     regMA.setNewValue(regEX.vIns, regEX.vRdt, regEX.vRs1, regEX.vRs2, regEX.vIns2, regEX.vRs3);
 
-    if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) {
+    if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) { //Rdt is type reg or it's a compare instruction
 
         // select correct source for operand 1
 		
@@ -559,12 +562,11 @@ function exExec() {														// {joj 14/11/17}
 
         }
 		
-		Register(0, 0, 108, 44, LEFT, "PC");     // {joj 1/2/06}
         num result = instrExecute(regEX.vIns, op1, op2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
 
         // R0 is always 0
-        if (regEX.vRdt == 0)
-            result = 0;
+        //if (regEX.vRdt == 0)
+        //    result = 0;
 
         regOUT0.setNewValue(result);
 
@@ -611,14 +613,14 @@ function exExec() {														// {joj 14/11/17}
     if (regEX.vIns == STR)                                           // {joj}
         fork(mux8Src.animate(24));                            	 	// {joj 1/2/06}
 
-    if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) {
-        if (mux6Src != 0)
+    if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) { //Rdt is type reg or it's a compare instruction
+        if (mux6Src != 0 && (instrOpTypeRs1(regEX.vIns) != OP_TYPE_UNUSED))
             fork(mux6Src.animate(24));
         if (mux7Src == apEX_MUX7) {                                 // {joj 29/10/06}
             txtEX_MUX7.setTxt("%02X", op2);                         // {joj 29/10/06}
             txtEX_MUX7.setOpacity(1);                             	// {joj 29/10/06}
         }                                                           // {joj 29/10/06}
-        fork(mux7Src.animate(24));
+		fork(mux7Src.animate(24));
     }
 
     wait(24);
@@ -631,10 +633,10 @@ function exExec() {														// {joj 14/11/17}
     if (regEX.vIns == STR)                                           // {joj}
         fork(apMUX8_SMDR.animate(40));                         		// {joj 1/2/06}
 
-    if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) {
+    if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) { //Rdt is type reg or it's a compare instruction
 
         alu.setTxtOp(regEX.vIns);                                   // {joj 29/10/06}
-        if (mux6Src != 0)
+        if (mux6Src != 0 && (instrOpTypeRs1(regEX.vIns) != OP_TYPE_UNUSED))
             fork(apMUX6_OUT0.animate(40));
         fork(apMUX7_OUT0.animate(40));                         		// {joj 29/10/06}
         wait(20);                                                   // {joj 29/10/06}
@@ -652,7 +654,7 @@ function maExec() {													// {joj 14/11/17}
 
     fork(regMA.update());
 
-    if (instrOpTypeRdt(regMA.nIns) == OP_TYPE_REG)
+    if (instrOpTypeRdt(regMA.nIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns)) //Rdt is type reg or it's a compare instruction
         fork(regOUT0.update());
 
     //if (regMA.nIns == ST) // {joj}
@@ -664,7 +666,7 @@ function maExec() {													// {joj 14/11/17}
     regWB.setNewValue(regMA.vIns, regMA.vRdt, regMA.vRs1, regMA.vRs2, regMA.vIns2, regMA.vRs3);
 
     //if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG) && (regMA.vIns != ST)) {  // {joj}
-    if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG) && (regMA.vIns != STR)) {  // {joj}
+    if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns)) && (regMA.vIns != STR)) {  // {joj}
 
         //if (regMA.vIns == LD) {   // {joj}
         if (regMA.vIns == LDR) {   // {joj}
@@ -691,7 +693,7 @@ function maExec() {													// {joj 14/11/17}
         apOUT0_Mem.animate(24);
         memory[regOUT0.value % 4].update();
 
-    } else if (instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG) {
+    } else if (instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns)) { //Rdt is type reg or it's a compare instruction
 
         //if (regMA.vIns == LD) {                                     // {joj}
         if (regMA.vIns == LDR) {                                     // {joj}
@@ -715,13 +717,13 @@ function wbExec() {																// {joj 14/11/17}
     fork(regWB.update());
 
     //if ((instrOpTypeRdt(regWB.nIns) == OP_TYPE_REG) && (regWB.nIns != ST))      // {joj}
-    if ((instrOpTypeRdt(regWB.nIns) == OP_TYPE_REG) && (regWB.nIns != STR))      // {joj}
+    if ((instrOpTypeRdt(regWB.nIns) == OP_TYPE_REG || instrHasNoDstRR(regWB.vIns) || instrHasNoDstRI(regWB.vIns)) && (regWB.nIns != STR))      // {joj}
         fork(regOUT1.update());
 
     wait(8);
 
     //if ((instrOpTypeRdt(regWB.vIns) == OP_TYPE_REG) && (regWB.vIns != ST)) {    // {joj}
-    if ((instrOpTypeRdt(regWB.vIns) == OP_TYPE_REG) && (regWB.vIns != STR)) {    // {joj}
+    if ((instrOpTypeRdt(regWB.vIns) == OP_TYPE_REG || instrHasNoDstRR(regWB.vIns) || instrHasNoDstRI(regWB.vIns)) && (regWB.vIns != STR)) {    // {joj}
         regFile[regOUT1.tag].setNewValue(regOUT1.value);
 
         wait(8);
