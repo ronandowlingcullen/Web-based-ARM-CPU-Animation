@@ -19,6 +19,62 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+
+//
+// Condition Constants
+//
+
+// Number of Conditions
+const num MAX_COND = 18;
+
+const num def = 0; 	// Default is equivalent to AL
+const num EQ = 1; 		// Z set (Equal)
+const num NE = 2; 		// Z clear (Not Equal)
+const num HS = 3; 		// C set (Unsigned Higher or same)
+const num CS = 4; 		// C set
+const num LO = 5; 		// C clear (Unsigned Lower or Same)
+const num CC = 6; 		// C clear
+const num MI = 7; 		// N set (Negative)
+const num PL = 8; 		// N clear (Positive or Zero)
+const num VS = 9; 		// V set (Overflow)
+const num VC = 10; 		// V clear (No Overflow)
+const num HI = 11; 		// C set and Z clear (Unsigned Higher)
+const num LS = 12; 		// C clear  or Z set (Unsigned Lower or Same)
+const num GE = 13; 		// N set and V set, or N clear and V clear (Greater Than or Equal)
+const num LT = 14; 		// N set and V clear, or N clear and V set(Less Than)
+const num GT = 15; 		// Z clear, and either N set and V set, or N clear and V clear
+const num LE = 16; 		// Z set, or N set and V clear, or N clear and V set (Equal)
+const num AL = 17; 		// (Always)
+const num NV = 18; 		// (Reserved)
+
+//
+// Condition Names
+//
+
+string condNames[MAX_COND+1];
+
+
+condNames[def]= "  "; 	// Default is equivalent to AL
+condNames[EQ] = "EQ"; 		// Z set (Equal)
+condNames[NE] = "NE"; 		// Z clear (Not Equal)
+condNames[HS] = "HS"; 		// C set (Unsigned Higher or same)
+condNames[CS] = "CS"; 		// C set
+condNames[LO] = "LO"; 		// C clear (Unsigned Lower or Same)
+condNames[CC] = "CC"; 		// C clear
+condNames[MI] = "MI"; 		// N set (Negative)
+condNames[PL] = "PL"; 		// N clear (Positive or Zero)
+condNames[VS] = "VS"; 		// V set (Overflow)
+condNames[VC] = "VC"; 		// V clear (No Overflow)
+condNames[HI] = "HI"; 		// C set and Z clear (Unsigned Higher)
+condNames[LS] = "LS"; 		// C clear  or Z set (Unsigned Lower or Same)
+condNames[GE] = "GE"; 		// N set and V set, or N clear and V clear (Greater Than or Equal)
+condNames[LT] = "LT"; 		// N set and V clear, or N clear and V set(Less Than)
+condNames[GT] = "GT"; 		// Z clear, and either N set and V set, or N clear and V clear
+condNames[LE] = "LE"; 		// Z set, or N set and V clear, or N clear and V set (Equal)
+condNames[AL] = "AL"; 		// (Always)
+condNames[NV] = "NV"; 		// (Reserved)
+
+
 //
 // Instruction constants
 //
@@ -538,6 +594,8 @@ num function instrExecute(num instr, num op1, num op2, num n, num z, num c, num 
 		return((op2) & 0xFF);
 	}
 	else if (instr == MUL || instr == MULi) { // Multiply ********(If S set V preserved)******************
+		debug("RegA = %d", op1);
+		debug("RegB = %d", op2);
 		return((op1 * op2) & 0xFF);
 	}
 	else if (instr == MVN || instr == MVNi) {

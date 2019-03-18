@@ -25,14 +25,14 @@ if (name != "")
 
 Font fTitle = Font("Calibri", 54, SMALLCAPS | ITALIC);
 
-Rectangle title = Rectangle2(0, HLEFT, 0, SolidBrush(DARK_BLUE), 27, 27, 911.0, 66, whitePen, fTitle, sprintf(" MIPS Animation %s", name));	// {joj 2/27/16}
+Rectangle title = Rectangle2(0, HLEFT, 0, SolidBrush(DARK_BLUE), 27, 27, 911.0, 66, whitePen, fTitle, sprintf(" ARM9 TDMI Animation %s", name));	// {joj 2/27/16}
 
 Pen borderPen = SolidPen(DASH, 3, DARK_BLUE, ROUND_START | ROUND_JOIN | ROUND_END);
 
-Line2(0, ABSOLUTE, borderPen, 425.0, 176, 1993.0, 176);
-Line2(0, ABSOLUTE, borderPen, 425.0, 970, 1993.0, 970);
+Line2(0, ABSOLUTE, borderPen, 437.0, 176, 1993.0, 176);
+Line2(0, ABSOLUTE, borderPen, 437.0, 970, 1993.0, 970);
 
-Line2(0, ABSOLUTE, borderPen, 425.0, 176, 425.0, 970);
+Line2(0, ABSOLUTE, borderPen, 437.0, 176, 437.0, 970);
 Line b1 = Line2(0, ABSOLUTE, borderPen, 749.0, 176, 749.0, 970);
 Line b2 = Line2(0, ABSOLUTE, borderPen, 1155.0, 176, 1155.0, 970);
 Line b3 = Line2(0, ABSOLUTE, borderPen, 1560.0, 176, 1560.0, 970);
@@ -83,8 +83,8 @@ Rectangle statTE = Txt(0, HLEFT | VTOP, 243, 123, redPen, font, "0");				// {joj
 
 // Instruction memory and clock
 Rectangle imLabel = Rectangle2(0, 0, 0, 0, 27, 150, 270, 27, 0, font, "Instruction Cache"); // {joj}
-InstructionMemory im = InstructionMemory(27, 176, 370, 705);
-AnimatedClock animClock = AnimatedClock(54, 904, 216, 66);
+InstructionMemory im = InstructionMemory(27, 190, 390, 715);
+AnimatedClock animClock = AnimatedClock(54, 914, 216, 66);
 
 // IF and PC
 Register regPC = Register(641.0, 463, 54, 88, TOP, "PC");
@@ -105,7 +105,7 @@ Component cPLUS4 = Component(533.0, 595, 54, 22, "+4");
 
 // connections from and to instruction memory
 AnimPipe apIM_ID = AnimPipe();
-apIM_ID.addPoint(397.0, 860);
+apIM_ID.addPoint(415.0, 860);
 apIM_ID.addPoint(776.0, 860);
 Rectangle txtIM_ID = Rectangle(activePipesLayer, 0, 0, redBrush, 587.0,8130, -81,-13, 130,26, whitePen, font);	// {joj 1/4/013, 17/10/113}
 txtIM_ID.setRounded(2, 2);	// {joj 17/10/16}
@@ -113,7 +113,7 @@ txtIM_ID.setRounded(2, 2);	// {joj 17/10/16}
 AnimPipe apPC_IM = AnimPipe();
 apPC_IM.addPoint(668.0, 551);
 apPC_IM.addPoint(668.0, 705);
-apPC_IM.addPoint(397.0, 705);
+apPC_IM.addPoint(415.0, 705);
 
 // connections into MUX1
 AnimPipe apMUX3_MUX1 = AnimPipe();
