@@ -60,7 +60,7 @@ num lockCircuit = 0;
 const num NO_STALL = 0;
 const num DATA_STALL = 1;
 const num CTRL_STALL = 2;
-const num MUL_STALL = 2;
+const num MUL_STALL = 3;
 
 const num PIPELINING_ENABLED = 0;
 const num PIPELINING_DISABLED = 1;

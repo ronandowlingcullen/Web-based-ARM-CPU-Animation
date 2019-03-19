@@ -80,7 +80,7 @@ condNames[NV] = "NV"; 		// (Reserved)
 //
 
 // Number of instructions (excluding "stall" instruction)
-const num MAX_INSTR = 54;
+const num MAX_INSTR = 48;
 
 // No-op
 const num NOP = 0;
@@ -115,68 +115,62 @@ const num SUBi  = 18;    // Subtract
 const num SBCi	= 19;	// Subtract with Carry
 const num RSBi	= 20;	// Reverse Subtract
 const num RSCi	= 21;	// Reverse Subtract with Carry
-const num MULi	= 22;	// Multiply
 
-const num ANDi  = 23;    // Logical AND
-const num ORRi  = 24;    // Logical OR
-const num EORi	= 25;	// Exclusive OR
-const num BICi	= 26;	// Bit Clear
+const num ANDi  = 22;    // Logical AND
+const num ORRi  = 23;    // Logical OR
+const num EORi	= 24;	// Exclusive OR
+const num BICi	= 25;	// Bit Clear
 
-const num LSLi	= 27;	// Logical Shift Left
-const num LSRi	= 28;	// Logical Shift Right
-const num ASRi	= 29;	// Arithmetic Shift RIght
-const num RORi	= 30;	// Rotate Right
+const num LSLi	= 26;	// Logical Shift Left
+const num LSRi	= 27;	// Logical Shift Right
+const num ASRi	= 28;	// Arithmetic Shift RIght
+const num RORi	= 29;	// Rotate Right
 
 
 // Comparisons (register - register)
-const num CMN	= 31;	// Compare Negative
-const num CMP	= 32;	// Compare
-const num TEQ	= 33;	// Test bitwise equality
-const num TST	= 34;	// Test bits
+const num CMN	= 30;	// Compare Negative
+const num CMP	= 31;	// Compare
+const num TEQ	= 32;	// Test bitwise equality
+const num TST	= 33;	// Test bits
 
 // Comparisons (register - immediate)
-const num CMNi	= 35;	// Compare Negative
-const num CMPi	= 36;	// Compare
-const num TEQi	= 37;	// Test bitwise equality
-const num TSTi	= 38;	// Test bits
+const num CMNi	= 34;	// Compare Negative
+const num CMPi	= 35;	// Compare
+const num TEQi	= 36;	// Test bitwise equality
+const num TSTi	= 37;	// Test bits
 
 
 
 // Load/store instructions (register - register)
-const num MOV	= 39;	// Move register or constant
-const num MVN	= 40;	// Move negative register
-const num LDR	= 41;   // Load register from memory
-const num STR	= 42;   // Store register to memory
-const num SWP	= 43;	// Swap register with memory
+const num MOV	= 38;	// Move register or constant
+const num MVN	= 39;	// Move negative register
+const num LDR	= 40;   // Load register from memory
+const num STR	= 41;   // Store register to memory
 
 // Load/store instructions (register - immediate)
-const num MOVi	= 44;	// Move register or constant
-const num MVNi	= 45;	// Move negative register
-const num LDRi	= 46;   // Load register from memory
-const num STRi	= 47;   // Store register to memory
+const num MOVi	= 42;	// Move register or constant
+const num MVNi	= 43;	// Move negative register
+const num LDRi	= 44;   // Load register from memory
+const num STRi	= 45;   // Store register to memory
 
-
-// Control instructions (register - register)
-const num B		= 48;   // Branch
-const num BL	= 49;   // Branch with Link
 
 // Control instructions (register - immediate)
-const num Bi	= 50;   // Branch
-const num BLi	= 51;   // Branch with Link
+const num B		= 46;   // Branch
+const num BL	= 47;   // Branch with Link
 
 
 // Halt
-const num HALT  = 52;   // Stop running
+const num HALT  = 48;   // Stop running
 
 // "Stall" and "Empty" instruction (aliases for NOP)
-const num STALL = 53;
-const num EMPTY = 54;
+const num STALL = 49;
+const num EMPTY = 50;
 
 //
 // Instruction names
 //
 
-string instrNames[55];
+string instrNames[51];
 
 // NOP
 instrNames[NOP] = "NOP";
@@ -246,8 +240,6 @@ instrNames[SUBi] = "SUB(i)";    // Subtract
 instrNames[SBCi] = "SBC(i)";	// Subtract with Carry
 instrNames[RSBi] = "RSB(i)";	// Reverse Subtract
 instrNames[RSCi] = "RSC(i)";	// Reverse Subtract with Carry
-instrNames[MULi] = "MUL(i)";	// Multiply
-
 instrNames[ANDi] = "AND(i)";    // Logical AND
 instrNames[ORRi] = "ORR(i)";    // Logical OR
 instrNames[EORi] = "EOR(i)";	// Exclusive OR
@@ -277,7 +269,6 @@ instrNames[MOV]	= "MOV";	// Move register or constant
 instrNames[MVN]	= "MVN";	// Move negative register
 instrNames[LDR]	= "LDR";   // Load register from memory
 instrNames[STR]	= "STR";   // Store register to memory
-instrNames[SWP]	= "SWP";	// Swap register with memory
 
 // Load/store instructions (register - immediate)
 instrNames[MOVi]	= "MOV(i)";	// Move register or constant
@@ -289,11 +280,6 @@ instrNames[STRi]	= "STR(i)";   // Store register to memory
 // Control instructions (register - register)
 instrNames[B]	= "B";   // Branch
 instrNames[BL]	= "BL";   // Branch with Link
-
-// Control instructions (register - register)
-instrNames[Bi]	= "B(i)";   // Branch
-instrNames[BLi]	= "BL(i)";   // Branch with Link
-
 
 // Halt
 instrNames[HALT]    = "HALT";
@@ -321,7 +307,7 @@ num function instrIsArRI(num instr) {
 
 num function instrIsBranch(num instr) {
     //return ((instr == BEQZ) || (instr == BNEZ)) ? 1 : 0;    // {joj 28/10/06}
-	return (instr >= B && instr <= BLi) ? 1 : 0;
+	return (instr == B || instr == BL) ? 1 : 0;
 }
 
 //num function isJorJAL(num instr) {							// {joj 3/11/12}
@@ -367,7 +353,7 @@ num function instrHasNoDstRI(num instr) {
 
 // instructions with no op2 Register - Register
 num function instrHasNoOp1RR(num instr) {
-	return ((instr >= MOV && instr <= SWP)) ? 1 : 0;
+	return ((instr >= MOV && instr <= STR)) ? 1 : 0;
 }
 
 // instructions with no op2 Register - Immediate
@@ -393,7 +379,7 @@ num function instrOpTypeRdt(num instr) {
 num function instrOpTypeRs1(num instr) {
     if (instrIsNop(instr) || instrHasNoOp1RR(instr) ||  instrHasNoOp1RI(instr))
         return OP_TYPE_UNUSED;
-	else if (instr == Bi || instr == BLi)
+	else if (instr == B || instr == BL)
 		return OP_TYPE_IMM;
     else
         return OP_TYPE_REG;
@@ -649,7 +635,7 @@ num function instrExecute(num instr, string s, num cond, num op1, num op2, num n
 	else if (instr == MOV || instr == MOVi) {
 		res =((op2) & 0xFF);
 	}
-	else if (instr == MUL || instr == MULi) { // Multiply ********(If S set V preserved)******************
+	else if (instr == MUL) { // Multiply ********(If S set V preserved)******************
 		res =((op1 * op2) & 0xFF);
 	}
 	else if (instr == MVN || instr == MVNi) {
@@ -685,7 +671,7 @@ num function instrExecute(num instr, string s, num cond, num op1, num op2, num n
 		setFlags(res,op1,op2,add);
 	}
     else if (instr == B || instr == BL) {
-        res = op2;
+        res = op2 & 0xFF;
     } else {
         res = 0xEE;
 	}
