@@ -21,8 +21,10 @@
 
 class InstructionRegister(num x, num y, num w, num h, string caption) {
 
-    num vIns = EMPTY, vRdt = 0, vRs1 = 0, vRs2 = 0, vIns2 = EMPTY, vRs3 = 0;
-    num nIns = EMPTY, nRdt = 0, nRs1 = 0, nRs2 = 0, nIns2 = EMPTY, nRs3 = 0;
+	string vSBit = " ";
+    num vIns = EMPTY, vCond = 0, vRdt = 0, vRs1 = 0, vRs2 = 0, vIns2 = EMPTY, vRs3 = 0;
+	string nSBit = " ";
+    num nIns = EMPTY, nCond = 0, nRdt = 0, nRs1 = 0, nRs2 = 0, nIns2 = EMPTY, nRs3 = 0;
 
     string txt = "EMPTY";
 
@@ -37,8 +39,10 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     //
     // setNewValue
     //
-    function setNewValue(num instr, num rdt, num rs1, num rs2, num instr2, num rs3) {
+    function setNewValue(num instr, string sBit, num cond, num rdt, num rs1, num rs2, num instr2, num rs3) {
         nIns = instr;
+		nSBit = sBit;
+		nCond = cond;
         nRdt = rdt;
         nRs1 = rs1;
         nRs2 = rs2;
@@ -51,6 +55,8 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     //
     function setNewInstruction(Instruction i) {
         nIns = i.vIns;
+		nSBit = i.vSBit;
+		nCond = i.vCond;
         nRdt = i.vRdt;
         nRs1 = i.vRs1;
         nRs2 = i.vRs2;
@@ -70,6 +76,8 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     //
    function update() {									// {joj 14/11/17}
         vIns = nIns;
+		vSBit = nSBit;
+		vCond = nCond;
         vRdt = nRdt;
         vRs1 = nRs1;
         vRs2 = nRs2;									
@@ -98,9 +106,11 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     function reset() {
         vIns = EMPTY;
 		vIns2 = EMPTY;
-        vRdt = vRs1 = vRs2 = vRs3 = 0;
+		vSBit = " ";
+        vRdt = vCond = vRs1 = vRs2 = vRs3 = 0;
         nIns = EMPTY;
 		nIns2 = EMPTY;
+		nSBit = " ";
         nRdt = nRs1 = nRs2 = nRs3 = 0;
         txt = instrText(vIns, vRdt, vRs1, vRs2, nIns2, nRs3);        // {joj 28/10/10}
         label.setTxt(txt);

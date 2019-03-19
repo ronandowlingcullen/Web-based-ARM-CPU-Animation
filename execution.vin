@@ -118,42 +118,57 @@ function calcNewPC() {
 		//Pen pen = (stall == NO_STALL) ? controlHLPen : controlPen;	// {joj 4/11/12}
 		Pen pen = controlHLPen;	// {joj 8/12/16}
 
-        if (zfMode == ZERO_FORWARDING) {
-            if ((regEX.vRdt == regID.vRs1) && (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) && instrIsLoadOrStore(regEX.vIns) == 0) {	// {joj 8/12/16}
-                clALU.setPen(pen);
-                zero = regOUT0.newValue;                            // where ALU result is stored
-            } else if (regOUT0.tagMatches(regID.vRs1)) {
-                clOUT0.setPen(pen);
-                zero = regOUT0.value;
-            //} else if (regOUT1.tagMatches(regID.vRs1)) {			// {joj 9/12/16}
-            //    clOUT1.setPen(pen);
-            //    zero = regOUT1.value;
-            } else {
-				mux1Src = apMUX3_MUX1;                              // {joj 3/11/12}
-                clA.setPen(pen);
-                zero = regFile[regID.vRs1].value;
-                txtRF_A.setTxt("R%d:%02X", regID.vRs1, zero);       // {joj 29/10/06}
-                txtRF_A.setOpacity(1);                            	// {joj 1/2/06}
-                fork(apRF_A.animate(24));                      		// {joj 1/2/06}
-            }
-        } else {
-            clA.setPen(pen);
-            zero = regFile[regID.vRs1].value;
-        }
+        //if (zfMode == ZERO_FORWARDING) {
+        //    if ((regEX.vRdt == regID.vRs1) && (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) && instrIsLoadOrStore(regEX.vIns) == 0) {	// {joj 8/12/16}
+        //        clALU.setPen(pen);
+        //        zero = regOUT0.newValue;                            // where ALU result is stored
+        //    } else if (regOUT0.tagMatches(regID.vRs1)) {
+        //        clOUT0.setPen(pen);
+        //        zero = regOUT0.value;
+        //    //} else if (regOUT1.tagMatches(regID.vRs1)) {			// {joj 9/12/16}
+        //    //    clOUT1.setPen(pen);
+        //    //    zero = regOUT1.value;
+        //    } else {
+		//		mux1Src = apMUX3_MUX1;                              // {joj 3/11/12}
+        //        clA.setPen(pen);
+        //        zero = regFile[regID.vRs1].value;
+        //        txtRF_A.setTxt("R%d:%02X", regID.vRs1, zero);       // {joj 29/10/06}
+        //        txtRF_A.setOpacity(1);                            	// {joj 1/2/06}
+        //        fork(apRF_A.animate(24));                      		// {joj 1/2/06}
+        //    }
+        //} else {
+        //    clA.setPen(pen);
+        //    zero = regFile[regID.vRs1].value;
+        //}
 
-        clMUX.setPen(pen);
+        //clMUX.setPen(pen);
 
-        //if ((regID.vIns == BEQZ) == (zero == 0)) {
-        if ((regID.vIns == B) == (zero == 0)) {
-            mux3Src = apADDi_MUX3;
-            newPC = (regPC1.value + regID.vRs2) & 0x7F;
-        } else {
-            mux3Src = apADD4_MUX3;
-            newPC = (regPC1.value + 4) & 0x7F;
-        }
+        ////if ((regID.vIns == BEQZ) == (zero == 0)) {
+        //if ((regID.vIns == B) == (zero == 0)) {
+        //    mux3Src = apADDi_MUX3;
+        //    newPC = (regPC1.value + regID.vRs2) & 0x7F;
+        //} else {
+        //    mux3Src = apADD4_MUX3;
+        //    newPC = (regPC1.value + 4) & 0x7F;
+        //}
 
-        newMux1Src = apMUX3_MUX1;
-        mux4Src = apMUX3_MUX4;
+        //newMux1Src = apMUX3_MUX1;
+        //mux4Src = apMUX3_MUX4;
+
+		//RDC's implementation
+		mux3Src = apADDi_MUX3;
+    	mux4Src = apMUX3_MUX4;
+		
+		if(testCondition(regID.vCond)){
+			if(regID.vIns == B || regID.vIns == BL) {
+    			newPC = (regPC1.value + regFile[regID.vRs1].value) & 0x7F;
+			} else {
+				newPC = (regPC1.value + regID.vRs1) & 0x7F;
+			}
+		} else {
+			newPC = regPC1.value + 4;
+		}
+    	newMux1Src = apMUX3_MUX1;
 
     }// else if (isJorJAL(regID.vIns)) {		//-----May need to fix this----------------------
 
@@ -442,9 +457,9 @@ function idExec() {																// {joj 14/11/17}
 		updBTB();																// {joj 9/12/16}
 
     if (stall == NO_STALL || stall == MUL_STALL) {
-        regEX.setNewValue(regID.vIns, regID.vRdt, regID.vRs1, regID.vRs2, regID.vIns2, regID.vRs3);
+        regEX.setNewValue(regID.vIns, regID.vSBit, regID.vCond, regID.vRdt, regID.vRs1, regID.vRs2, regID.vIns2, regID.vRs3);
     } else {
-        regEX.setNewValue(STALL, 0, 0, 0, STALL, 0);
+        regEX.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
     }
     
     wait(7);																	// {joj 4/11/12}
@@ -463,7 +478,8 @@ function idExec() {																// {joj 14/11/17}
 
         //} else {
 
-            regFile[regID.vRs1].highlight(bhighlight);                             // {joj}
+            if(instrOpTypeRs1(regID.vRs1) != OP_TYPE_IMM)
+				regFile[regID.vRs1].highlight(bhighlight);                             // {joj}
             if(instrOpTypeRs1(regID.vIns) != OP_TYPE_UNUSED)	//Don't set if not in use
 				regA.setNewValue(regFile[regID.vRs1].value);
 
@@ -472,7 +488,8 @@ function idExec() {																// {joj 14/11/17}
                 regFile[regID.vRs2].highlight(bhighlight);                         // {joj}
                 regB.setNewValue(regFile[regID.vRs2].value);
             } else {
-                regFile[regID.vRdt].highlight(bhighlight);                         // {joj}
+                if(instrOpTypeRdt(regID.vRdt) != OP_TYPE_UNUSED)
+					regFile[regID.vRdt].highlight(bhighlight);                         // {joj}
                 regB.setNewValue(regFile[regID.vRdt].value);
             }
 
@@ -524,7 +541,7 @@ function exExec() {														// {joj 14/11/17}
 
     wait(8);
 
-    regMA.setNewValue(regEX.vIns, regEX.vRdt, regEX.vRs1, regEX.vRs2, regEX.vIns2, regEX.vRs3);
+    regMA.setNewValue(regEX.vIns, regEX.vSBit, regEX.vCond, regEX.vRdt, regEX.vRs1, regEX.vRs2, regEX.vIns2, regEX.vRs3);
 
     if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) { //Rdt is type reg or it's a compare instruction
 
@@ -590,23 +607,32 @@ function exExec() {														// {joj 14/11/17}
 
         }
 		
-        num result = instrExecute(regEX.vIns, op1, op2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
+        num result = instrExecute(regEX.vIns, regEX.vSBit, regEX.vCond, op1, op2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
 
         // R0 is always 0
         //if (regEX.vRdt == 0)
         //    result = 0;
 
-        regOUT0.setNewValue(result);
+		
+
+        
 
         if (instrIsLoadOrStore(regEX.vIns)) {
-            regOUT0.setNewTag(-1)				// OUT0 contains the EA, tag should be -1
+            regOUT0.setNewTag(-1);				// OUT0 contains the EA, tag should be -1
         } else {
             regOUT0.setNewTag(regEX.vRdt);
 		}
 
+		//If condition fails result is old value of Rd
+		if (testCondition(regEX.vCond)) {
+			regOUT0.setNewValue(result);
+		} else {
+			regOUT0.setNewTag(-2);
+		}
+
         regOUT0.setInvalid(0);								
 
-    } else if (regEX.vIns == NOP) {				// {joj 30/11/16}
+    } else if (regEX.vIns == NOP || !testCondition(regEX.vCond)) {				// {joj 30/11/16}
 
 		regOUT0.setInvalid(1);					// {joj 30/11/16}
 		regOUT0.updateLabel();					// {joj 30/11/16}
@@ -615,7 +641,7 @@ function exExec() {														// {joj 14/11/17}
 
     // For stores, send correct operand to SMDR
     //if (regEX.vIns == ST) {  // {joj}
-    if (regEX.vIns == STR || regEX.vIns == STRi) {  // {joj}
+    if ((regEX.vIns == STR || regEX.vIns == STRi)) {  // {joj}
         if (sfMode == FORWARDING_TO_SMDR) {
             if (regOUT0.tagMatches(regEX.vRdt)) {
                 mux8Src = apOUT0_MUX8;
@@ -638,7 +664,7 @@ function exExec() {														// {joj 14/11/17}
     fork(apEX_MA.animate(64));
 
     //if (regEX.vIns == ST)                                           // {joj}
-    if (regEX.vIns == STR || regEX.vIns == STRi)                                           // {joj}
+    if ((regEX.vIns == STR || regEX.vIns == STRi))                                           // {joj}
         fork(mux8Src.animate(24));                            	 	// {joj 1/2/06}
 
     if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) { //Rdt is type reg or it's a compare instruction
@@ -658,7 +684,7 @@ function exExec() {														// {joj 14/11/17}
     //
 
     //if (regEX.vIns == ST)                                           // {joj}
-    if (regEX.vIns == STR || regEX.vIns == STRi)                                           // {joj}
+    if ((regEX.vIns == STR || regEX.vIns == STRi))                                           // {joj}
         fork(apMUX8_SMDR.animate(40));                         		// {joj 1/2/06}
 
     if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) { //Rdt is type reg or it's a compare instruction
@@ -681,13 +707,20 @@ function exExec() {														// {joj 14/11/17}
 function maExec() {													// {joj 14/11/17}
 
 	if(stall == MUL_STALL) {	//Stall ahead of MUL op
-		regMA.setNewValue(STALL, 0, 0, 0, STALL, 0);
+		regMA.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
 	}
+
+	//Check for coditional nonexecution
+	if(regOUT0.tag == -2) {
+		regOUT1.setNewTag(-2);
+	}
+	
 
 	fork(regMA.update());
 
-    if (instrOpTypeRdt(regMA.nIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns)) //Rdt is type reg or it's a compare instruction
+    if (instrOpTypeRdt(regMA.nIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns)) { //Rdt is type reg or it's a compare instruction
         fork(regOUT0.update());
+	}
 
     //if (regMA.nIns == ST) // {joj}
     if (regMA.nIns == STR || regMA.nIns == STRi) // {joj}
@@ -695,15 +728,17 @@ function maExec() {													// {joj 14/11/17}
 
     wait(8);
 
-    regWB.setNewValue(regMA.vIns, regMA.vRdt, regMA.vRs1, regMA.vRs2, regMA.vIns2, regMA.vRs3);
+    regWB.setNewValue(regMA.vIns, regMA.vSBit, regMA.vCond, regMA.vRdt, regMA.vRs1, regMA.vRs2, regMA.vIns2, regMA.vRs3);
 
     //if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG) && (regMA.vIns != ST)) {  // {joj}
     if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns)) && (regMA.vIns != STR && regMA.vIns != STRi)) {  // {joj}
 
         //if (regMA.vIns == LD) {   // {joj}
-        if (regMA.vIns == LDR || regMA.vIns == LDRi) {   // {joj}
+        if ((regMA.vIns == LDR || regMA.vIns == LDRi)) {   // {joj}
             regOUT1.setNewValue(memory[regOUT0.value % 4].value);
-            regOUT1.setNewTag(regMA.vRdt);
+			if(regOUT1.tag != -2) {
+            	regOUT1.setNewTag(regMA.vRdt);
+			}
         } else {
             regOUT1.setNewValue(regOUT0.value);
             regOUT1.setNewTag(regOUT0.tag);
@@ -716,9 +751,8 @@ function maExec() {													// {joj 14/11/17}
     wait(8);
 
     fork(apMA_WB.animate(64));
-
     //if (regMA.vIns == ST) {                                         // {joj}
-    if (regMA.vIns == STR || regMA.vIns == STRi) {                                         // {joj}
+    if ((regMA.vIns == STR || regMA.vIns == STRi) && (regOUT0.tag != -2)) {                                         // {joj}
 
         memory[regOUT0.value % 4].setNewValue(regSMDR.value);
         fork(apSMDR_Mem.animate(24));                          		// {joj 1/2/06}
@@ -728,7 +762,7 @@ function maExec() {													// {joj 14/11/17}
     } else if (instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns)) { //Rdt is type reg or it's a compare instruction
 
         //if (regMA.vIns == LD) {                                     // {joj}
-        if (regMA.vIns == LDR || regMA.vIns == LDRi) {                                     // {joj}
+        if ((regMA.vIns == LDR || regMA.vIns == LDRi) && (regOUT0.tag != -2)) {                                     // {joj}
             apOUT0_Mem.animate(24);
             memory[regOUT0.value % 4].highlight(bhighlight);		// {joj}
             apMem_MUX9.animate(24);
@@ -755,7 +789,7 @@ function wbExec() {																// {joj 14/11/17}
     wait(8);
 
     //if ((instrOpTypeRdt(regWB.vIns) == OP_TYPE_REG) && (regWB.vIns != ST)) {    // {joj}
-    if ((instrOpTypeRdt(regWB.vIns) == OP_TYPE_REG || instrHasNoDstRR(regWB.vIns) || instrHasNoDstRI(regWB.vIns)) && (regWB.vIns != STR && regWB.nIns != STRi)) {    // {joj}
+    if ((instrOpTypeRdt(regWB.vIns) == OP_TYPE_REG || instrHasNoDstRR(regWB.vIns) || instrHasNoDstRI(regWB.vIns)) && (regWB.vIns != STR && regWB.nIns != STRi) && (regOUT1.tag != -2)) {    // {joj}
         regFile[regOUT1.tag].setNewValue(regOUT1.value);
 
         wait(8);
@@ -763,7 +797,7 @@ function wbExec() {																// {joj 14/11/17}
         apOUT1_RF.animate(24);
 
         //
-        // Second half of the clock cycle
+        // Second half of the clock cycle ---------------------------------------khgjhgjfj---------------
         //
         regFile[regOUT1.tag].update();
         wait(19);
@@ -856,7 +890,7 @@ function execNonPipelined() {													// {joj 14/11/17}
 
     wait(24);
 
-    /// Second half of the clock cycle
+    // Second half of the clock cycle
 
 	//----------------May need to fix this-------------------------------
     //if (instrIsJumpAndLink(regID.vIns)) {
@@ -870,7 +904,8 @@ function execNonPipelined() {													// {joj 14/11/17}
 	if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) {
 
         regA = regFile[regID.vRs1].value;
-        regFile[regID.vRs1].highlight(bhighlight);                                 // {joj}
+		if(instrOpTypeRs1(regID.vRs1 != OP_TYPE_IMM))
+        	regFile[regID.vRs1].highlight(bhighlight);                                 // {joj}
 
         txtRF_A.setTxt("R%d:%02X", regID.vRs1, regFile[regID.vRs1].value);          // {joj 29/10/06}
         txtRF_A.setOpacity(1);                                                      // {joj}
@@ -881,7 +916,8 @@ function execNonPipelined() {													// {joj 14/11/17}
 
             if (instrOpTypeRs2(regID.vIns) == OP_TYPE_IMM) {
                 regB = regFile[regID.vRdt].value;
-                regFile[regID.vRdt].highlight(bhighlight);                     		// {joj}
+				if(instrOpTypeRdt(regID.vIns != OP_TYPE_UNUSED))
+                	regFile[regID.vRdt].highlight(bhighlight);                     		// {joj}
             } else {
                 regB = regFile[regID.vRs2].value;
                 regFile[regID.vRs2].highlight(bhighlight);                    		 // {joj}
@@ -935,7 +971,7 @@ function execNonPipelined() {													// {joj 14/11/17}
         apMUX6_OUT0.animate(40);
 
         smdr = regFile[regID.vRdt].value;
-        result = instrExecute(regID.vIns, regA, regID.vRs2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
+        result = instrExecute(regID.vIns, regID.vSBit, regID.vCond, regA, regID.vRs2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
 
 	//-----------------------May Need to Fix This-------------------------------
     //} else if (instrIsJumpAndLink(regID.vIns)) {
@@ -952,10 +988,10 @@ function execNonPipelined() {													// {joj 14/11/17}
             txtEX_MUX7.setTxt("%02X", regID.vRs2);                          // {joj 29/10/06}
             txtEX_MUX7.setOpacity(1);                                     // {joj 29/10/06}
             apEX_MUX7.animate(40);
-            result = instrExecute(regID.vIns, regA, regID.vRs2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
+            result = instrExecute(regID.vIns, regID.vSBit, regID.vCond, regA, regID.vRs2, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
         } else {
             apB_MUX7.animate(40);
-            result = instrExecute(regID.vIns, regA, regB, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
+            result = instrExecute(regID.vIns, regID.vSBit, regID.vCond, regA, regB, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
         }
 
         fork(apMUX7_OUT0.animate(40));
