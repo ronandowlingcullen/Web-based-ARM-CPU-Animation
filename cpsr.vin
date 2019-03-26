@@ -4,13 +4,16 @@
 
 Brush cpsrBrush = SolidBrush(PURPLE);
 Brush cpsrValueBrush = SolidBrush(WHITE);
+Font lFont = componentFont;
+Font vFont = font;
 
-class CPSR(num x, num y, num w, num h) {
+class CPSR(num x, num y, num w, num h, num forwarding) {
 
     num n = 0;
 	num z = 0;
 	num c = 0;
 	num v = 0;
+	num invalid = 0;
 	
 	//Co-ordinates of n,z,c and v parts
 	num nx = x;
@@ -23,20 +26,25 @@ class CPSR(num x, num y, num w, num h) {
 	num cy = y + h/3;
 	num vy = y + h/3;
 
+	if(forwarding) { //Small so need to change font sizes
+		lFont = Font("Calibri", 18);
+		vFont = Font("Calibri", 18);
+	}
+
     // Outer Rectangle
 	Rectangle outer = Rectangle2(0, 0, blackPen, cpsrBrush, x, y, w+4, h);		//Draw outer rectangle
 	
 	// Labels
-	Rectangle nLabel = Rectangle(0, 0, 0, 0, nx, y, 0, 0, w/4, h/3, 0, componentFont, "N");
-	Rectangle zLabel = Rectangle(0, 0, 0, 0, zx, y, 0, 0, w/4, h/3, 0, componentFont, "Z");
-	Rectangle cLabel = Rectangle(0, 0, 0, 0, cx, y, 0, 0, w/4, h/3, 0, componentFont, "C");
-	Rectangle vLabel = Rectangle(0, 0, 0, 0, vx, y, 0, 0, w/4, h/3, 0, componentFont, "V");
+	Rectangle nLabel = Rectangle(0, 0, 0, 0, nx, y, 0, 0, w/4, h/3, 0, lFont, "N");
+	Rectangle zLabel = Rectangle(0, 0, 0, 0, zx, y, 0, 0, w/4, h/3, 0, lFont, "Z");
+	Rectangle cLabel = Rectangle(0, 0, 0, 0, cx, y, 0, 0, w/4, h/3, 0, lFont, "C");
+	Rectangle vLabel = Rectangle(0, 0, 0, 0, vx, y, 0, 0, w/4, h/3, 0, lFont, "V");
 	
 	// Values
-    Rectangle nValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, nx+4, ny, (w/4)-4, 2*h/3-4, 0, font, "%01X", n);
-    Rectangle zValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, zx+4, zy, (w/4)-4, 2*h/3-4, 0, font, "%01X", z);
-    Rectangle cValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, cx+4, cy, (w/4)-4, 2*h/3-4, 0, font, "%01X", c);
-    Rectangle vValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, vx+4, vy, (w/4)-4, 2*h/3-4, 0, font, "%01X", v);
+    Rectangle nValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, nx+4, ny, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", n);
+    Rectangle zValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, zx+4, zy, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", z);
+    Rectangle cValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, cx+4, cy, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", c);
+    Rectangle vValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, vx+4, vy, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", v);
 
     //
     // setOpacity
@@ -162,6 +170,31 @@ class CPSR(num x, num y, num w, num h) {
     function setVValue(num val) {
         v = val;
         updateVValue();
+    }
+
+	function setInvalid(num val) {
+		invalid = val;
+		if(invalid){
+			nValue.setTxt("X");
+			zValue.setTxt("X");
+			cValue.setTxt("X");
+			vValue.setTxt("X");
+		}
+	}
+
+	//
+    // setOpacity
+    //
+    function setOpacity(num opacity) {
+        outer.setOpacity(opacity);
+        nLabel.setOpacity(opacity);
+        zLabel.setOpacity(opacity);
+        cLabel.setOpacity(opacity);
+        vLabel.setOpacity(opacity);
+        nValue.setOpacity(opacity);
+        zValue.setOpacity(opacity);
+        cValue.setOpacity(opacity);
+        vValue.setOpacity(opacity);
     }
 
     num hmode = 0;

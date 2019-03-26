@@ -80,7 +80,7 @@ condNames[NV] = "NV"; 		// (Reserved)
 //
 
 // Number of instructions (excluding "stall" instruction)
-const num MAX_INSTR = 48;
+const num MAX_INSTR = 46;
 
 // No-op
 const num NOP = 0;
@@ -150,27 +150,25 @@ const num STR	= 41;   // Store register to memory
 // Load/store instructions (register - immediate)
 const num MOVi	= 42;	// Move register or constant
 const num MVNi	= 43;	// Move negative register
-const num LDRi	= 44;   // Load register from memory
-const num STRi	= 45;   // Store register to memory
 
 
 // Control instructions (register - immediate)
-const num B		= 46;   // Branch
-const num BL	= 47;   // Branch with Link
+const num B		= 44;   // Branch
+const num BL	= 45;   // Branch with Link
 
 
 // Halt
-const num HALT  = 48;   // Stop running
+const num HALT  = 46;   // Stop running
 
 // "Stall" and "Empty" instruction (aliases for NOP)
-const num STALL = 49;
-const num EMPTY = 50;
+const num STALL = 47;
+const num EMPTY = 48;
 
 //
 // Instruction names
 //
 
-string instrNames[51];
+string instrNames[49];
 
 // NOP
 instrNames[NOP] = "NOP";
@@ -273,9 +271,6 @@ instrNames[STR]	= "STR";   // Store register to memory
 // Load/store instructions (register - immediate)
 instrNames[MOVi]	= "MOV(i)";	// Move register or constant
 instrNames[MVNi]	= "MVN(i)";	// Move negative register
-instrNames[LDRi]	= "LDR(i)";   // Load register from memory
-instrNames[STRi]	= "STR(i)";   // Store register to memory
-
 
 // Control instructions (register - register)
 instrNames[B]	= "B";   // Branch
@@ -352,13 +347,13 @@ num function instrHasNoDstRI(num instr) {
 }
 
 // instructions with no op2 Register - Register
-num function instrHasNoOp1RR(num instr) {
+num function instrHasNoOp2RR(num instr) {
 	return ((instr >= MOV && instr <= STR)) ? 1 : 0;
 }
 
 // instructions with no op2 Register - Immediate
-num function instrHasNoOp1RI(num instr) {
-	return ((instr >= MOVi && instr <= STRi)) ? 1 : 0;
+num function instrHasNoOp2RI(num instr) {
+	return ((instr >= MOVi && instr <= MVNi)) ? 1 : 0;
 }
 
 
@@ -377,18 +372,18 @@ num function instrOpTypeRdt(num instr) {
 }
 
 num function instrOpTypeRs1(num instr) {
-    if (instrIsNop(instr) || instrHasNoOp1RR(instr) ||  instrHasNoOp1RI(instr))
+    if (instrIsNop(instr))
         return OP_TYPE_UNUSED;
-	else if (instr == B || instr == BL)
+	else if (instr == B || instr == BL ||  instrHasNoOp2RI(instr))
 		return OP_TYPE_IMM;
     else
         return OP_TYPE_REG;
 }
 
 num function instrOpTypeRs2(num instr) {
-    if (instrIsNop(instr) || instrIsBranch(instr))
+    if (instrIsNop(instr) || instrIsBranch(instr) || instrHasNoOp2RR(instr) ||  instrHasNoOp2RI(instr))
         return OP_TYPE_UNUSED;
-    else if (instrIsArRR(instr) || instrHasNoDstRR(instr)  ||  instrHasNoOp1RR(instr))
+    else if (instrIsArRR(instr) || instrHasNoDstRR(instr))
         return OP_TYPE_REG;
     else
         return OP_TYPE_IMM;
@@ -430,24 +425,22 @@ num function instrOpTypeRs3(num instr2) {
 //    return "EMPTY";                                                         	// {joj 28/10/10}
 //}
 
-string function instrText(num instr, num rdt, num rs1, num rs2, num instr2, num rs3) {				// {joj 28/10/10}
+string function instrText(num instr, string s, num cond, num rdt, num rs1, num rs2, num instr2, num rs3) {	
     if (instrIsNop(instr))
-        return sprintf("%s", instrNames[instr]);                             	// {joj 28/10/10}
+        return sprintf("%s", instrNames[instr]);                             	
     else if (instrIsArRR(instr))
-        return sprintf("%s R%d,R%d,R%d", instrNames[instr], rdt, rs1, rs2);  	// {joj 28/10/10}
+        return sprintf("%s%s%s R%d,R%d,R%d", instrNames[instr], s, condNames[cond], rdt, rs1, rs2);  	
     else if (instrIsArRI(instr))
-        return sprintf("%s R%d,R%d,%02X", instrNames[instr], rdt, rs1, rs2); 	// {joj 28/10/10}
-    else if (instr == LDR)														// {joj}
-       return sprintf("LDR R%d,R%d+%02X", rdt, rs1, rs2);                     	// {joj 28/10/06}
-    else if (instr == STR)                                                		// {joj 28/10/06}
-        return sprintf("STR R%d,R%d+%02X", rdt, rs1, rs2);                    	// {joj 28/10/06}
+        return sprintf("%s%s%s R%d,R%d,%02X", instrNames[instr], s, condNames[cond], rdt, rs1, rs2); 	
+    else if (instr == LDR || instr == STR)														
+       return sprintf("%s%s R%d,[R%d]", instrNames[instr], condNames[cond], rdt, rs1);     
+    else if (instr == MOV || instr == MVN)														
+       return sprintf("%s%s%s R%d,R%d", instrNames[instr], s, condNames[cond], rdt, rs1);                   
+    else if (instr == MOVi || instr == MVNi)                                                		
+        return sprintf("%s%s%s R%d,%02X", instrNames[instr], s, condNames[cond], rdt, rs1);                  
     else if (instrIsBranch(instr))
-        return sprintf("%s R%d,%02X", instrNames[instr], rs1, rs2);          	// {joj 28/10/10}
-    else if (instr == B)
-        return sprintf("%s %02X", instrNames[instr], rs2);                   	// {joj 28/10/10}
-    else if (instr == BL)
-        return sprintf("%s R%d, %02X", instrNames[instr], rdt, rs2);         	// {joj 28/10/10}
-    return "EMPTY";                                                         	// {joj 28/10/10}
+        return sprintf("%s%s %02X", instrNames[instr], condNames[cond], rs1, rs2); 
+    return "EMPTY";                                                         	
 }
 
 //
@@ -563,42 +556,30 @@ num function testCondition(num cond) {
 	}
 }
 
-num function instrExecute(num instr, string s, num cond, num op1, num op2, num n, num z, num c, num v) {
-//    if (instr == ADD || instr == ADDi)
-//        return (se8(op1) + se8(op2)) & 0xFF;
-//    else if (instr == SUB || instr == SUBi)
-//        return (se8(op1) - se8(op2)) & 0xFF;
-//    else if (instr == AND || instr == ANDi)
-//        return op1 & op2;
-//    else if (instr == OR || instr == ORi)
-//        return op1 | op2;
-//    else if (instr == XOR || instr == XORi)
-//        return op1 ^ op2;
-//    else if (instr == SLL || instr == SLLi)
-//        return (op1 << op2) & 0xFF;
-//    else if (instr == SRL || instr == SRLi)
-//        return (op1 >> op2) & 0xFF;
-//    else if (instr == SLT || instr == SLTi)
-//        return op1 < op2 ? 1 : 0;
-//    else if (instr == SGT || instr == SGTi)
-//        return op1 > op2 ? 1 : 0;
-//    else if (instr == SLE || instr == SLEi)
-//        return op1 <= op2 ? 1 : 0;
-//    else if (instr == SGE || instr == SGEi)
-//        return op1 >= op2 ? 1 : 0;
-//    else if (instr == LD || instr == ST)                 // joj
-//        return (se8(op1) + se8(op2)) & 0xFF;
-//    else if (instr == JAL || instr == JALR)
-//        return op2;
-//    else
-//        return 0xEE;
+num function instrExecute(num instr, string s, num cond, num op1, num op2, num shiftIns, num op3, num n, num z, num c, num v) {
 
-
-
-
+	
+	debug("Op2 before: %d",op2);
+	
+	//Perform Shift on OP2
+	if(shiftIns == LSL || shiftIns == LSLi){
+		op2 = (op2 << op3) & 0xFF;
+	} else if(shiftIns == LSR || shiftIns == LSRi){
+		op2 = (op2 >> op3) & 0xFF;
+	} else if(shiftIns == ASR || shiftIns == ASRi){
+		num sign = op2 & 0x80;
+		op2 = (op2 >> op3) & 0xFF;
+		if(sign){
+			op2 = (op2 | (0xFF << (8-op3))) & 0xFF;
+		}
+	} else if(shiftIns == ROR || shiftIns == RORi){
+		op3 = op3%8;
+		op2 = ((op2 >> op3) | (op2 << (8-op3))) & 0xFF;
+	}
+	debug("Op2 after: %d",op2);
 
 	num res = 0;				// Init result to zero	
-	num add = 0;				// Initi is Add instruction	to zero
+	num add = 0;				// Init is Add instruction	to zero
 
     if (instr == ADD || instr == ADDi) {
         res = (se8(op1) + se8(op2)) & 0xFF;
@@ -615,7 +596,7 @@ num function instrExecute(num instr, string s, num cond, num op1, num op2, num n
         res = (op1 << op2) & 0xFF;
     } else if (instr == LSR || instr == LSRi) {
         res = (op1 >> op2) & 0xFF;
-    } else if (instr == LDR || instr == LDRi || instr == STR || instr == STRi)   {               // joj
+    } else if (instr == LDR || instr == STR)   {               // joj
         res = (se8(op1) + se8(op2)) & 0xFF;
 		add = 1;
 	} else if (instr == ADC || instr == ADCi) {
@@ -633,13 +614,13 @@ num function instrExecute(num instr, string s, num cond, num op1, num op2, num n
 		setFlags(res,op1,op2,add);
 	}
 	else if (instr == MOV || instr == MOVi) {
-		res =((op2) & 0xFF);
+		res =((op1) & 0xFF);
 	}
 	else if (instr == MUL) { // Multiply ********(If S set V preserved)******************
 		res =((op1 * op2) & 0xFF);
 	}
 	else if (instr == MVN || instr == MVNi) {
-		res =((~op2) & 0xFF);
+		res =((~op1) & 0xFF);
 	}
 	else if (instr == RSB || instr == RSBi) {
 		res = (se8(op2) - se8(op1)) & 0xFF;

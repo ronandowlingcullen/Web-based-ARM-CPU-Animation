@@ -170,6 +170,9 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         opTypeRs2 = instrOpTypeRs2(vIns);
         opTypeRs3 = instrOpTypeRs3(vIns2);
 
+		if (opTypeRs1 == OP_TYPE_REG)
+            vRs1 = (vRs1 % 16);
+
         if (opTypeRs2 == OP_TYPE_REG)
             vRs2 = (vRs2 % 16);
 
@@ -182,26 +185,25 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         if (opTypeRs1 == OP_TYPE_UNUSED){
 			rs1.setTxt("-");
 		} else if (opTypeRs1 == OP_TYPE_IMM) {
-			rs1.setTxt("%02X", vRs1);
+			if(vIns == LDR || vIns == STR) {
+				rs1.setTxt("[%02X]", vRs1)
+			} else {
+				rs1.setTxt("%02X", vRs1);
+			}
 		} else {
-			rs1.setTxt("R%d", vRs1);
+			if(vIns == LDR || vIns == STR) {
+				rs1.setTxt("[R%d]", vRs1)
+			} else {
+				rs1.setTxt("R%d", vRs1);
+			}
 		}
 
         if (opTypeRs2 == OP_TYPE_UNUSED)
             rs2.setTxt("-")
         else if (opTypeRs2 == OP_TYPE_REG) {
-            if(vIns == LDR || vIns == LDRi || vIns == STR || vIns == STRi) {
-				rs2.setTxt("[R%d]", vRs2)
-			} else {
-				rs2.setTxt("R%d", vRs2)
-			}
+			rs2.setTxt("R%d", vRs2);
         } else {
-			if(vIns == LDR || vIns == LDRi || vIns == STR || vIns == STRi) {
-				rs2.setTxt("[%02X]", vRs2)
-			} else {
-				rs2.setTxt("%02X", vRs2);
-			}
-            
+			rs2.setTxt("%02X", vRs2);
 		}
 
         if (opTypeRs3 == OP_TYPE_UNUSED)

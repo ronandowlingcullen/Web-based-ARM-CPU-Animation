@@ -19,6 +19,9 @@
 // 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 //
 
+//Run Test on register output of every instruction
+const num testOps = 1;
+
 const num WIDTH = 2200;
 const num HEIGHT = 1080;
     

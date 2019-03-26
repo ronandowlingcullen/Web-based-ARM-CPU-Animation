@@ -25,6 +25,8 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     num vIns = EMPTY, vCond = 0, vRdt = 0, vRs1 = 0, vRs2 = 0, vIns2 = EMPTY, vRs3 = 0;
 	string nSBit = " ";
     num nIns = EMPTY, nCond = 0, nRdt = 0, nRs1 = 0, nRs2 = 0, nIns2 = EMPTY, nRs3 = 0;
+	
+	Font IMFont = Font("Calibri",21);
 
     string txt = "EMPTY";
 
@@ -33,7 +35,7 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     Rectangle r2 = Rectangle2(0, 0, blackPen, whiteBrush, x + 5, y + 4, w - 11, h - 31);
 	r2.setRounded(2, 2); // {joj 16/10/16}
     Rectangle r3 = Rectangle2(0, 0, 0, 0, x, y + h - 22, w, 22, whitePen, font, caption);
-    Rectangle label = Txt(valuesLayer, 0, x + w/2, y + (h - 31)/2, 0, font, txt); // {joj 16/10/16}
+    Rectangle label = Txt(valuesLayer, 0, x + w/2, y + (h - 31)/2, 0, IMFont, txt); // {joj 16/10/16}
 	label.rotate(-90); // {joj 14/10/16}
 
     //
@@ -68,7 +70,7 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     // getNewInstrTxt
     //
     string function getNewInstrTxt() {
-        return instrText(nIns, nRdt, nRs1, nRs2, nIns2, nRs3);       // {joj 28/10/10}
+        return instrText(nIns, nSBit, nCond, nRdt, nRs1, nRs2, nIns2, nRs3);       // {joj 28/10/10}
     }
 
     //
@@ -83,7 +85,7 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
         vRs2 = nRs2;									
         vIns2 = nIns2;
 		vRs3 = nRs3;
-        txt = instrText(vIns, vRdt, vRs1, vRs2, nIns2, nRs3);        // {joj 28/10/10}
+        txt = instrText(vIns, vSBit, vCond, vRdt, vRs1, vRs2, nIns2, nRs3);        // {joj 28/10/10}
         label.setTxt(txt);
         r2.setBrush(yellowBrush);                       // {joj}
         wait(16);
@@ -112,7 +114,7 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
 		nIns2 = EMPTY;
 		nSBit = " ";
         nRdt = nRs1 = nRs2 = nRs3 = 0;
-        txt = instrText(vIns, vRdt, vRs1, vRs2, nIns2, nRs3);        // {joj 28/10/10}
+        txt = instrText(vIns, vSBit, vCond, vRdt, vRs1, vRs2, nIns2, nRs3);        // {joj 28/10/10}
         label.setTxt(txt);
     }
 

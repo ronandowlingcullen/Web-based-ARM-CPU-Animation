@@ -76,26 +76,25 @@ class ALU(num x, num y, num w, num h) {
         //else if (vIns == JAL || vIns == JALR)
         //    op = "ADD"
 
-		if (vIns == ADD)
-            op = "ADD"
-        else if (vIns == SUB)
-            op = "SUB"
-        else if (vIns == AND)
-            op = "AND"
-        else if (vIns == ORR)
-            op = "OR"
-        else if (vIns == EOR)
-            op = "XOR"
-        else if (vIns == LSL)
-            op = "SLL"
-        else if (vIns == LSR)
-            op = "SRL"
-        else if (vIns == LDR || vIns == STR)          // joj
-            op = "ADD"
-        else if (vIns == BL)
-            op = "ADD"
-
-        //debug("op = %s\n", op);
+		if(vIns >= ADD && vIns <= BIC){
+			op = instrNames[vIns];
+		} else if(vIns >= ADDi && vIns <= RSCi ){ //Quick way to get instruction names for simple instruction on ALU
+			op = instrNames[vIns-15];
+		} else if(vIns >= ANDi && vIns <= BICi ){ //Quick way to get instruction names for simple instruction on ALU (one less away as no MULi instr)
+			op = instrNames[vIns-14];
+		} else if(vIns >= LSL && vIns <= ROR){
+			//Set Barrel Shifter Op
+		} else if(vIns >= LSLi && vIns <= RORi){
+			//Set Barrel Shifter Op
+		} else if(vIns == CMN || vIns == CMNi){
+			op = "ADD";
+		} else if(vIns == CMP || vIns == CMPi){
+			op = "SUB";
+		} else if(vIns == MVN || vIns == MVNi){
+			op = "XOR";
+		} else if(vIns == LDR || vIns == STR) {
+			op = "ADD";
+		}
 
         txtOp.setTxt(op);
         txtOp.setOpacity(1);
