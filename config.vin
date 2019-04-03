@@ -45,7 +45,7 @@ Font font = Font("Calibri", 22);							// {joj 18/12/16}
 Font fontST = Font("Calibri", 22, STRIKETHROUGH);		// {joj 18/12/16}
 
 // Layers
-Layer valuesLayer = Layer(1, 3);						// {joj 6/9/10}
+Layer valuesLayer = Layer(1, 3);
 Layer inactivePipesLayer = Layer(2, 3);					// {joj 6/9/10}
 Layer activePipesLayer = Layer(3, 0);					// {joj 6/9/10}
 Layer helpLayer = Layer(5, 0);							// {joj 6/9/10}

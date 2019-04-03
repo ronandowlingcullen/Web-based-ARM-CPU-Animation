@@ -198,6 +198,10 @@ regFile[13] = Register(1368.0, 66, 32, 88, TOP, "SP");
 regFile[14] = Register(1400.0, 66, 32, 88, TOP, "LR");
 regFile[15] = Register(1432.0, 66, 32, 88, TOP, "PC");
 
+//Initialise SP and PC
+regFile[13].setValue(0x40);
+regFile[15].setValue(0x7C);
+
 //
 // CPSR
 //
@@ -307,17 +311,17 @@ apMUX5_B.addPoint(1132.0, 551);
 
 // Connections from the register file
 AnimPipe apRF_MUX5 = AnimPipe();
-apRF_MUX5.addPoint(1019.0, 154);
-apRF_MUX5.addPoint(1019.0, 540);
+apRF_MUX5.addPoint(1000.0, 154);
+apRF_MUX5.addPoint(1000.0, 540);
 apRF_MUX5.addPoint(1051.0, 540);
-Rectangle txtRF_MUX5 = Rectangle(activePipesLayer, 0, 0, redBrush, 1019.0,181, -32,0, 65,32, whitePen, font, "R0:0");   // {joj 1/4/06, 17/10/16}
+Rectangle txtRF_MUX5 = Rectangle(activePipesLayer, 0, 0, redBrush, 990.0,181, -32,0, 65,32, whitePen, font, "R0:0");   // {joj 1/4/06, 17/10/16}
 txtRF_MUX5.setRounded(2, 2);	// {joj 17/10/16}
 
 AnimPipe apRF_A = AnimPipe();
 apRF_A.addPoint(1051.0, 154);
 apRF_A.addPoint(1051.0, 463);
 apRF_A.addPoint(1082.0, 463);
-Rectangle txtRF_A = Rectangle(activePipesLayer, 0, 0, redBrush, 1051.0,181, -32,0, 65,32, whitePen, font, "R0:0");      // {joj 1/4/06, 17/10/16}
+Rectangle txtRF_A = Rectangle(activePipesLayer, 0, 0, redBrush, 1065.0,181, -32,0, 65,32, whitePen, font, "R0:0");      // {joj 1/4/06, 17/10/16}
 txtRF_A.setRounded(2, 2);	// {joj 17/10/16}
 
 //
@@ -336,7 +340,7 @@ Component cMUX8 = Component(1301.0, 683, 27, 88, "mux 8");   // {joj}
 ALU alu = ALU(1445.0, 419, 88, 176);
 
 //Barrel Shifter
-Component BarrelShifter = Component(1351.0, 537, 75, 50, "Barrel\nShifter");
+Component BarrelShifter = Component(1361.0, 517, 55, 90, "Barrel\nShifter");
 
 // EX to MA
 AnimPipe apEX_MA = AnimPipe();
@@ -374,6 +378,20 @@ apEX_MUX7.addPoint(1213.0, 551);
 apEX_MUX7.addPoint(1371.0, 551);
 Rectangle txtEX_MUX7 = Rectangle(activePipesLayer, 0, 0, redBrush, 1268.0,816, -27,0, 54,26, whitePen, font, "IMM");	// {joj 1/4/06, 17/27/16}
 txtEX_MUX7.setRounded(2, 2);	// {joj 17/10/16}
+
+//Animations to Barrel Shifter
+AnimPipe apEX_BS = AnimPipe();
+apEX_BS.addPoint(1186.0, 860);
+apEX_BS.addPoint(1388.0, 860);
+apEX_BS.addPoint(1388.0, 607);
+Rectangle txtEX_BS = Rectangle(activePipesLayer, 0, 0, redBrush, 1388.0,816, -27,0, 54,26, whitePen, font, "IMM");	// {joj 1/4/06, 17/27/16}
+txtEX_BS.setRounded(2, 2);
+
+AnimPipe apRF_BS = AnimPipe();
+apRF_BS.addPoint(1388.0, 154);
+apRF_BS.addPoint(1388.0, 517);
+Rectangle txtRF_BS = Rectangle(activePipesLayer, 0, 0, redBrush, 1388.0,181, -32,0, 65,32, whitePen, font, "R0:0");      // {joj 1/4/06, 17/10/16}
+txtRF_BS.setRounded(2, 2);	// {joj 17/10/16}
 
 AnimPipe apOUT1_MUX7 = AnimPipe();
 apOUT1_MUX7.addPoint(1937.0, 551);
@@ -443,12 +461,66 @@ Txt(valuesLayer, HLEFT | VTOP, 1736.0, 705, 0, font, "memory\ndata-in");        
 Txt(valuesLayer, HLEFT | VTOP, 1763.0, 220, 0, font, "memory\ndata-out");       // {joj}
 
 // Memory
-Txt(0, HLEFT | VTOP, 1884.0, 77, 0, font, "Data\nCache\n(memory)"); // {joj}
-Register memory[4];
-memory[0] = Register(1654.0, 66, 108, 44, LEFT, "M0");
-memory[1] = Register(1654.0, 110, 108, 44, LEFT, "M1");
-memory[2] = Register(1763.0, 66, 108, 44, RIGHT, "M2");
-memory[3] = Register(1763.0, 110, 108, 44, RIGHT, "M3");
+Txt(0, HLEFT | VTOP, 1695.0, 32, 0, font, "Data Cache (memory)");
+Register memory[16];
+memory[0] = Register(1654.0, 58, 70, 25, LEFT, "00");
+memory[1] = Register(1654.0, 83, 70, 25, LEFT, "04");
+memory[2] = Register(1654.0, 108, 70, 25, LEFT, "08");
+memory[3] = Register(1654.0, 133, 70, 25, LEFT, "0C");
+memory[4] = Register(1724.0, 58, 70, 25, LEFT, "10");
+memory[5] = Register(1724.0, 83, 70, 25, LEFT, "14");
+memory[6] = Register(1724.0, 108, 70, 25, LEFT, "18");
+memory[7] = Register(1724.0, 133, 70, 25, LEFT, "1C");
+
+//Stack Memory
+memory[8] = Register(1794.0, 58, 70, 25, LEFT, "20");
+memory[9] = Register(1794.0, 83, 70, 25, LEFT, "24");
+memory[10] = Register(1794.0, 108, 70, 25, LEFT, "28");
+memory[11] = Register(1794.0, 133, 70, 25, LEFT, "2C");
+memory[12] = Register(1864.0, 58, 70, 25, LEFT, "30");
+memory[13] = Register(1864.0, 83, 70, 25, LEFT, "34");
+memory[14] = Register(1864.0, 108, 70, 25, LEFT, "38");
+memory[15] = Register(1864.0, 133, 70, 25, LEFT, "3C");
+
+memory[0].rotateText(90);
+memory[1].rotateText(90);
+memory[2].rotateText(90);
+memory[3].rotateText(90);
+memory[4].rotateText(90);
+memory[5].rotateText(90);
+memory[6].rotateText(90);
+memory[7].rotateText(90);
+memory[8].rotateText(90);
+memory[9].rotateText(90);
+memory[10].rotateText(90);
+memory[11].rotateText(90);
+memory[12].rotateText(90);
+memory[13].rotateText(90);
+memory[14].rotateText(90);
+memory[15].rotateText(90);
+
+
+//Stack
+Txt(0, HLEFT | VTOP, 2000.0, 32, 0, font, "Stack Visualisation");
+Register stack[8];
+stack[7] = Register(2020.0, 80, 140, 50, LEFT, "3C");
+stack[6] = Register(2020.0, 130, 140, 50, LEFT, "38");
+stack[5] = Register(2020.0, 180, 140, 50, LEFT, "34");
+stack[4] = Register(2020.0, 230, 140, 50, LEFT, "30");
+stack[3] = Register(2020.0, 280, 140, 50, LEFT, "2C");
+stack[2] = Register(2020.0, 330, 140, 50, LEFT, "28");
+stack[1] = Register(2020.0, 380, 140, 50, LEFT, "24");
+stack[0] = Register(2020.0, 430, 140, 50, LEFT, "20");
+
+stack[0].rotateText(90);
+stack[1].rotateText(90);
+stack[2].rotateText(90);
+stack[3].rotateText(90);
+stack[4].rotateText(90);
+stack[5].rotateText(90);
+stack[6].rotateText(90);
+stack[7].rotateText(90);
+
 
 //
 // Other components
@@ -475,15 +547,15 @@ apMUX9_OUT1.addPoint(1910.0, 507);
 AnimPipe apOUT0_Mem = AnimPipe();
 apOUT0_Mem.addPoint(1684.0, 507);
 apOUT0_Mem.addPoint(1695.0, 507);
-apOUT0_Mem.addPoint(1695.0, 154);
+apOUT0_Mem.addPoint(1695.0, 158);
 
 AnimPipe apSMDR_Mem = AnimPipe();
 apSMDR_Mem.addPoint(1695.0, 727);
 apSMDR_Mem.addPoint(1723.0, 727);
-apSMDR_Mem.addPoint(1723.0, 154);
+apSMDR_Mem.addPoint(1723.0, 158);
 
 AnimPipe apMem_MUX9 = AnimPipe();
-apMem_MUX9.addPoint(1750.0, 154);
+apMem_MUX9.addPoint(1750.0, 158);
 apMem_MUX9.addPoint(1750.0, 485);
 apMem_MUX9.addPoint(1804.0, 485);
 
@@ -564,6 +636,8 @@ function resetWires() {
     apA_MUX6.reset();
     apB_MUX7.reset();
     apEX_MUX7.reset(); txtEX_MUX7.setOpacity(0);        // {joj 29/10/06}
+	apEX_BS.reset(); txtEX_BS.setOpacity(0);
+    apRF_BS.reset(); txtRF_BS.setOpacity(0);                  // {joj}
     apOUT1_MUX7.reset();
     apOUT0_MUX7.reset();
     apOUT0_MUX8.reset();
@@ -799,6 +873,9 @@ function showPipeline(num opacity) {   // {joj 20/8/10}
         apMUX7_OUT0.setPoint(3, 1630.0, 507);
         apMUX8_SMDR.setPoint(1, 1695.0, 727);
         apMUX9_OUT1.setPoint(1, 1939.0, 507);
+		
+		apEX_BS.setPoint(0,830.0, 860);
+		apEX_BS.setPoint(1,1388.0, 860);
 
         apID_EX.setHead(0);
         apPC_PC1.setHead(0);
@@ -835,6 +912,9 @@ function showPipeline(num opacity) {   // {joj 20/8/10}
         apMUX7_OUT0.setPoint(3, 1630.0, 507);
         apMUX8_SMDR.setPoint(1, 1587.0, 727);
         apMUX9_OUT1.setPoint(1, 1910.0, 507);
+
+		apEX_BS.setPoint(0,1186.0, 860);
+		apEX_BS.setPoint(1,1388.0, 860);
 
         apID_EX.setHead(1);
         apPC_PC1.setHead(1);
@@ -1025,69 +1105,79 @@ if (example == 0) {
 } else if (example == 1) {                          // {joj}
 
     //
-    // multiplication program
+    // Data Hazard Showing Pipeline Forwarding and Two Stage
     //
-    // r1 = r2*r3
+	// r1 = r3 + r4
+	// r3 = r1 - r6		;OUT0 Forwarded
+	// r5 = r1 + r4 + C	;OUT1 Forwarded
+	// r6 = r1 & r9		;Two Stage Clocking Removes need for forwarding
     //
-    //im.setValue( 0, XOR,  1, 1, 1);                  // {joj}
-    //im.setValue( 4, BEQZ, 0, 2, 36);                 // {joj}
-    //im.setValue( 8, ST,   2, 0, 0);                  // {joj}
-    //im.setValue(12, ANDi, 2, 2, 1);                 // {joj}
-    //im.setValue(16, BEQZ, 0, 2, 8);                 // {joj}
-    //im.setValue(20, ADD,  1, 1, 3);                 // {joj}
-    //im.setValue(24, LD,   2, 0, 0);                 // {joj}
-	//im.setValue(28, SRLi, 2, 2, 1);                 // {joj 29/11/16}
-	//im.setValue(32, SLLi, 3, 3, 1);                 // {joj 29/11/16}
-    //im.setValue(36, J,    0, 0, 4-36);              // {joj 01/11/06}
-    //im.setValue(40, ST,   1, 0, 0);                 // {joj 4/10/16}
-    im.setValue(44, HALT, 0, 0, 0);                 // {joj}
-    regFile[2].setValue(9);                         // {joj}
-    regFile[3].setValue(8);                         // {joj}
-    setTPS(100);                                    // {joj}
+    im.setValue( 0, ADD,  1, 3, 4);                 
+    im.setValue( 4, SUB,  3, 1, 6);                 
+    im.setValue( 8, ADC,  5, 1, 4);                 
+    im.setValue(12, AND,  6, 1, 9);                 
+    im.setValue(16, HALT, 0, 0, 0);                
+    regFile[3].setValue(3);                         
+    regFile[4].setValue(4);                        
+    regFile[6].setValue(6);                         
+    regFile[9].setValue(9);                         
 
 } else if (example == 2) {                          // {joj}
 
     //
-    // pipeline forwarding example
+    // Load Hazard with Poor Scheduling Showing Stall
     //
-    im.setValue( 0, ADD, 1, 2, 3);                   // r1 = r2 + r3     // {joj 20/10/12}
-    im.setValue( 4, SUB, 3, 1, 2);                   // r3 = r1 - r2     // {joj 20/10/12}
-    im.setValue( 8, AND, 2, 1, 3);                   // r2 = r1 & r3     // {joj 20/10/12}
-    //im.setValue(12, XOR, 2, 1, 3);                  // r2 = r1 ^ r3     // {joj 20/10/12}
-    im.setValue(12, EOR, 2, 1, 3);
-	im.setValue(16, ADD, 2, 1, 0);                  // r2 = r1 + r0     // {joj 20/10/12}
-    im.setValue(20, HALT, 0, 0, 0);                 //                  // {joj 20/10/12}
-    regFile[1].setValue(1);                         // r1 = 1           // {joj 20/10/12}
-    regFile[2].setValue(2);                         // r2 = 2           // {joj 20/10/12}
-    setTPS(50);                                     // {joj}
+	// r1 = M[r3]
+	// r3 = r1 - r6		;Stall on this instruction waiting for load to finish
+	// r5 = r9 + r4 + C
+    //
+    im.setValue( 0, LDRi, 1, 3, 0);                 
+    im.setValue( 4, SUB,  3, 1, 6);                 
+    im.setValue( 8, ADC,  5, 9, 4);                 
+    im.setValue(12, HALT, 0, 0, 0);                
+    regFile[3].setValue(12);                         
+    regFile[4].setValue(4);                        
+    regFile[6].setValue(6);                         
+    regFile[9].setValue(9);  
 
 } else if (example == 3) {                          // {joj}
 
     //
-    // tutorial 4
+    // Load Hazard with Good Scheduling Showing No Stall
     //
-    im.setValue( 0, ADD, 1, 1, 2);					// r1 = r1 + r2     // {joj 13/11/17}
-    im.setValue( 4, ADD, 2, 1, 2);					// r2 = r1 + r2		// {joj 13/11/17}
-    im.setValue( 8, ADD, 1, 1, 2);					// r1 = r1 + r2		// {joj 13/11/17}
-    im.setValue(12, ADD, 2, 1, 2);					// r2 = r1 + r2		// {joj 13/11/17}
-    im.setValue(16, ADD, 1, 1, 2);        			// r1 = r1 + r2		// {joj 13/11/17}
-    im.setValue(20, HALT, 0, 0, 0);                 // HALT             // {joj 13/11/17}
-	regFile[1].setValue(1);                         // r1 = 1           // {joj 13/11/17}
-	regFile[2].setValue(2);                         // r2 = 2           // {joj 13/11/17}
-	setTPS(50);                                     //
+	// r1 = M[r3]
+	// r5 = r9 + r4 + C
+	// r3 = r1 - r6		;No Stall on this instruction as load has finished
+    //
+    im.setValue( 0, LDRi, 1, 3, 0);                
+    im.setValue( 4, ADC,  5, 9, 4);                 
+    im.setValue( 8, SUB,  3, 1, 6);                  
+    im.setValue(12, HALT, 0, 0, 0);                
+    regFile[3].setValue(12);                         
+    regFile[4].setValue(4);                        
+    regFile[6].setValue(6);                         
+    regFile[9].setValue(9);  
 
 } else if (example == 4) {
 
 	//
-    // branch prediction example
+    // Branch Prediction showing no stall on branches after 1st
     //
-    //im.setValue( 0, ADDi, 1, 0, 3);                 //      r1 = 3      // {joj}
-    im.setValue( 4, ADD,  0, 0, 0);                 // L:               // {joj}
-    im.setValue( 8, ADD,  0, 0, 0);                 //                  // {joj}
-    //im.setValue(12, SUBi, 1, 1, 1);                 //      r1 = r1-1   // {joj}
-    //im.setValue(16, BNEZ, 0, 1, -12 & 0xff);        //      bnez r1, L  // {joj}
-    im.setValue(20, HALT, 0, 0, 0);                 //                  // {joj}
-    setTPS(50);                                     // {joj}
+	//L1 r1 = r3 + r4
+	//	 r3 = r7 - r6		;OUT0 Forwarded
+	//	 r5 = r9 + r4 + C	;OUT1 Forwarded
+	//	 B	L1
+    //
+    im.setValue( 0, ADD,  1, 3, 4);                 
+    im.setValue( 4, SUB,  3, 1, 6);                 
+    im.setValue( 8, ADC,  5, 1, 4);                 
+    im.setValue(12, B,    0, 0xF4, 0);                 
+    im.setValue(16, HALT, 0, 0, 0);                
+    regFile[3].setValue(3);                         
+    regFile[4].setValue(4);                        
+    regFile[6].setValue(6);                          
+    regFile[7].setValue(7);                       
+    regFile[9].setValue(9); 
 
 } else if (example == 5) {
 
@@ -1152,20 +1242,22 @@ r.setRounded(10, 10);
 Pen helpPen = SolidPen(SOLID, 5, RED, ROUND_START | ROUND_JOIN | ROUND_END);
 Font helpFont = Font("Arial", 32, BOLD);
 
-Txt(helpLayer, HLEFT | VTOP, 32, 639, helpPen, helpFont, "LEFT CLICK on animation background to start and stop clock.\n\nSHIFT LEFT CLICK on background to execute \"single MIPS clock cycle\".");
+Txt(helpLayer, HLEFT | VTOP, 587, 639, helpPen, helpFont, "LEFT CLICK on animation background to start and stop clock.\n\nSHIFT LEFT CLICK on background to execute \"single MIPS clock cycle\".");
 if (!lockCircuit) {
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 44, 184, 176, 10); r.setRounded(5, 5);
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 55, 427.0, 66, 10); r.setRounded(5, 5);
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 132, 427.0, 31, 10); r.setRounded(5, 5);
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 168, 427.0, 31, 10); r.setRounded(5, 5);
-    r = Rectangle2(helpLayer, 0, helpPen, 0, 203, 427.0, 31, 10); r.setRounded(5, 5);
-    Txt(helpLayer, HLEFT | VTOP, 397.0, 132, helpPen, helpFont, "LEFT CLICK to change\ninitial program.");
-    Txt(helpLayer, HLEFT | VTOP, 397.0, 231, helpPen, helpFont, "LEFT or RIGHT CLICK to \"rotate\"\ninstructions and operands.\nHold and release to reset value.");
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 72, 152, 176, 25); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 55, 424.0, 66, 20); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 206, 424.0, 31, 20); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 243, 424.0, 31, 20); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 280, 424.0, 31, 20); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 317, 424.0, 40, 20); r.setRounded(5, 5);
+    r = Rectangle2(helpLayer, 0, helpPen, 0, 382, 424.0, 31, 20); r.setRounded(5, 5);
+    Txt(helpLayer, HLEFT | VTOP, 260.0, 135, helpPen, helpFont, "LEFT CLICK to change\ninitial program.");
+    Txt(helpLayer, HLEFT | VTOP, 425.0, 401, helpPen, helpFont, "LEFT or RIGHT CLICK to \"rotate\"\ninstructions and operands.\nHold and release to reset value.");
 }
 
-r = Rectangle2(helpLayer, 0, helpPen, 0, 683, 68, 198, 50);
+r = Rectangle2(helpLayer, 0, helpPen, 0, 983, 90, 32, 64);
 r.setRounded(10, 10);
-Txt(helpLayer, HLEFT | VTOP, 1209.0, 88, helpPen, helpFont, "LEFT or RIGHT CLICK register\nto increment or decrement value.");
+Txt(helpLayer, HLEFT | VTOP, 1025.0, 88, helpPen, helpFont, "LEFT or RIGHT CLICK register\nto increment or decrement value.");
 
 if (!lockCircuit) {
     r = Rectangle2(helpLayer, 0, helpPen, 0, 242, 1330.0, 1212, 30);

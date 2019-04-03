@@ -29,14 +29,14 @@ class Component(num _x, num _y, num _w, num _h, string caption) {
 	num w = _w;
 	num h = _h;
 
-    Rectangle bg = Rectangle2(0, 0, blackPen, componentBrush, x, y, w, h);
+    Rectangle bg = Rectangle2(activePipesLayer, 0, blackPen, componentBrush, x, y, w, h);
 	bg.setRounded(2, 2);	// {joj 16/10/16}
     Rectangle label;
 
     if (w >= h) {
-        label = Rectangle2(0, 0, 0, 0, x, y, w, h, 0, componentFont, caption);
+        label = Rectangle2(activePipesLayer, 0, 0, 0, x, y, w, h, 0, componentFont, caption);
     } else {
-        label = Rectangle(0, 0, 0, 0, x + w/2 - 3, y + h/2, -w/2, -h/2, w, h, 0, componentFont, caption);   // {joj 7/10/16}
+        label = Rectangle(activePipesLayer, 0, 0, 0, x + w/2 - 3, y + h/2, -w/2, -h/2, w, h, 0, componentFont, caption);   // {joj 7/10/16}
 		label.rotate(-90);			// {joj 7/10/16}
     }
 

@@ -54,7 +54,7 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
         vh = h - 9;
 
         if (labelPos == LEFT) {
-			Rectangle r2 = Rectangle(0, 0, 0, 0, x + 19 - 1, y + h/2, -19, -h/2, 38, h, 0, font, caption);	// {joj 7/10/16}
+			Rectangle r2 = Rectangle(0, 0, 0, 0, x + 17 - 1, y + h/2, -17, -h/2, 34, h, 0, font, caption);	// {joj 7/10/16}
 			r2.rotate(-90);	// {joj 7/10/16}
             vx = x + 32;
         } else if (labelPos == RIGHT) {
@@ -110,6 +110,13 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
         bg2.setOpacity(opacity);
         label.setOpacity(opacity);
     }
+
+	//
+	// rotateText
+	//
+	function rotateText(num deg){
+		r2.rotate(deg);
+	}
 
     //
     // updateLabel
@@ -250,6 +257,22 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
         unHighlight();
         updateLabel();
     }
+
+
+	//
+	// doubleUpdate
+	// updates this register and the passedRegister to the same values
+	function doubleUpdate(Register reg2) {
+		update();
+        reg2.value = newValue;
+        reg2.tag = newTag;
+        reg2.updateLabel();
+        reg2.bg1.setBrush(yellowBrush);
+        reg2.bg2.setBrush(yellowBrush);
+        //reg2.wait(16);
+        reg2.bg1.setBrush(whiteBrush);
+        reg2.bg2.setBrush(whiteBrush);
+	}
 
 }
 

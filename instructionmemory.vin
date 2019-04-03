@@ -36,6 +36,8 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 	string vSBit = " ";
     num vIns = 0, vIns2 = 0, vCond = 0, vRdt = 0, vRs1 = 0, vRs2 = 0, vRs3 = 0;
     num opTypeRdt = 0, opTypeRs1 = 0, opTypeRs2 = 0, opTypeRs3 = 0;
+	num shiftOk = 0;
+	num sOk = 0;
     num clk;
 
     num fw = w / 11;
@@ -57,8 +59,8 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
     Rectangle cond = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 3.5 * fw, y, fw, h, condPen, font, "AL"); // {joj 25/7/10}
     Rectangle rdt = Rectangle2(valuesLayer, 0, 0, brush, x + 5 * fw, y, fw, h, rdtPen, font, "-");
     Rectangle rs1 = Rectangle2(valuesLayer, 0, 0, brush, x + 6 * fw, y, fw, h, rs1Pen, font, "-");
-    Rectangle rs2 = Rectangle2(valuesLayer, 0, 0, brush, x + 7 * fw, y, fw, h, rs2Pen, font, "-");
-    Rectangle ins2 = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 8 * fw, y, 2 * fw, h, ins2Pen, font, " NOP");
+    Rectangle rs2 = Rectangle2(valuesLayer, 0, 0, brush, x + 7.2 * fw, y, fw, h, rs2Pen, font, "-");
+    Rectangle ins2 = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 8.2 * fw, y, 2 * fw, h, ins2Pen, font, " NOP");
     Rectangle rs3 = Rectangle2(valuesLayer, 0, 0, brush, x + 10 * fw, y, fw, h, rs2Pen, font, "-");
 
     Rectangle dot = Rectangle2(valuesLayer, 0, 0, redBrush, x+fw*0.8, y+2, h/2, h/2);	// {joj 30/10/06}
@@ -161,14 +163,28 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         num offset;
 
         ins.setTxt("%c%s", 32, instrNames[vIns]);
-        ins2.setTxt("%c%s", 32, instrNames[vIns2]);
-        sBit.setTxt("%c%s", 32, vSBit);
         cond.setTxt("%c%s", 32, condNames[vCond]);
 
         opTypeRdt = instrOpTypeRdt(vIns);
         opTypeRs1 = instrOpTypeRs1(vIns);
         opTypeRs2 = instrOpTypeRs2(vIns);
-        opTypeRs3 = instrOpTypeRs3(vIns2);
+        opTypeRs3 = instrOpTypeRs3(vIns,vIns2);
+
+		shiftOk = shiftAllowed(vIns);
+		sOk = sAllowed(vIns);
+		
+		if(sOk) {
+        	sBit.setTxt("%c%s", 32, vSBit);
+		} else {
+			sBit.setTxt(" ");
+		}
+			
+
+		if(shiftOk) {
+	        ins2.setTxt("%c%s", 32, instrNames[vIns2]);
+		} else {
+			ins2.setTxt("--");
+		}
 
 		if (opTypeRs1 == OP_TYPE_REG)
             vRs1 = (vRs1 % 16);
@@ -185,14 +201,10 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         if (opTypeRs1 == OP_TYPE_UNUSED){
 			rs1.setTxt("-");
 		} else if (opTypeRs1 == OP_TYPE_IMM) {
-			if(vIns == LDR || vIns == STR) {
-				rs1.setTxt("[%02X]", vRs1)
-			} else {
-				rs1.setTxt("%02X", vRs1);
-			}
+			rs1.setTxt("%02X", vRs1);
 		} else {
-			if(vIns == LDR || vIns == STR) {
-				rs1.setTxt("[R%d]", vRs1)
+			if(vIns == LDR || vIns == STR || vIns == LDRi || vIns == STRi) {
+				rs1.setTxt("[R%d", vRs1)
 			} else {
 				rs1.setTxt("R%d", vRs1);
 			}
@@ -201,17 +213,34 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         if (opTypeRs2 == OP_TYPE_UNUSED)
             rs2.setTxt("-")
         else if (opTypeRs2 == OP_TYPE_REG) {
-			rs2.setTxt("R%d", vRs2);
+			if((vIns == LDR || vIns == STR) && opTypeRs3 == OP_TYPE_UNUSED) {
+				rs2.setTxt("R%d]", vRs2);
+			} else {
+				rs2.setTxt("R%d", vRs2);
+			}
         } else {
-			rs2.setTxt("%02X", vRs2);
+			if((vIns == LDRi || vIns == STRi) && opTypeRs3 == OP_TYPE_UNUSED) {
+				rs2.setTxt("%02X]", vRs2);
+			} else {
+				rs2.setTxt("%02X", vRs2);
+			}
 		}
 
         if (opTypeRs3 == OP_TYPE_UNUSED)
             rs3.setTxt("-")
-        else if (opTypeRs3 == OP_TYPE_REG)
-            rs3.setTxt("R%d", vRs3)
-        else
-            rs3.setTxt("%02X", vRs3);
+        else if (opTypeRs3 == OP_TYPE_REG){
+            if(vIns == LDR || vIns == STR) {
+				rs3.setTxt("R%d]", vRs3)
+			} else {
+				rs3.setTxt("R%d", vRs3)
+			}
+        } else {
+            if(vIns == LDR || vIns == STR) {
+				rs3.setTxt("%02X]", vRs3);
+			} else {
+				rs3.setTxt("%02X", vRs3)
+			}
+		}
 
         if (instrIsBranch(vIns) ) { //|| isJorJAL(vIns)) { //-------------------May need to fix--------------------------
             if (vRs2 & 0x80) {
@@ -280,7 +309,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 
 
 	when sBit ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/9/17}
-        if (!lockCircuit) {
+        if (!lockCircuit && sOk) {
             if (down) {
                 clk = timeMS();
 				if (flags & MB_LEFT) {
@@ -319,7 +348,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
     }
 
     when ins2 ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/9/17}
-        if (!lockCircuit) {
+        if (!lockCircuit && shiftOk) {
             if (down) {
                 clk = timeMS();
 				//Special functionallity so only shift operations possible
