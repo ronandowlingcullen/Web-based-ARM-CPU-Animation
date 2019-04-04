@@ -244,10 +244,15 @@ apPC1_MUX2.addPoint(803.0, 441);
 apPC1_MUX2.addPoint(695.0, 441);
 apPC1_MUX2.addPoint(695.0, 397);
 
-AnimPipe apADD4_MUX5 = AnimPipe();
-apADD4_MUX5.addPoint(871.0, 595);
-apADD4_MUX5.addPoint(871.0, 562);
-apADD4_MUX5.addPoint(1051.0, 562);
+//AnimPipe apADD4_MUX5 = AnimPipe();
+//apADD4_MUX5.addPoint(871.0, 595);
+//apADD4_MUX5.addPoint(871.0, 562);
+//apADD4_MUX5.addPoint(1051.0, 562);
+
+AnimPipe apPC1_MUX5 = AnimPipe();
+apPC1_MUX5.addPoint(803.0, 551);
+apPC1_MUX5.addPoint(803.0, 565);
+apPC1_MUX5.addPoint(1051.0, 565);
 
 AnimPipe apPC1_ADD4 = AnimPipe();
 apPC1_ADD4.addPoint(803.0, 551);
@@ -501,16 +506,19 @@ memory[15].rotateText(90);
 
 
 //Stack
-Txt(0, HLEFT | VTOP, 2000.0, 32, 0, font, "Stack Visualisation");
+Rectangle outer = Rectangle2(0, 0, blackPen, 0, 2005, 25, 180, 500);
+outer.setRounded(2, 2);	// {joj 16/10/16}
+
+Txt(0, HLEFT | VTOP, 2010.0, 32, 0, font, "Stack Visualisation");
 Register stack[8];
-stack[7] = Register(2020.0, 80, 140, 50, LEFT, "3C");
-stack[6] = Register(2020.0, 130, 140, 50, LEFT, "38");
-stack[5] = Register(2020.0, 180, 140, 50, LEFT, "34");
-stack[4] = Register(2020.0, 230, 140, 50, LEFT, "30");
-stack[3] = Register(2020.0, 280, 140, 50, LEFT, "2C");
-stack[2] = Register(2020.0, 330, 140, 50, LEFT, "28");
-stack[1] = Register(2020.0, 380, 140, 50, LEFT, "24");
-stack[0] = Register(2020.0, 430, 140, 50, LEFT, "20");
+stack[7] = Register(2050.0, 100, 100, 50, LEFT, "3C");
+stack[6] = Register(2050.0, 150, 100, 50, LEFT, "38");
+stack[5] = Register(2050.0, 200, 100, 50, LEFT, "34");
+stack[4] = Register(2050.0, 250, 100, 50, LEFT, "30");
+stack[3] = Register(2050.0, 300, 100, 50, LEFT, "2C");
+stack[2] = Register(2050.0, 350, 100, 50, LEFT, "28");
+stack[1] = Register(2050.0, 400, 100, 50, LEFT, "24");
+stack[0] = Register(2050.0, 450, 100, 50, LEFT, "20");
 
 stack[0].rotateText(90);
 stack[1].rotateText(90);
@@ -521,6 +529,8 @@ stack[5].rotateText(90);
 stack[6].rotateText(90);
 stack[7].rotateText(90);
 
+//Stack Pointer
+StackPointer sp = StackPointer(2015,125,2045,125,12,50);
 
 //
 // Other components
@@ -607,7 +617,8 @@ function resetWires() {
     apID_EX.reset();
     apPC1_MUX2.reset();
     //apPC1_MUX5.reset();
-    apADD4_MUX5.reset();
+    //apADD4_MUX5.reset();
+	apPC1_MUX5.reset()
     apPC1_ADD4.reset();
     apPC1_ADDi.reset();
     ap4_ADD4.reset();

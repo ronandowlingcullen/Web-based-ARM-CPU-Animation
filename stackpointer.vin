@@ -1,0 +1,81 @@
+//
+// animatedpipe.vin
+//
+// Simulation of the DLX
+// Written by Edsko de Vries, Summer 2003
+//
+// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
+//
+// This program is free software; you can redistribute it and/or modify it under
+// the terms of the GNU General Public License as published by the Free Software Foundation;
+// either version 2 of the License, or (at your option) any later version.
+//
+// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
+// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+// See the GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with this program; if not, write to the Free Software Foundation Inc.,
+// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+//
+
+class StackPointer(num _x1, num _y1, num _x2, num _y2, num w, num _regWidth) {
+
+	num x1 = _x1, y1 = _y1, x2 = _x2, y2 = _y2, regWidth = _regWidth;
+    Pen fgPen0 = SolidPen(SOLID, w, RED, BEVEL_JOIN | BUTT_END);			// could be static / global
+    Pen fgPen1 = SolidPen(SOLID, w, RED, BEVEL_JOIN | ARROW60_END);			// could be static / global
+
+	Line bodies[8];
+	Line heads[8];
+	bodies[0] = Line2(0, ABSOLUTE, fgPen0, x1, y1-1*regWidth, x2-w, y2-1*regWidth);
+	bodies[1] = Line2(0, ABSOLUTE, fgPen0, x1, y1+0*regWidth, x2-w, y2+0*regWidth);
+	bodies[2] = Line2(0, ABSOLUTE, fgPen0, x1, y1+1*regWidth, x2-w, y2+1*regWidth);
+	bodies[3] = Line2(0, ABSOLUTE, fgPen0, x1, y1+2*regWidth, x2-w, y2+2*regWidth);
+	bodies[4] = Line2(0, ABSOLUTE, fgPen0, x1, y1+3*regWidth, x2-w, y2+3*regWidth);
+	bodies[5] = Line2(0, ABSOLUTE, fgPen0, x1, y1+4*regWidth, x2-w, y2+4*regWidth);
+	bodies[6] = Line2(0, ABSOLUTE, fgPen0, x1, y1+5*regWidth, x2-w, y2+5*regWidth);
+	bodies[7] = Line2(0, ABSOLUTE, fgPen0, x1, y1+6*regWidth, x2-w, y2+6*regWidth);
+
+	heads[0] = Line2(0, ABSOLUTE, fgPen1, x2-w, y2-1*regWidth, x2, y2-1*regWidth);
+	heads[1] = Line2(0, ABSOLUTE, fgPen1, x2-w, y2+0*regWidth, x2, y2+0*regWidth);
+	heads[2] = Line2(0, ABSOLUTE, fgPen1, x2-w, y2+1*regWidth, x2, y2+1*regWidth);
+	heads[3] = Line2(0, ABSOLUTE, fgPen1, x2-w, y2+2*regWidth, x2, y2+2*regWidth);
+	heads[4] = Line2(0, ABSOLUTE, fgPen1, x2-w, y2+3*regWidth, x2, y2+3*regWidth);
+	heads[5] = Line2(0, ABSOLUTE, fgPen1, x2-w, y2+4*regWidth, x2, y2+4*regWidth);
+	heads[6] = Line2(0, ABSOLUTE, fgPen1, x2-w, y2+5*regWidth, x2, y2+5*regWidth);
+	heads[7] = Line2(0, ABSOLUTE, fgPen1, x2-w, y2+6*regWidth, x2, y2+6*regWidth);
+	
+	setPosOpacity(1,0);
+	setPosOpacity(2,0);
+	setPosOpacity(3,0);
+	setPosOpacity(4,0);
+	setPosOpacity(5,0);
+	setPosOpacity(6,0);
+	setPosOpacity(7,0);
+	setPosOpacity(0,1);
+
+	
+	function setPosOpacity(num position, num opacity){
+		setOpacity(0);
+		bodies[position].setOpacity(opacity);
+		heads[position].setOpacity(opacity);
+	}
+
+	function setOpacity(num opacity) {
+		num i = 0;
+		while(i < 8){
+			bodies[i].setOpacity(0);
+			heads[i].setOpacity(0);
+			i++;
+		}
+	}
+
+	function moveSP(num sp){
+		num position = ((0x40 - sp)/4);
+		setPosOpacity(position,1);
+	}
+
+
+}
+
+// eof
