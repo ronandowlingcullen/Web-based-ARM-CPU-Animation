@@ -13,6 +13,12 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
 	num z = 0;
 	num c = 0;
 	num v = 0;
+
+	num nN = 0;
+	num nZ = 0;
+	num nC = 0;
+	num nV = 0;
+
 	num invalid = 0;
 	
 	//Co-ordinates of n,z,c and v parts
@@ -27,24 +33,74 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
 	num vy = y + h/3;
 
 	if(forwarding) { //Small so need to change font sizes
-		lFont = Font("Calibri", 18);
-		vFont = Font("Calibri", 18);
+		lFont = Font("Calibri", 16);
+		vFont = Font("Calibri", 16);
 	}
 
-    // Outer Rectangle
-	Rectangle outer = Rectangle2(0, 0, blackPen, cpsrBrush, x, y, w+4, h);		//Draw outer rectangle
-	
+	// Outer Rectangle
+	Rectangle outer;
+
 	// Labels
-	Rectangle nLabel = Rectangle(0, 0, 0, 0, nx, y, 0, 0, w/4, h/3, 0, lFont, "N");
-	Rectangle zLabel = Rectangle(0, 0, 0, 0, zx, y, 0, 0, w/4, h/3, 0, lFont, "Z");
-	Rectangle cLabel = Rectangle(0, 0, 0, 0, cx, y, 0, 0, w/4, h/3, 0, lFont, "C");
-	Rectangle vLabel = Rectangle(0, 0, 0, 0, vx, y, 0, 0, w/4, h/3, 0, lFont, "V");
+	Rectangle nLabel;
+	Rectangle zLabel;
+	Rectangle cLabel;
+	Rectangle vLabel;
 	
 	// Values
-    Rectangle nValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, nx+4, ny, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", n);
-    Rectangle zValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, zx+4, zy, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", z);
-    Rectangle cValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, cx+4, cy, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", c);
-    Rectangle vValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, vx+4, vy, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", v);
+    Rectangle nValue;
+    Rectangle zValue;
+    Rectangle cValue;
+    Rectangle vValue;
+
+    
+
+	if(h > w) {
+
+		//Co-ordinates of n,z,c and v parts
+		nx = x + w/3;
+		zx = x + w/3;
+		cx = x + w/3;
+		vx = x + w/3;
+
+		ny = y;
+		zy = y + h/4;
+		cy = y + 2*(h/4);
+		vy = y + 3*(h/4);
+		
+		// Outer Rectangle
+		outer = Rectangle2(0, 0, blackPen, cpsrBrush, x, y, w, h+4);		//Draw outer rectangle
+
+		// Labels
+		nLabel = Rectangle(0, 0, 0, 0, x+2, ny, 0, 0, w/4, h/3, 0, lFont, "N");
+		zLabel = Rectangle(0, 0, 0, 0, x+2, zy, 0, 0, w/4, h/3, 0, lFont, "Z");
+		cLabel = Rectangle(0, 0, 0, 0, x+2, cy, 0, 0, w/4, h/3, 0, lFont, "C");
+		vLabel = Rectangle(0, 0, 0, 0, x+2, vy, 0, 0, w/4, h/3, 0, lFont, "V");
+	
+		// Values
+    	nValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, nx, ny+4, 2*w/3-4, (h/4)-4, 0, vFont, "%01X", n);
+    	zValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, zx, zy+4, 2*w/3-4, (h/4)-4, 0, vFont, "%01X", z);
+    	cValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, cx, cy+4, 2*w/3-4, (h/4)-4, 0, vFont, "%01X", c);
+    	vValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, vx, vy+4, 2*w/3-4, (h/4)-4, 0, vFont, "%01X", v);
+
+
+	} else {
+		
+		// Outer Rectangle
+		outer = Rectangle2(0, 0, blackPen, cpsrBrush, x, y, w+4, h);		//Draw outer rectangle
+		
+		// Labels
+		nLabel = Rectangle(0, 0, 0, 0, nx, y, 0, 0, w/4, h/3, 0, lFont, "N");
+		zLabel = Rectangle(0, 0, 0, 0, zx, y, 0, 0, w/4, h/3, 0, lFont, "Z");
+		cLabel = Rectangle(0, 0, 0, 0, cx, y, 0, 0, w/4, h/3, 0, lFont, "C");
+		vLabel = Rectangle(0, 0, 0, 0, vx, y, 0, 0, w/4, h/3, 0, lFont, "V");
+	
+		// Values
+    	nValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, nx+4, ny, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", n);
+    	zValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, zx+4, zy, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", z);
+    	cValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, cx+4, cy, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", c);
+    	vValue = Rectangle2(valuesLayer, 0, 0, yellowBrush, vx+4, vy, (w/4)-4, 2*h/3-4, 0, vFont, "%01X", v);
+
+	}
 
     //
     // setOpacity
@@ -172,6 +228,36 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
         updateVValue();
     }
 
+	//
+    // set next values
+    //
+    function setNNValue(num val) {
+        nN = val;
+    }
+
+    function setNZValue(num val) {
+        nZ = val;
+    }
+
+    function setNCValue(num val) {
+        nC = val;
+    }
+
+    function setNVValue(num val) {
+        nV = val;
+    }
+
+
+	function update() {
+		n = nN;
+		z = nZ;
+		c = nC;
+		v = nV;
+		invalid = 0;
+		updateValues();
+	}
+
+
 	function setInvalid(num val) {
 		invalid = val;
 		if(invalid){
@@ -223,6 +309,7 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
 		v = 0;
         unHighlight();
         updateValues();
+		setInvalid(1);
     }
 
 	

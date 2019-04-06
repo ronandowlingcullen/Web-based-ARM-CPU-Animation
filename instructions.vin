@@ -530,56 +530,66 @@ num function isSubV(num op1, num op2, num res){
 
 //Function to set flags based on res, op1 and op2
 num function setFlags(num res, num op1, num op2, num add, num mul) {
-	cpsr.setNValue(isN(res&0xFF));
-	cpsr.setZValue(isZ(res&0xFF));
+	cpsr0.setNNValue(isN(res&0xFF));
+	cpsr0.setNZValue(isZ(res&0xFF));
 	if(add){
-		cpsr.setCValue(isAddC(se8(op1),se8(op2)));
+		cpsr0.setNCValue(isAddC(se8(op1),se8(op2)));
 		if(!mul)
-			cpsr.setVValue(isAddV(se8(op1),se8(op2),(res&0xFF)));
+			cpsr0.setNVValue(isAddV(se8(op1),se8(op2),(res&0xFF)));
 	} else {
-		cpsr.setCValue(isSubC(se8(op1),se8(op2)));
+		cpsr0.setNCValue(isSubC(se8(op1),se8(op2)));
 		if(!mul)
-			cpsr.setVValue(isSubV(se8(op1),se8(op2),(res&0xFF)));
+			cpsr0.setNVValue(isSubV(se8(op1),se8(op2),(res&0xFF)));
 	}
 }
 
 //Test Condition On Function
 num function testCondition(num cond) {
 	
+	CPSR tempCPSR;
+	if(!cpsr0.invalid){
+		tempCPSR = cpsr0;
+	} else if (!cpsr1.invalid){
+		tempCPSR = cpsr1;
+	} else {
+		tempCPSR = cpsr;
+	}
+
+
 	if(cond == def || cond == AL) {	//Always
 		return 1;
 	} else if (cond == EQ) { 		// Z set (cond) {= Equal)
-		return(cpsr.z);
+		return(tempCPSR.z);
 	} else if (cond == NE) { 		// Z clear (cond) {= Not Equal)
-		return(!cpsr.z);
+		return(!tempCPSR.z);
 	} else if (cond == HS) { 		// C set (cond) {= Unsigned Higher or same)
-		return(cpsr.c);
+		return(tempCPSR.c);
 	} else if (cond == CS) { 		// C set
-		return(cpsr.c);
+		return(tempCPSR.c);
 	} else if (cond == LO) { 		// C clear (cond) {= Unsigned Lower or Same)
-		return(!cpsr.c);
+		return(!tempCPSR.c);
 	} else if (cond == CC) { 		// C clear
-		return(!cpsr.c);
+		return(!tempCPSR.c);
 	} else if (cond == MI) { 		// N set (cond) {= Negative)
-		return(cpsr.n);
+		return(tempCPSR.n);
 	} else if (cond == PL) { 		// N clear (cond) {= Positive or Zero)
-		return(!cpsr.n);
+		return(!tempCPSR.n);
 	} else if (cond == VS) { 		// V set (cond) {= Overflow)
-		return(cpsr.v);
+		return(tempCPSR.v);
 	} else if (cond == VC) { 		// V clear (cond) {= No Overflow)
-		return(!cpsr.v);
+		return(!tempCPSR.v);
 	} else if (cond == HI) { 		// C set and Z clear (cond) {= Unsigned Higher)
-		return(cpsr.c && !cpsr.z);
+		return(tempCPSR.c && !tempCPSR.z);
 	} else if (cond == LS) { 		// C clear  or Z set (cond) {= Unsigned Lower or Same)
-		return(!cpsr.c || cpsr.z);
+		return(!tempCPSR.c || tempCPSR.z);
 	} else if (cond == GE) { 		// N set and V set, or N clear and V clear (cond) {= Greater Than or Equal)
-		return((cpsr.n && cpsr.v) || (!cpsr.n && !cpsr.v));
+		return((tempCPSR.n && tempCPSR.v) || (!tempCPSR.n && !tempCPSR.v));
 	} else if (cond == LT) { 		// N set and V clear, or N clear and V set(cond) {= Less Than)
-		return((cpsr.n && !cpsr.v) || (!cpsr.n && cpsr.v));
+		return((tempCPSR.n && !tempCPSR.v) || (!tempCPSR.n && tempCPSR.v));
 	} else if (cond == GT) { 		// Z clear, and either N set and V set, or N clear and V clear
-		return(!cpsr.z && ((cpsr.n && cpsr.v) || (!cpsr.n && !cpsr.v)));
+		return(!tempCPSR.z && ((tempCPSR.n && tempCPSR.v) || (!tempCPSR.n && !tempCPSR.v)));
 	} else if (cond == LE) { 		// Z set, or N set and V clear, or N clear and V set (cond) {= Equal)
-		return(cpsr.z || (cpsr.n && !cpsr.v) || (!cpsr.n && cpsr.v));
+		return(tempCPSR.z || (tempCPSR.n && !tempCPSR.v) || (!tempCPSR.n && tempCPSR.v));
 	} else if (cond == NV) { 		// (cond) {= Reserved)
 		return 0;
 	}

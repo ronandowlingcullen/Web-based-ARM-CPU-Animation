@@ -21,6 +21,7 @@
 
 AnimPipe mux1Src, mux3Src, mux4Src;
 
+num blockingCond = 0;			//Indicates conditional unexecution
 num zero;																		// {joj 3/11/12}
 num newPC;																		// {joj 3/11/12}
 //num branchMissPredict;														// {joj 4/11/12}
@@ -740,9 +741,23 @@ function exExec() {														// {joj 14/11/17}
 		
 		                      
         
-		wait(20);                                                   // {joj 29/10/06}
+		wait(20);
         alu.txtResult.setTxt("%02X", result);                       // {joj 29/10/06}
         alu.txtResult.setOpacity(1, 20, 1, 0);                      // {joj 29/10/06}
+
+		//Animate blocking/allowing write if condition
+		if(regEX.vCond != def && testCondition(regEX.vCond)) {
+			conditionMux.setPen(controlMuxHLPen);
+			cpsrEX.setPen(controlHLPen);
+
+			if(!cpsr0.invalid){
+				cpsrOUT0.setPen(controlHLPen);
+			} else if (!cpsr1.invalid){
+				cpsrOUT1.setPen(controlHLPen);
+			} else {
+				cpsrCPSR.setPen(controlHLPen);
+			}
+		}
 
     }
 
@@ -755,11 +770,32 @@ function exExec() {														// {joj 14/11/17}
     } else if (regEX.vIns == NOP || !testCondition(regEX.vCond) || regEX.vIns == B || regEX.vIns == STALL) {
 		regOUT0.setInvalid(1);
 	}
-
+	
+	
+		
 	if (regEX.vIns == NOP || !testCondition(regEX.vCond)) {	//Delay updating label for better visualisation
+		
+		debug("Cond: %d",regEX.vCond);
+		if(regEX.vCond != def) {
+			blockingCond = 1;
+		}
+		//Animate blocking write if condition
+		if(blockingCond) {
+			conditionMux.setPen(muxPen);
+			cpsrEX.setPen(controlHLPen);
+			if(!cpsr0.invalid){
+				cpsrOUT0.setPen(controlHLPen);
+			} else if (!cpsr1.invalid){
+				cpsrOUT1.setPen(controlHLPen);
+			} else {
+				cpsrCPSR.setPen(controlHLPen);
+			}
+			blockingCond = 0;
+		}
 		wait(40);
-		regOUT0.updateLabel();	
+		regOUT0.updateLabel();
 	}
+
 
 }
 
@@ -767,6 +803,7 @@ function exExec() {														// {joj 14/11/17}
 // maExec - Memory Access phase
 //
 function maExec() {													// {joj 14/11/17}
+
 
 	if(stall == MUL_STALL) {	//Stall ahead of MUL op
 		regMA.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
@@ -777,12 +814,27 @@ function maExec() {													// {joj 14/11/17}
 		regOUT1.setNewTag(-2);
 	}
 	
-
+	
 	fork(regMA.update());
+
+	
 
     if (instrOpTypeRdt(regMA.nIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns) || regEX.vIns == BL) { //Rdt is type reg or it's a compare instruction
         fork(regOUT0.update());
 	}
+
+	wait(1);
+
+	//Update CPSR0 if S set or comparison instruction
+	if((regMA.vSBit == "S") || (regMA.vIns >= CMN && regMA.vIns <= TST) || (regMA.vIns >= CMNi && regMA.vIns <= TSTi)){
+		cpsr0.update();
+	} else {
+		cpsr0.setInvalid(1);
+	}
+
+	
+
+	
 	
 		
 
@@ -790,13 +842,13 @@ function maExec() {													// {joj 14/11/17}
     if (regMA.nIns == STR || regMA.nIns == STRi) // {joj}
         fork(regSMDR.update());
 
-    wait(8);
+    wait(7);
 
     regWB.setNewValue(regMA.vIns, regMA.vSBit, regMA.vCond, regMA.vRdt, regMA.vRs1, regMA.vRs2, regMA.vIns2, regMA.vRs3);
 
     //if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG) && (regMA.vIns != ST)) {  // {joj}
     if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns) || regEX.vIns == BL) && (regMA.vIns != STR)&& (regMA.vIns != STRi)) {  // {joj}
-
+		debug("1");
         //if (regMA.vIns == LD) {   // {joj}
         if ((regMA.vIns == LDR) || (regMA.vIns == LDRi)) {   // {joj}
             regOUT1.setNewValue(memory[(regOUT0.value / 4) % 16].value);
@@ -804,6 +856,7 @@ function maExec() {													// {joj 14/11/17}
             	regOUT1.setNewTag(regMA.vRdt);
 			}
         } else {
+			debug("2");
             regOUT1.setNewValue(regOUT0.value);
             regOUT1.setNewTag(regOUT0.tag);
         }
@@ -844,6 +897,14 @@ function maExec() {													// {joj 14/11/17}
 		regOUT1.updateLabel();	
 	}
 
+	//Pass CPSR0 to CPSR1 if S set or comparison instruction
+	if((regMA.vSBit == "S") || (regMA.vIns >= CMN && regMA.vIns <= TST) || (regMA.vIns >= CMNi && regMA.vIns <= TSTi)){
+		cpsr1.setNNValue(cpsr0.n);
+		cpsr1.setNZValue(cpsr0.z);
+		cpsr1.setNCValue(cpsr0.c);
+		cpsr1.setNVValue(cpsr0.v);
+	}
+
 }
 
 //
@@ -853,26 +914,48 @@ function wbExec() {																// {joj 14/11/17}
 
     fork(regWB.update());
 	
-	debug("regWB.vIns: %d", regWB.vIns);
-    //if ((instrOpTypeRdt(regWB.nIns) == OP_TYPE_REG) && (regWB.nIns != ST))      // {joj}
+	
+    wait(1); //To guarantee regWB updated in time for following if statement
+
     if ((instrOpTypeRdt(regWB.vIns) == OP_TYPE_REG || instrHasNoDstRR(regWB.vIns) || instrHasNoDstRI(regWB.vIns) || regWB.vIns == BL)){
         fork(regOUT1.update());
-		debug("Yes");
+	}
+	
+	//Update CPSR1 if S set or comparison instruction
+	if((regWB.vSBit == "S") || (regWB.vIns >= CMN && regWB.vIns <= TST) || (regWB.vIns >= CMNi && regWB.vIns <= TSTi)){
+		cpsr1.update();
+	} else {
+		cpsr1.setInvalid(1);
 	}
 
-
-    wait(8);
+	wait(7);
     if ((regWB.vIns != STRi) && (regWB.vIns != STR) && (regWB.vIns != B) && (instrOpTypeRdt(regWB.vIns) == OP_TYPE_REG || instrHasNoDstRR(regWB.vIns) || instrHasNoDstRI(regWB.vIns) || regWB.vIns == BL) && (regOUT1.tag != -2)) {
+		
+		//Update CPSR1 if S set or comparison instruction
+		if((regWB.vSBit == "S") || (regWB.vIns >= CMN && regWB.vIns <= TST) || (regWB.vIns >= CMNi && regWB.vIns <= TSTi)){
+			cpsr.setNNValue(cpsr1.n);
+			cpsr.setNZValue(cpsr1.z);
+			cpsr.setNCValue(cpsr1.c);
+			cpsr.setNVValue(cpsr1.v);
+		}
+
 		regFile[regOUT1.tag].setNewValue(regOUT1.value);
 
         wait(8);
 
-        apOUT1_RF.animate(24);
+        fork(apOUT1_RF.animate(24));
+		if((regWB.vSBit == "S") || (regWB.vIns >= CMN && regWB.vIns <= TST) || (regWB.vIns >= CMNi && regWB.vIns <= TSTi)){
+			fork(apCPSR1_RF.animate(24));
+		}
 
         //
         // Second half of the clock cycle ---------------------------------------khgjhgjfj---------------
         //
         regFile[regOUT1.tag].update();
+		//Update CPSR1 if S set or comparison instruction
+		if((regWB.vSBit == "S") || (regWB.vIns >= CMN && regWB.vIns <= TST) || (regWB.vIns >= CMNi && regWB.vIns <= TSTi)){
+			cpsr.update();
+		}
 
 		//Update the stack pointer visualisation
 		if(regOUT1.tag == 13){

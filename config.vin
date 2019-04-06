@@ -41,6 +41,7 @@ setViewport(0, 0, WIDTH, HEIGHT, 1);
 
 setBgBrush(whiteBrush);									// {joj 7/10/16}
 
+Font sFont = Font("Calibri", 20);
 Font font = Font("Calibri", 22);							// {joj 18/12/16}
 Font fontST = Font("Calibri", 22, STRIKETHROUGH);		// {joj 18/12/16}
 
