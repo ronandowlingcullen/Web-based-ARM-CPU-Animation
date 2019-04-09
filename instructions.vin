@@ -446,7 +446,7 @@ string function instrText(num instr, string s, num cond, num rdt, num rs1, num r
     if (instrIsNop(instr))
         return sprintf("%s", instrNames[instr]);                             	
     else if (instr >= ADD && instr <= BIC)
-        return sprintf("%s%s%s R%d,R%d,R%d,%s R%d", instrNames[instr], s, condNames[cond], rdt, rs1, rs2, instrNames[instr2], rs3);  
+        return sprintf("%s%s%s R%d,R%d,R%d,%s R%d", instrNames[instr], s, condNames[cond], rdt, rs1, rs2, ((instr2 != NOP)? instrNames[instr2]:""), rs3);  
     else if (instr >= LSL && instr <= ROR)
         return sprintf("MOV%s%s R%d,R%d,%s R%d", s, condNames[cond], rdt, rs1, instrNames[instr], rs2); 	
     else if (instr >= ADDi && instr <= BICi)
@@ -454,15 +454,15 @@ string function instrText(num instr, string s, num cond, num rdt, num rs1, num r
     else if (instr >= LSLi && instr <= RORi)
         return sprintf("MOV%s%s R%d,R%d,%s %02X", s, condNames[cond], rdt, rs1, instrNames[instr], rs2); 
     else if (instr >= CMN && instr <= TST)
-        return sprintf("%s%s%s R%d,R%d,R%d,%s R%d", instrNames[instr], s, condNames[cond], rdt, rs1, rs2, instrNames[instr2], rs3);  	
+        return sprintf("%s%s%s R%d,R%d,R%d,%s R%d", instrNames[instr], s, condNames[cond], rdt, rs1, rs2, ((instr2 != NOP)? instrNames[instr2]:""), rs3);  	
     else if (instr >= CMNi && instr <= TSTi)
         return sprintf("%s%s%s R%d,R%d,%02X", instrNames[instr], s, condNames[cond], rdt, rs1, rs2); 	
     else if (instr == LDR || instr == STR)														
-       return sprintf("%s%s R%d,[R%d,R%d,%s R%d]", instrNames[instr], condNames[cond], rdt, rs1, rs2, instrNames[instr2], rs3);    
+       return sprintf("%s%s R%d,[R%d,R%d,%s R%d]", instrNames[instr], condNames[cond], rdt, rs1, rs2, ((instr2 != NOP)? instrNames[instr2]:""), rs3);    
     else if (instr == LDRi || instr == STRi)														
        return sprintf("%s%s R%d,[R%d,%02X]", instrNames[instr], condNames[cond], rdt, rs1, rs2);  
     else if (instr == MOV || instr == MVN)														
-       return sprintf("%s%s%s R%d,R%d,%s R%d", instrNames[instr], s, condNames[cond], rdt, rs1, instrNames[instr2], rs3);                   
+       return sprintf("%s%s%s R%d,R%d,%s R%d", instrNames[instr], s, condNames[cond], rdt, rs1, ((instr2 != NOP)? instrNames[instr2]:""), rs3);                   
     else if (instr == MOVi || instr == MVNi)                                                		
         return sprintf("%s%s%s R%d,%02X", instrNames[instr], s, condNames[cond], rdt, rs1);                  
     else if (instrIsBranch(instr))

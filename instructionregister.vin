@@ -26,16 +26,16 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
 	string nSBit = " ";
     num nIns = EMPTY, nCond = 0, nRdt = 0, nRs1 = 0, nRs2 = 0, nIns2 = EMPTY, nRs3 = 0;
 	
-	Font IMFont = Font("Calibri",21);
+	Font IMFont = Font("Calibri",18);
 
     string txt = "EMPTY";
 
     Rectangle r1 = Rectangle2(0, 0, blackPen, blackBrush, x, y, w, h);
 	r1.setRounded(2, 2); // {joj 16/10/16}
-    Rectangle r2 = Rectangle2(0, 0, blackPen, whiteBrush, x + 5, y + 4, w - 11, h - 31);
+    Rectangle r2 = Rectangle2(0, 0, blackPen, whiteBrush, x + 5, y + 4, w - 11, h - 24);
 	r2.setRounded(2, 2); // {joj 16/10/16}
-    Rectangle r3 = Rectangle2(0, 0, 0, 0, x, y + h - 22, w, 22, whitePen, font, caption);
-    Rectangle label = Txt(valuesLayer, 0, x + w/2, y + (h - 31)/2 + 4, 0, IMFont, txt); // {joj 16/10/16}
+    Rectangle r3 = Rectangle2(0, 0, 0, 0, x, y + h - 20, w, 22, whitePen, font, caption);
+    Rectangle label = Txt(valuesLayer, 0, x + w/2, y + (h - 24)/2 + 4, 0, IMFont, txt); // {joj 16/10/16}
 	label.rotate(-90); // {joj 14/10/16}
 
     //
