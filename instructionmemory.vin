@@ -272,12 +272,16 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 
     }
 
-    function setValue(num instr, num rdt, num rs1, num rd2imm) {
+    function setValue(num instr, string sBit, num cond, num rdt, num rs1, num rs2imm, num instr2, num rs3imm) {
         vIns = instr;
+		vSBit = sBit;
+		vCond = cond;
         vRdt = rdt;
-        vRs1 = rs1;
-        vRs2 = rd2imm & 0xff;                                           // {joj 01/11/06}
-        initRegs(0);                                                    // {joj 27/10/06}
+        vRs1 = rs1 & 0xff;
+        vRs2 = rs2imm & 0xff;
+		vIns2 = instr2;       
+		vRs3 = rs3imm; 
+        initRegs(0);
     }
 
     function setOpcode(num opcode) {
@@ -521,8 +525,8 @@ class InstructionMemory(num x, num y, num w, num h) {
     for (num lp1 = 0; lp1 < 32; lp1++)
     	instruction[lp1] = Instruction(x + 2, y+12 + 2 + lp1 * ih, w - 4, ih, lp1 * 4);
 
-    function setValue(num addr, num instr, num rdt, num rs1, num rs2imm) {
-        instruction[addr / 4].setValue(instr, rdt, rs1, rs2imm);
+    function setValue(num addr, num instr, string sBit, num cond, num rdt, num rs1, num rs2imm, num instr2, num rs3imm) {
+        instruction[addr / 4].setValue(instr, sBit, cond, rdt, rs1, rs2imm, instr2, rs3imm);
     }
 
     num function getOpcode(num addr) {                                  // {joj 27/10/06}

@@ -675,10 +675,10 @@ function exExec() {														// {joj 14/11/17}
 		//Deal with barrel shift ops
 		if(regEX.vIns2 != NOP){
 			if(instrIsShI(regEX.vIns2)){
-				fork(apEX_BS.animate(24));
+				//fork(apEX_BS.animate(24));
 				txtEX_BS.setTxt("%02X", op3); 
 			} else {
-				fork(apRF_BS.animate(24));
+				//fork(apRF_BS.animate(24));
 				txtRF_BS.setTxt("R%d:%02X", regEX.vRs3, regFile[regEX.vRs3].value);
 				txtRF_BS.setOpacity(1);
 			}
@@ -991,13 +991,8 @@ function nonPipelinedBranch() {										// {joj 14/11/11}
     fork(apPC1_ADDi.animate(12));									// {joj 2/11/12}
 	wait(12);														// {joj 2/11/12}
 
-    //-------------May Need to Fix This ----------------------------------
-	//if (instrIsJumpR(regID.vIns)) {
-    //    regPC.setNewValue((regFile[regID.vRs2].value) & 0x7F);
-    //    apRF_MUX1.animate(34);
-    //} else 
+
 	if (instrIsBranch(regID.vIns)) {
-//        if ((regFile[regID.vRs1].value == 0) == (regID.vIns == BEQZ)) {
         if ((regFile[regID.vRs1].value == 0) == (regID.vIns == B)) {
             apADDi_MUX3.animate(20);
             regPC.setNewValue((regPC.value + regID.vRs2) & 0x7F);
@@ -1006,10 +1001,6 @@ function nonPipelinedBranch() {										// {joj 14/11/11}
             regPC.setNewValue((regPC.value + 4) & 0x7F);
         }
         apMUX3_MUX1.animate(14);
-    //} else if (isJorJAL(regID.vIns)) {	//-----------------And this------------------
-    //    regPC.setNewValue((regPC.value + regID.vRs2) & 0x7F);
-    //    apADDi_MUX3.animate(20);
-    //    apMUX3_MUX1.animate(14);
     } else {
         regPC.setNewValue((regPC.value + 4) & 0x7F);
         apADD4_MUX3.animate(20);
