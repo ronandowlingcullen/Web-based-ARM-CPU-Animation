@@ -706,8 +706,9 @@ num function instrExecute(num instr, string s, num cond, num op1, num op2, num s
 		setFlags(res,op1,op2,add,0);
 		res = res & 0xFF;
 	}
-    else if (instr == BL) {
-        res = op2 & 0xFF;
+    else if (instr == B || instr == BL) {
+        res = op1 + (op2-4) & 0xFF;
+		
 		sOK = 0;
     } else {
         res = 0xEE;
