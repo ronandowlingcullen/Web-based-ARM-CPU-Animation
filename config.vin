@@ -32,7 +32,7 @@ const num HEIGHT = 1080;
 // 3:   branch prediction                           	// joj
 // 4:   nops                                        	// joj
 //
-const num maxexample = 5;                           	// joj
+const num maxexample = 10;                           	// joj
 num example = 0;										// joj - must be 0
 
 setViewport(0, 0, WIDTH, HEIGHT, 1);

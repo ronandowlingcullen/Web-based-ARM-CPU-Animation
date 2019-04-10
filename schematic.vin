@@ -1202,6 +1202,92 @@ if (example == 0) {
 } else if (example == 1) {                          // {joj}
 
     //
+    // Demonstrating SBit Functionality
+    //
+	// SUBS		R1,R2,R3
+    //
+    im.setValue( 0, SUB,  "S", 0,  1, 2, 3, 0, 0);               
+    im.setValue(4, HALT, " ", 0, 0, 0, 0, 0, 0);                
+    regFile[2].setValue(4);                         
+    regFile[3].setValue(4);                        
+
+} else if (example == 2) {                          // {joj}
+
+    //
+    // Demonstrating Condition Functionality
+    //
+	// ADDS		R1,R2,R3
+	// SUB		R1,R1,#2
+	// B		L1
+	// MOV		R1,#2
+	// MOV		R2,#3
+	//L1
+    //
+    im.setValue( 0, ADD,  "S", 0,  1, 2, 3, 0, 0);
+    im.setValue( 4, SUBi, " ", 0,  1, 1, 2, 0, 0);               
+    im.setValue( 8, B,    " ", CS, 0, 0,12, 0, 0);                 
+    im.setValue(12, MOVi, " ", 0,  1, 0, 2, 0, 0);                
+    im.setValue(16, MOVi, " ", 0,  2, 0, 3, 0, 0);                
+    im.setValue(20, HALT, " ", 0,  0, 0, 0, 0, 0);               
+    regFile[2].setValue(0xFF);                         
+    regFile[3].setValue(0xFF);  
+
+} else if (example == 3) {                          // {joj}
+
+    //
+    // Demonstrating Condition Functionality
+    //
+	// ADDS		R1,R2,R3
+	// SUB		R1,R1,#2
+	// MOVCS	R1,#2
+	// MOVCS	R2,#3
+    //
+    im.setValue( 0, ADD,  "S", 0,  1, 2, 3, 0, 0);
+    im.setValue( 4, SUBi, " ", 0,  1, 1, 2, 0, 0);                 
+    im.setValue( 8, MOVi, " ", CS, 1, 0, 2, 0, 0);                
+    im.setValue(12, MOVi, " ", CS, 2, 0, 3, 0, 0);                
+    im.setValue(16, HALT, " ", 0,  0, 0, 0, 0, 0);               
+    regFile[2].setValue(5);                         
+    regFile[3].setValue(6);
+
+} else if (example == 4) {
+
+    //
+    // Demonstrating Shifting Functionality
+    //
+	// MOV		R1,#4
+//	L1 CMP		R1,#0
+	// BLE		HALT
+	// LDR		R3,[R0,R1,LSL #2]
+	// ADD		R3,R3,R3
+	// STR		R3,[R0,R1,LSL #2]
+	// B		L1
+    //
+    im.setValue( 0, MOVi, " ", 0,  3, 0, 16, 0, 0);;              
+    im.setValue( 4, STR,  " ", 0,  3, 0, 1, LSLi, 2);              
+    im.setValue( 8, HALT, " ", 0,  0, 0, 0, 0, 0);  
+	regFile[1].setValue(3);             
+    memory[0].setValue(1);               
+    memory[1].setValue(2);               
+    memory[2].setValue(3);               
+    memory[3].setValue(4);
+
+
+} else if (example == 5) {
+
+	//Factorial
+	// Pushing registers 3-1 onto the stack then popping one off
+
+	//im.setValue( 0,   JR, 0, 0, 1);				
+	im.setValue( 0, MOVi, " ", 0, 0, 0, 8, 0, 0);	
+	im.setValue( 4, STRi, " ", 0, 0, 13, 0xFC, 0, 0);
+	im.setValue( 8, SUBi, " ", 0, 13, 13, 4, 0, 0);
+	im.setValue(12, B,    " ", 0, 0, 0, 0xF0, 0, 0);
+	im.setValue(16, HALT, " ", 0, 0, 1, 1, 0, 0);
+
+} else if (example == 6) {                          // {joj}
+
+    //
     // Data Hazard Showing Pipeline Forwarding and Two Stage
     //
 	// r1 = r3 + r4
@@ -1219,7 +1305,7 @@ if (example == 0) {
     regFile[6].setValue(6);                         
     regFile[9].setValue(9);                         
 
-} else if (example == 2) {                          // {joj}
+} else if (example == 7) {                          // {joj}
 
     //
     // Load Hazard with Poor Scheduling Showing Stall
@@ -1237,7 +1323,7 @@ if (example == 0) {
     regFile[6].setValue(6);                         
     regFile[9].setValue(9);  
 
-} else if (example == 3) {                          // {joj}
+} else if (example == 8) {                          // {joj}
 
     //
     // Load Hazard with Good Scheduling Showing No Stall
@@ -1255,7 +1341,7 @@ if (example == 0) {
     regFile[6].setValue(6);                         
     regFile[9].setValue(9);  
 
-} else if (example == 4) {
+} else if (example == 9) {
 
 	//
     // Branch Prediction showing no stall on branches after 1st
@@ -1268,7 +1354,7 @@ if (example == 0) {
     im.setValue( 0, MOVi, " ", 0, 1, 0, 4, 0, 0);                 
     im.setValue( 4, SUB,  " ", 0, 3, 1, 6, 0, 0);                 
     im.setValue( 8, ADC,  " ", 0, 5, 1, 4, 0, 0);                 
-    im.setValue(12, B,    " ", 0, 0, 0xF4, 0, 0, 0);                 
+    im.setValue(12, B,    " ", 0, 0, 0, 0xF4, 0, 0);                 
     im.setValue(16, HALT, " ", 0, 0, 0, 0, 0, 0);                
     regFile[3].setValue(3);                         
     regFile[4].setValue(4);                        
@@ -1276,58 +1362,20 @@ if (example == 0) {
     regFile[7].setValue(7);                       
     regFile[9].setValue(9); 
 
-} else if (example == 5) {
+} else if (example == 10) {
 
 	//Factorial
 
 	//im.setValue( 0,   JR, 0, 0, 1);				
 	im.setValue( 0, MOV, " ", 0, 0, 0, 1, 0, 0);				
 	im.setValue( 4, CMPi, " ", 0, 0, 1, 1, 0, 0);				
-	im.setValue( 8, B,    " ", LE, 0, 0, 24, 0, 0);
+	im.setValue( 8, B,    " ", LE, 0, 0, 16, 0, 0);
 	im.setValue(12, SUBi, " ", 0, 1, 1, 1, 0, 0);
-	im.setValue(16, MUL,  " ", 0, 0, 1, 1, 0, 0);
+	im.setValue(16, MUL,  " ", 0, 0, 0, 1, 0, 0);
 	im.setValue(20, B,    " ", 0, 0, 0, 0xF0, 0, 0);
 	im.setValue(24, HALT, " ", 0, 0, 1, 1, 0, 0);
 
-	//im.setValue( 0,  ADD, 2, 2, 3);				// {joj 30/11/16}
-	//im.setValue( 4,  NOP, 0, 0, 0);				// {joj 30/11/16}
-	//im.setValue( 8,  ADD, 1, 2, 3);				// {joj 30/11/16}
-	//im.setValue(12, HALT, 0, 0, 0);				// {joj 30/11/16}
-
-	//im.setValue( 0,   LD, 1, 0, 0);					// {joj 5/12/16}
-	//im.setValue( 4, BEQZ, 0, 1, 28);				// {joj 5/12/16}
-	//im.setValue(32, HALT, 0, 0, 0);					// {joj 5/12/16}
-
-	//im.setValue( 0,   LD, 1, 0, 1);				// {joj 7/12/16}
-	//im.setValue( 4,  ADD, 2, 0, 0);				// {joj 7/12/16}
-	//im.setValue( 8,  ADD, 3, 0, 0);				// {joj 7/12/16}
-	//im.setValue(12, BEQZ, 0, 1, 20);				// {joj 7/12/16}
-	//im.setValue(32, HALT, 0, 0, 0);				// {joj 7/12/16}
-
-}  else if (example == 6) {
-
-	// Fina
-
-	//im.setValue( 0,   JR, 0, 0, 1);				// {joj 29/11/16}
-	im.setValue( 0,   B,   " ", 0,0, 0, 1, 0, 0);				// {joj 29/11/16}
-	im.setValue(32,  ADD,  " ", 0,1, 1, 1, 0, 0);				// {joj 29/11/16}
-	im.setValue(36, HALT,  " ", 0,0, 0, 0, 0, 0);				// {joj 29/11/16}
-	regFile[1].setValue(32);					// {joj 29/11/16}
-
-	//im.setValue( 0,  ADD, 2, 2, 3);				// {joj 30/11/16}
-	//im.setValue( 4,  NOP, 0, 0, 0);				// {joj 30/11/16}
-	//im.setValue( 8,  ADD, 1, 2, 3);				// {joj 30/11/16}
-	//im.setValue(12, HALT, 0, 0, 0);				// {joj 30/11/16}
-
-	//im.setValue( 0,   LD, 1, 0, 0);					// {joj 5/12/16}
-	//im.setValue( 4, BEQZ, 0, 1, 28);				// {joj 5/12/16}
-	//im.setValue(32, HALT, 0, 0, 0);					// {joj 5/12/16}
-
-	//im.setValue( 0,   LD, 1, 0, 1);				// {joj 7/12/16}
-	//im.setValue( 4,  ADD, 2, 0, 0);				// {joj 7/12/16}
-	//im.setValue( 8,  ADD, 3, 0, 0);				// {joj 7/12/16}
-	//im.setValue(12, BEQZ, 0, 1, 20);				// {joj 7/12/16}
-	//im.setValue(32, HALT, 0, 0, 0);				// {joj 7/12/16}
+	regFile[1].setValue(4);
 
 }
 
