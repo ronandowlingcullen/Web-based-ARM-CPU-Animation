@@ -69,6 +69,7 @@ function ifExec() {																// {joj 24/9/17}
         mux1Src = apADD4_MUX1;
     }
 
+
 	//Update PC visualised as R15 in register file
 	regFile[15].setNewValue(regPC.newValue);
 
@@ -131,46 +132,12 @@ function calcNewPC() {
 		//Pen pen = (stall == NO_STALL) ? controlHLPen : controlPen;	// {joj 4/11/12}
 		Pen pen = controlHLPen;	// {joj 8/12/16}
 
-        //if (zfMode == ZERO_FORWARDING) {
-        //    if ((regEX.vRdt == regID.vRs1) && (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) && instrIsLoadOrStore(regEX.vIns) == 0) {	// {joj 8/12/16}
-        //        clALU.setPen(pen);
-        //        zero = regOUT0.newValue;                            // where ALU result is stored
-        //    } else if (regOUT0.tagMatches(regID.vRs1)) {
-        //        clOUT0.setPen(pen);
-        //        zero = regOUT0.value;
-        //    //} else if (regOUT1.tagMatches(regID.vRs1)) {			// {joj 9/12/16}
-        //    //    clOUT1.setPen(pen);
-        //    //    zero = regOUT1.value;
-        //    } else {
-		//		mux1Src = apMUX3_MUX1;                              // {joj 3/11/12}
-        //        clA.setPen(pen);
-        //        zero = regFile[regID.vRs1].value;
-        //        txtRF_A.setTxt("R%d:%02X", regID.vRs1, zero);       // {joj 29/10/06}
-        //        txtRF_A.setOpacity(1);                            	// {joj 1/2/06}
-        //        fork(apRF_A.animate(24));                      		// {joj 1/2/06}
-        //    }
-        //} else {
-        //    clA.setPen(pen);
-        //    zero = regFile[regID.vRs1].value;
-        //}
-
-        //clMUX.setPen(pen);
-
-        ////if ((regID.vIns == BEQZ) == (zero == 0)) {
-        //if ((regID.vIns == B) == (zero == 0)) {
-        //    mux3Src = apADDi_MUX3;
-        //    newPC = (regPC1.value + regID.vRs2) & 0x7F;
-        //} else {
-        //    mux3Src = apADD4_MUX3;
-        //    newPC = (regPC1.value + 4) & 0x7F;
-        //}
-
-        //newMux1Src = apMUX3_MUX1;
+        newMux1Src = apADDi_MUX1;
         //mux4Src = apMUX3_MUX4;
 
 		//RDC's implementation
-		mux3Src = apADDi_MUX3;
-    	mux4Src = apMUX3_MUX4;
+//		mux3Src = apADDi_MUX3;
+//    	mux4Src = apMUX3_MUX4;
 		
 		if(testCondition(regID.vCond)){
 			if(regID.vIns == B || regID.vIns == BL) {
@@ -179,11 +146,40 @@ function calcNewPC() {
 		} else {
 			newPC = regPC1.value + 4;
 		}
-    	newMux1Src = apMUX3_MUX1;
-
+    	newMux1Src = apADDi_MUX1;
     }
+}
 
-	
+//
+// set mux1Src, mux3Src and regPC.newValue and values for BTB if necessary
+//
+function calcNewPC2() {
+
+   // AnimPipe newMux1Src;
+
+    if (instrIsBranch(regEX.vIns)) {
+
+        // conditional branch
+		//Pen pen = (stall == NO_STALL) ? controlHLPen : controlPen;	// {joj 4/11/12}
+		Pen pen = controlHLPen;	// {joj 8/12/16}
+
+        //newMux1Src = apADDi_MUX1;
+        //mux4Src = apMUX3_MUX4;
+
+		//RDC's implementation
+//		mux3Src = apADDi_MUX3;
+//    	mux4Src = apMUX3_MUX4;
+
+		
+		
+		if(testCondition(regEX.vCond)){
+    		newPC = (regB.value + regEX.vRs2) & 0x7F;
+    		newMux1Src = apADDi_MUX1;
+		} else {
+			newPC = regB.value + 4;
+    		newMux1Src = apB_MUX1;
+		}
+    }
 }
 
 function updBTB() {
@@ -231,6 +227,43 @@ function updBTB() {
         }
 
     }
+
+}
+
+function updBTB2() {
+
+	//branchMissPredict = 0;
+
+	if (newPC != regPC.value) {
+
+        //branchMissPredict = 1;
+
+		regPC.setNewValue(newPC);
+		regFile[15].setNewValue(newPC);		// Update PC in regfile
+        mux1Src = newMux1Src;
+
+        //
+        // update branch target buffer
+        //
+        if (bpMode == BRANCH_PREDICTION) {
+
+
+                //
+                // re-use entry if present
+                //
+                if (btbIndex(regB.value) >= 0)					// {joj 1/11/06}
+                    btbLast = btbIndex(regB.value)       	        // {joj 1/11/06}
+                else
+                    btbLast = (btbLast) ? 0 : 1;                    // {joj 1/2/06}
+
+                btbPC[btbLast].setNewValue(regB.value);           // {joj 1/2/06}
+                btbPC[btbLast].setInvalid(0);                       // {joj 1/2/06}
+                btbPC[btbLast].useTag = 0;                          // {joj 1/2/06}
+                btbPPC[btbLast].setNewValue(newPC);                 // {joj 1/2/06}
+
+            }
+
+        }
 
 }
 
@@ -322,7 +355,7 @@ function detectStall() {
 
     // control hazards (real detection for control hazards is done in calcNewPC)
     //if ((stall == NO_STALL) && (bpMode != DELAYED_BRANCHES) && instrIsBranchOrJump(regID.vIns) && branchMissPredict) {	// {joj 1/2/06}
-	if ((stall == NO_STALL) && instrIsBranch(regID.vIns) && (newPC != regPC.value)) {	// {joj 9/12/16}
+	if ((stall == NO_STALL) && instrIsBranch(regEX.vIns) && (newPC != regPC.value)) {	// {joj 9/12/16}
 		if (bpMode == BRANCH_PREDICTION) {
 			updateBTB = 1;
 		} else if (bpMode == BRANCH_INTERLOCK) {
@@ -354,10 +387,10 @@ function idExec() {																// {joj 14/11/17}
         fork(regID.update());
     }
 
-    if (updateBTB && (bpMode == BRANCH_PREDICTION))	{							// {joj 3/11/12}
-        fork(btbPC[btbLast].update());											// {joj 1/2/06}
-        fork(btbPPC[btbLast].update());											// {joj 1/2/06}
-    }
+    //if (updateBTB && (bpMode == BRANCH_PREDICTION))	{							// {joj 3/11/12}
+   //     fork(btbPC[btbLast].update());											// {joj 1/2/06}
+    //    fork(btbPPC[btbLast].update());											// {joj 1/2/06}
+   // }
 
 	
 
@@ -368,21 +401,21 @@ function idExec() {																// {joj 14/11/17}
 	
 	if(instrIsBranch(regID.vIns) ) {
 		
-		if (regID.vIns == BL) {												
-			regB.setNewValue(regPC1.value);                        			
-		}
+											
+		regB.setNewValue(regPC1.value);                        			
+
 		
 		if (stall == NO_STALL) {												// {joj 4/11/12}
 		
-			fork(apPC1_ADDi.animate(16));                          				// {joj 4/11/12}
-        	fork(apID_ADDi.animate(16));                           				// {joj 4/11/12}
+//			fork(apPC1_ADDi.animate(16));                          				// {joj 4/11/12}
+//        	fork(apID_ADDi.animate(16));                           				// {joj 4/11/12}
         	wait(12);                                           				// {joj 4/11/12}
-        	txtID_ADDi.setTxt("%02X", regID.vRs1);                      		// {joj 4/11/12}
-        	txtID_ADDi.setOpacity(1);                                 			// {joj 4/11/12}
+//        	txtID_ADDi.setTxt("%02X", regID.vRs1);                      		// {joj 4/11/12}
+//        	txtID_ADDi.setOpacity(1);                                 			// {joj 4/11/12}
         	wait(4);                                                   			// {joj 4/11/12}
-			fork(apADDi_MUX3.animate(8));                                  		// {joj 4/11/12}
-			txtADDi_MUX3.setTxt("%02X", (regPC1.value + regID.vRs1) & 0xff);	// {joj 4/11/12}
-        	txtADDi_MUX3.setOpacity(1, 8, 1, 0);          						// {joj 4/11/12}
+//			fork(apADDi_MUX3.animate(8));                                  		// {joj 4/11/12}
+//			txtADDi_MUX3.setTxt("%02X", (regPC1.value + regID.vRs1) & 0xff);	// {joj 4/11/12}
+//        	txtADDi_MUX3.setOpacity(1, 8, 1, 0);          						// {joj 4/11/12}
 		
 		} else {																// {joj 4/11/12}
 		
@@ -401,13 +434,13 @@ function idExec() {																// {joj 14/11/17}
     //
     // second half of the clock cycle
     //
-    if (instrIsBranch(regID.vIns))
-        calcNewPC();
+    //if (instrIsBranch(regID.vIns))
+    //    newPC = regPC1.value + 4//calcNewPC();
 	
 	//if (instrIsBranch(regID.vIns) && (stall == NO_STALL)) {					// {joj 3/11/12}
 	if (instrIsBranch(regID.vIns)) {											// {joj 9/12/16}
-		txtMUX3_MUX4.setTxt("%02X", newPC); 									// {joj 3/11/12}
-		txtMUX3_MUX4.setOpacity(1, 8, 1, 0);                           			// {joj 3/11/12}
+//		txtMUX3_MUX4.setTxt("%02X", newPC); 									// {joj 3/11/12}
+//		txtMUX3_MUX4.setOpacity(1, 8, 1, 0);                           			// {joj 3/11/12}
 	}																			// {joj 3/11/12}
 	
 	if (instrIsBranch(regID.vIns))										// {joj 9/12/16}
@@ -415,8 +448,8 @@ function idExec() {																// {joj 14/11/17}
 	
     detectStall();
 	//debug("stall=%d", stall);
-	if (instrIsBranch(regID.vIns) && (stall != DATA_STALL))				// {joj 10/12/16}
-		updBTB();																// {joj 9/12/16}
+	//if (instrIsBranch(regID.vIns) && (stall != DATA_STALL))				// {joj 10/12/16}
+	//	updBTB();																// {joj 9/12/16}
 
     if (stall == NO_STALL || stall == MUL_STALL) {
         regEX.setNewValue(regID.vIns, regID.vSBit, regID.vCond, regID.vRdt, regID.vRs1, regID.vRs2, regID.vIns2, regID.vRs3);
@@ -427,9 +460,7 @@ function idExec() {																// {joj 14/11/17}
     wait(7);																	// {joj 4/11/12}
 
     // Send source registers to A and B
-	debug("%d", regEX.vIns);
-	debug("%d", stall);
-	debug("-------");
+
     if ((instrOpTypeRdt(regID.vIns) == OP_TYPE_REG || instrHasNoDstRR(regID.vIns) || instrHasNoDstRI(regID.vIns)) && (regID.vIns != B) && (regEX.vIns != MUL || stall != MUL_STALL)){//!instrIsBranch(regID.vIns)) { //Rdt is type reg or it's a compare instruction
 		
         if(instrOpTypeRs1(regID.vRs1) != OP_TYPE_IMM)
@@ -441,7 +472,7 @@ function idExec() {																// {joj 14/11/17}
         if (instrOpTypeRs2(regID.vIns) == OP_TYPE_REG) {
             regFile[regID.vRs2].highlight(bhighlight);                         // {joj}
             regB.setNewValue(regFile[regID.vRs2].value);
-        } else if (regID.vIns != BL) {
+        } else if (!instrIsBranch(regID.vIns)) {
             if(instrOpTypeRdt(regID.vRdt) != OP_TYPE_UNUSED)
 				regFile[regID.vRdt].highlight(bhighlight);                         // {joj}
             regB.setNewValue(regFile[regID.vRdt].value);
@@ -463,7 +494,7 @@ function idExec() {																// {joj 14/11/17}
         //
         if ((!instrIsArRI(regID.vIns)) && (regID.vIns != LDR &&  regID.vIns != LDRi) && (!instrHasNoOp1RI(regID.vIns))) { 
             num vr = (regID.vIns == STR || regID.vIns == STRi) ? regID.vRdt : regID.vRs2;  // {joj 28/10/06}
-            if(regID.vIns == BL) {
+            if(instrIsBranch(regID.vIns)) {
 				apPC1_MUX5.animate(18);                               		
                	apMUX5_B.animate(6);
 			} else if(instrOpTypeRs2(regID.vIns) != OP_TYPE_UNUSED) {	//Don't animate if not in use
@@ -488,17 +519,45 @@ function idExec() {																// {joj 14/11/17}
 		//}
 	//}
 
+				//if (btbIndex(regB.value) >= 0)					// {joj 1/11/06}
+                //    btbLast = btbIndex(regB.value)       	        // {joj 1/11/06}
+                //else
+                //    btbLast = (btbLast) ? 0 : 1;                    // {joj 1/2/06}
+
+                //btbPC[btbLast].setNewValue(regB.value);           // {joj 1/2/06}
+               // btbPC[btbLast].setInvalid(0);                       // {joj 1/2/06}
+                //btbPC[btbLast].useTag = 0;                          // {joj 1/2/06}
+               // btbPPC[btbLast].setNewValue(newPC);                 // {joj 1/2/06}
 	//Flush regID if Branch Instr and not conditionally unexecuted
-	if(instrIsBranch(regID.vIns)){
-		if(bpMode == BRANCH_PREDICTION){
-			if((btbIndex(regPC1.value) != -1) && !testCondition(regID.vCond)){
-				regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
-			}
-			if((btbIndex(regPC1.value) == -1) && testCondition(regID.vCond)){
-				regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
-			}
-		}
-	}
+	//if(instrIsBranch(regID.vIns)){
+	//	if(bpMode == BRANCH_PREDICTION){
+	//		if((btbIndex(regPC1.value) != -1)){
+	//			if(!testCondition(regID.vCond) && (btbPPC[btbIndex(regPC1.value)] == ((regPC1.value + regID.vRs2) & 0x7C))){	
+					//If branch conditionally not taken but predicted to be taken then stall and invalidate btb line
+	//				regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+	//				btbPC[regPC1.value].setInvalid(1);
+	//			} else if (testCondition(regID.vCond) && (btbPPC[btbIndex(regPC1.value)] != ((regPC1.value + regID.vRs2) & 0x7C))) { 
+	//				//If branch taken but predicted to not be taken then stall
+	//				regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+	//				btbPC[regPC1.value].setInvalid(1);
+	//			}
+	//		}
+	//		if((btbIndex(regPC1.value) == -1) && testCondition(regID.vCond)){
+	//			regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+	//		}
+	//	}
+	//}
+	
+	//if(instrIsBranch(regEX.vIns)){
+	//	if(bpMode == BRANCH_PREDICTION){
+	//		if((btbIndex(regB.value) != -1) && !testCondition(regEX.vCond)){
+	//			regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+	//		}
+	//		if((btbIndex(regB.value) == -1) && testCondition(regEX.vCond)){
+	//			regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+	//		}
+	//	}
+	//}
 	
 
 }
@@ -528,6 +587,72 @@ function exExec() {														// {joj 14/11/17}
     wait(8);
 
     regMA.setNewValue(regEX.vIns, regEX.vSBit, regEX.vCond, regEX.vRdt, regEX.vRs1, regEX.vRs2, regEX.vIns2, regEX.vRs3);
+	
+	num branchPredicted = 0;
+	//Flush regID and regEX on btb miss or incorrect prediction
+	if(instrIsBranch(regEX.vIns)){
+		if(bpMode == BRANCH_PREDICTION){
+			if((btbIndex(regB.value) != -1)){
+				if(!testCondition(regEX.vCond) && (btbPPC[btbIndex(regB.value)].value == ((regB.value + regEX.vRs2) & 0x7C))){	
+					//If branch conditionally not taken but predicted to be taken then stall and invalidate btb line
+					regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+					regID.update();
+					regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+					//btbPC[regB.value].setInvalid(1);
+				} else if (testCondition(regEX.vCond) && (btbPPC[btbIndex(regB.value)].value != ((regB.value + regEX.vRs2) & 0xFF))) { 
+					//If branch taken but predicted to not be taken then stall
+					regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+					regID.update();
+					regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+					//btbPC[regB.value].setInvalid(1);
+				} else {
+					branchPredicted = 1;
+				}
+			}
+			if((btbIndex(regB.value) == -1) && testCondition(regID.vCond)){
+				//If btb miss and branch taken then stall
+					regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+					regID.update();
+					regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
+			}
+		}
+		//Animate blocking/allowing write if conditional branch
+		if(regEX.vCond != def) {
+			if (testCondition(regEX.vCond)) {
+				conditionMuxB.setPen(controlMuxHLPen);
+			} else {
+				conditionMuxB.setPen(muxPen);
+			}
+			cpsrEXB.setPen(controlHLPen);
+
+			if(!cpsr0.invalid){
+				cpsrOUT0B.setPen(controlHLPen);
+			} else if (!cpsr1.invalid){
+				cpsrOUT1B.setPen(controlHLPen);
+			} else {
+				cpsrCPSRB.setPen(controlHLPen);
+			}
+		}
+	}
+
+
+		
+
+	//New Branch Functionality
+	if(instrIsBranch(regEX.vIns) && !branchPredicted){
+		debug("Calc");
+		calcNewPC2();
+		fork(apB_ADDi.animate(12));
+		fork(apEX_ADDi.animate(12));
+	}
+
+	if (instrIsBranch(regEX.vIns) && !branchPredicted && (stall != DATA_STALL))				// {joj 10/12/16}
+		updBTB2()
+
+    if (updateBTB && (bpMode == BRANCH_PREDICTION))	{							// {joj 3/11/12}
+        fork(btbPC[btbLast].update());											// {joj 1/2/06}
+        fork(btbPPC[btbLast].update());											// {joj 1/2/06}
+    }
 
     if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) { //Rdt is type reg or it's a compare instruction
 
@@ -769,13 +894,13 @@ function exExec() {														// {joj 14/11/17}
     if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) {
 		regOUT0.setInvalid(0);								
 
-    } else if (regEX.vIns == NOP || !testCondition(regEX.vCond) || regEX.vIns == B || regEX.vIns == STALL) {
+    } else if (regEX.vIns == NOP || !testCondition(regEX.vCond) || instrIsBranch(regEX.vIns) || regEX.vIns == STALL) {
 		regOUT0.setInvalid(1);
 	}
 	
 	
 		
-	if (regEX.vIns == NOP || !testCondition(regEX.vCond)) {	//Delay updating label for better visualisation
+	if ((regEX.vIns != B) && (regEX.vIns == NOP || !testCondition(regEX.vCond))) {	//Delay updating label for better visualisation
 		
 		if(regEX.vCond != def) {
 			blockingCond = 1;
@@ -892,7 +1017,7 @@ function maExec() {													// {joj 14/11/17}
 
     }
 
-	if (regMA.vIns == NOP || !testCondition(regMA.vCond)) {	//Delay updating label for better visualisation
+	if (regMA.vIns == NOP || !testCondition(regMA.vCond) || regEX.vIns == B || regEX.vIns == STALL) {	//Delay updating label for better visualisation
 		wait(64);
 		regOUT1.setInvalid(1);	
 		regOUT1.updateLabel();	
@@ -984,27 +1109,27 @@ function wbExec() {																// {joj 14/11/17}
 //
 function nonPipelinedBranch() {										// {joj 14/11/11}
 
-    fork(ap4_ADD4.animate(24));                                		// {joj 2/11/12}
-    fork(apID_ADDi.animate(24));                               		// {joj 2/11/12}
+//    fork(ap4_ADD4.animate(24));                                		// {joj 2/11/12}
+//    fork(apID_ADDi.animate(24));                               		// {joj 2/11/12}
 	apPC_PC1.animate(12);											// {joj 2/11/12}
-    fork(apPC1_ADD4.animate(12));									// {joj 2/11/12}
-    fork(apPC1_ADDi.animate(12));									// {joj 2/11/12}
+//    fork(apPC1_ADD4.animate(12));									// {joj 2/11/12}
+//    fork(apPC1_ADDi.animate(12));									// {joj 2/11/12}
 	wait(12);														// {joj 2/11/12}
 
 
 	if (instrIsBranch(regID.vIns)) {
         if ((regFile[regID.vRs1].value == 0) == (regID.vIns == B)) {
-            apADDi_MUX3.animate(20);
+//            apADDi_MUX3.animate(20);
             regPC.setNewValue((regPC.value + regID.vRs2) & 0x7F);
         } else {
-            apADD4_MUX3.animate(20);
+//            apADD4_MUX3.animate(20);
             regPC.setNewValue((regPC.value + 4) & 0x7F);
         }
-        apMUX3_MUX1.animate(14);
+//        apMUX3_MUX1.animate(14);
     } else {
         regPC.setNewValue((regPC.value + 4) & 0x7F);
-        apADD4_MUX3.animate(20);
-        apMUX3_MUX1.animate(14);
+//        apADD4_MUX3.animate(20);
+//        apMUX3_MUX1.animate(14);
     }
 
 	regFile[15].setNewValue(regPC.newValue);		// Update PC in regfile

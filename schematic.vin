@@ -34,7 +34,7 @@ Line2(0, ABSOLUTE, borderPen, 437.0, 1000, 1993.0, 1000);
 
 Line2(0, ABSOLUTE, borderPen, 437.0, 176, 437.0, 1000);
 Line b1 = Line2(0, ABSOLUTE, borderPen, 749.0, 176, 749.0, 1000);
-Line b2 = Line2(0, ABSOLUTE, borderPen, 1100.0, 176, 1100.0, 1000);
+Line b2 = Line2(0, ABSOLUTE, borderPen, 1050.0, 176, 1050.0, 1000);
 Line b3 = Line2(0, ABSOLUTE, borderPen, 1535.0, 176, 1535.0, 1000);
 Line b4 = Line2(0, ABSOLUTE, borderPen, 1825.0, 176, 1825.0, 1000);
 Line2(0, ABSOLUTE, borderPen, 1997.0, 176, 1997.0, 1000);
@@ -102,6 +102,7 @@ btbPPC[1] = Register(614.0, 264, 108, 44, RIGHT, "PPC");   // {joj 1/2/06}
 Component cMUX2 = Component(641.0, 375, 81, 22, "mux 2");       // {joj}
 Component cMUX1 = Component(560.0, 452, 27, 110, "mux 1");       // {joj}
 Component cPLUS4 = Component(533.0, 595, 54, 22, "+4");
+Component bPLUS4 = Component(533.0, 639, 54, 22, "+4");
 
 // connections from and to instruction memory
 AnimPipe apIM_ID = AnimPipe();
@@ -116,12 +117,30 @@ apPC_IM.addPoint(668.0, 705);
 apPC_IM.addPoint(415.0, 705);
 
 // connections into MUX1
-AnimPipe apMUX3_MUX1 = AnimPipe();
-apMUX3_MUX1.addPoint(911.0, 375);
-apMUX3_MUX1.addPoint(911.0, 353);
-apMUX3_MUX1.addPoint(506.0, 353);
-apMUX3_MUX1.addPoint(506.0, 474);
-apMUX3_MUX1.addPoint(560.0, 474);
+//AnimPipe apMUX3_MUX1 = AnimPipe();
+//apMUX3_MUX1.addPoint(911.0, 375);
+//apMUX3_MUX1.addPoint(911.0, 353);
+//apMUX3_MUX1.addPoint(506.0, 353);
+//apMUX3_MUX1.addPoint(506.0, 474);
+//apMUX3_MUX1.addPoint(560.0, 474);
+
+//Register regB = Register(1082.0, 507, 54, 88, BOTTOM, "B");
+//Component cMUX1 = Component(560.0, 452, 27, 110, "mux 1");       // {joj}
+AnimPipe apB_MUX1 = AnimPipe();
+apB_MUX1.addPoint(1109,595);
+apB_MUX1.addPoint(1109,650);
+apB_MUX1.addPoint(479,650);
+apB_MUX1.addPoint(479,518);
+apB_MUX1.addPoint(560,518);
+
+AnimPipe apADDi_MUX1 = AnimPipe();
+apADDi_MUX1.addPoint(1180.0, 305);
+apADDi_MUX1.addPoint(1180.0, 287);
+apADDi_MUX1.addPoint(911.0, 287);
+apADDi_MUX1.addPoint(911.0, 353);
+apADDi_MUX1.addPoint(506.0, 353);
+apADDi_MUX1.addPoint(506.0, 474);
+apADDi_MUX1.addPoint(560.0, 474);
 
 AnimPipe apBTB_MUX1 = AnimPipe();
 apBTB_MUX1.addPoint(506.0, 264);
@@ -129,11 +148,11 @@ apBTB_MUX1.addPoint(479.0, 264);
 apBTB_MUX1.addPoint(479.0, 496);
 apBTB_MUX1.addPoint(560.0, 496);
 
-AnimPipe apRF_MUX1 = AnimPipe();
-apRF_MUX1.addPoint(952.0, 110);
-apRF_MUX1.addPoint(452.0, 110);
-apRF_MUX1.addPoint(452.0, 518);
-apRF_MUX1.addPoint(560.0, 518);
+//AnimPipe apRF_MUX1 = AnimPipe();
+//apRF_MUX1.addPoint(952.0, 110);
+//apRF_MUX1.addPoint(452.0, 110);
+//apRF_MUX1.addPoint(452.0, 518);
+//apRF_MUX1.addPoint(560.0, 518);
 
 AnimPipe apADD4_MUX1 = AnimPipe();
 apADD4_MUX1.addPoint(533.0, 606);
@@ -172,7 +191,7 @@ apMUX2_BTB.addPoint(681.0, 309);
 //
 AnimPipe apID_EX = AnimPipe();
 apID_EX.addPoint(830.0, 860);
-apID_EX.addPoint(1132.0, 860);
+apID_EX.addPoint(1082.0, 860);
 
 // ID and PC1
 InstructionRegister regID = InstructionRegister(776.0, 745, 54, 250, "ID");
@@ -209,13 +228,13 @@ regFile[15].setValue(0x7C);
 CPSR cpsr = CPSR(1490, 66, 140, 88, 0);
 
 // Other components
-Component cMUX3 = Component(844.0, 375, 135, 22, "mux 3");                                               // {joj}
-Component cADD4 = Component(830.0, 595, 81, 22, "ADD4");                                                // {joj}
-Component cADDi = Component(911.0, 595, 81, 22, "ADDi");                                                //
+//Component cMUX3 = Component(844.0, 375, 135, 22, "mux 3");                                               // {joj}
+//Component cADD4 = Component(830.0, 595, 81, 22, "ADD4");                                                // {joj}
+Component cADDi = Component(1140.0, 305, 81, 22, "ADDi");                                                //
 Component cMUX4 = Component(776.0, 220, 27, 88, "mux 4");                                               // {joj}
-Component cMUX5 = Component(1051.0, 518, 27, 66, "mux 5");                                               // {joj}
+Component cMUX5 = Component(1001.0, 518, 27, 66, "mux 5");                                               // {joj}
 
-Rectangle2(0, 0, 0, 0, 857.0, 661, 54, 22, 0, font, "4");
+//Rectangle2(0, 0, 0, 0, 857.0, 661, 54, 22, 0, font, "4");
 
 // Control lines for MUX3
 Pen controlPen = SolidPen(SOLID, 2, PURPLE, ARROW60_END);
@@ -251,51 +270,58 @@ apPC1_MUX2.addPoint(695.0, 397);
 AnimPipe apPC1_MUX5 = AnimPipe();
 apPC1_MUX5.addPoint(803.0, 551);
 apPC1_MUX5.addPoint(803.0, 565);
-apPC1_MUX5.addPoint(1051.0, 565);
+apPC1_MUX5.addPoint(1001.0, 565);
 
-AnimPipe apPC1_ADD4 = AnimPipe();
-apPC1_ADD4.addPoint(803.0, 551);
-apPC1_ADD4.addPoint(803.0, 705);
-apPC1_ADD4.addPoint(857.0, 705);
-apPC1_ADD4.addPoint(857.0, 617);
+//AnimPipe apPC1_ADD4 = AnimPipe();
+//apPC1_ADD4.addPoint(803.0, 551);
+//apPC1_ADD4.addPoint(803.0, 705);
+//apPC1_ADD4.addPoint(857.0, 705);
+//apPC1_ADD4.addPoint(857.0, 617);
 
-AnimPipe apPC1_ADDi = AnimPipe();
-apPC1_ADDi.addPoint(803.0, 551);
-apPC1_ADDi.addPoint(803.0, 705);
-apPC1_ADDi.addPoint(938.0, 705);
-apPC1_ADDi.addPoint(938.0, 617);
+//AnimPipe apPC1_ADDi = AnimPipe();
+//apPC1_ADDi.addPoint(803.0, 551);
+//apPC1_ADDi.addPoint(803.0, 705);
+//apPC1_ADDi.addPoint(938.0, 705);
+//apPC1_ADDi.addPoint(938.0, 617);
 
 // Connections to and from the adders
-AnimPipe ap4_ADD4 = AnimPipe();
-ap4_ADD4.addPoint(884.0, 661);
-ap4_ADD4.addPoint(884.0, 617);
+//AnimPipe ap4_ADD4 = AnimPipe();
+//ap4_ADD4.addPoint(884.0, 661);
+//ap4_ADD4.addPoint(884.0, 617);
 
-AnimPipe apID_ADDi = AnimPipe();
-apID_ADDi.addPoint(830.0, 860);
-apID_ADDi.addPoint(965.0, 860);
-apID_ADDi.addPoint(965.0, 617);
-Rectangle txtID_ADDi = Rectangle(activePipesLayer, 0, 0, redBrush, 8235.0,829, -32,-13, 65,32, whitePen, font);		// {joj 29/10/013, 17/10/113}
-txtID_ADDi.setRounded(2, 2);	// {joj 17/10/16}
+//AnimPipe apID_ADDi = AnimPipe();
+//apID_ADDi.addPoint(830.0, 860);
+//apID_ADDi.addPoint(965.0, 860);
+//apID_ADDi.addPoint(965.0, 617);
+//Rectangle txtID_ADDi = Rectangle(activePipesLayer, 0, 0, redBrush, 8235.0,829, -32,-13, 65,32, whitePen, font);		// {joj 29/10/013, 17/10/113}
+//txtID_ADDi.setRounded(2, 2);	// {joj 17/10/16}
 
-AnimPipe apADD4_MUX3 = AnimPipe();
-apADD4_MUX3.addPoint(871.0, 595);
-apADD4_MUX3.addPoint(871.0, 397);
-Rectangle txtADD4_MUX3 = Rectangle(activePipesLayer, 0, 0, redBrush, 871.0,441, -32,-13, 65,32, whitePen, font);	// {joj 29/10/013, 15/3/15}
-txtADD4_MUX3.setRounded(2, 2); // {joj 17/10/16}
+//AnimPipe apADD4_MUX3 = AnimPipe();
+//apADD4_MUX3.addPoint(871.0, 595);
+//apADD4_MUX3.addPoint(871.0, 397);
+//Rectangle txtADD4_MUX3 = Rectangle(activePipesLayer, 0, 0, redBrush, 871.0,441, -32,-13, 65,32, whitePen, font);	// {joj 29/10/013, 15/3/15}
+//txtADD4_MUX3.setRounded(2, 2); // {joj 17/10/16}
 
-AnimPipe apADDi_MUX3 = AnimPipe();
-apADDi_MUX3.addPoint(952.0, 595);
-apADDi_MUX3.addPoint(952.0, 397);
-Rectangle txtADDi_MUX3 = Rectangle(activePipesLayer, 0, 0, redBrush, 952.0,441, -32,-13, 65,32, whitePen, font);	// {joj 29/10/013, 15/3/15}
-txtADDi_MUX3.setRounded(2, 2); // {joj 17/10/16}
+//AnimPipe apADDi_MUX3 = AnimPipe();
+//apADDi_MUX3.addPoint(952.0, 595);
+//apADDi_MUX3.addPoint(952.0, 397);
+//Rectangle txtADDi_MUX3 = Rectangle(activePipesLayer, 0, 0, redBrush, 952.0,441, -32,-13, 65,32, whitePen, font);	// {joj 29/10/013, 15/3/15}
+//txtADDi_MUX3.setRounded(2, 2); // {joj 17/10/16}
 
 // Connection to BTB
-AnimPipe apMUX3_MUX4 = AnimPipe();
-apMUX3_MUX4.addPoint(911.0, 375);
-apMUX3_MUX4.addPoint(911.0, 287);
-apMUX3_MUX4.addPoint(803.0, 287);
-Rectangle txtMUX3_MUX4 = Rectangle(activePipesLayer, 0, 0, redBrush, 911.0,353, -32,-13, 65,32, whitePen, font);	// {joj 29/10/013, 15/3/15}
-txtMUX3_MUX4.setRounded(2, 2); // {joj 17/10/16}
+//AnimPipe apMUX3_MUX4 = AnimPipe();
+//apMUX3_MUX4.addPoint(911.0, 375);
+//apMUX3_MUX4.addPoint(911.0, 287);
+//apMUX3_MUX4.addPoint(803.0, 287);
+//Rectangle txtMUX3_MUX4 = Rectangle(activePipesLayer, 0, 0, redBrush, 911.0,353, -32,-13, 65,32, whitePen, font);	// {joj 29/10/013, 15/3/15}
+//txtMUX3_MUX4.setRounded(2, 2); // {joj 17/10/16}
+
+AnimPipe apADDi_MUX4 = AnimPipe();
+apADDi_MUX4.addPoint(1180.0, 305);
+apADDi_MUX4.addPoint(1180.0, 287);
+apADDi_MUX4.addPoint(803.0, 287);
+//Rectangle txtADDi_MUX4 = Rectangle(activePipesLayer, 0, 0, redBrush, 1170.0,290, -32,-13, 65,32, whitePen, font);	// {joj 29/10/013, 15/3/15}
+//txtADDi_MUX4.setRounded(2, 2); // {joj 17/10/16}
 
 AnimPipe apMUX4_BTB = AnimPipe();
 apMUX4_BTB.addPoint(776.0, 264);
@@ -310,22 +336,22 @@ Rectangle txtRF_MUX1 = Rectangle(activePipesLayer, 0, 0, redBrush, 911.0,97, -32
 
 // MUX5 to A
 AnimPipe apMUX5_B = AnimPipe();
-apMUX5_B.addPoint(1078.0, 551);
-apMUX5_B.addPoint(1132.0, 551);
+apMUX5_B.addPoint(1028.0, 551);
+apMUX5_B.addPoint(1082.0, 551);
 
 // Connections from the register file
 AnimPipe apRF_MUX5 = AnimPipe();
-apRF_MUX5.addPoint(1000.0, 154);
-apRF_MUX5.addPoint(1000.0, 540);
-apRF_MUX5.addPoint(1051.0, 540);
-Rectangle txtRF_MUX5 = Rectangle(activePipesLayer, 0, 0, redBrush, 990.0,181, -32,0, 65,32, whitePen, font, "R0:0");   // {joj 1/4/06, 17/10/16}
+apRF_MUX5.addPoint(965.0, 154);
+apRF_MUX5.addPoint(965.0, 540);
+apRF_MUX5.addPoint(1001.0, 540);
+Rectangle txtRF_MUX5 = Rectangle(activePipesLayer, 0, 0, redBrush, 955.0,181, -32,0, 65,32, whitePen, font, "R0:0");   // {joj 1/4/06, 17/10/16}
 txtRF_MUX5.setRounded(2, 2);	// {joj 17/10/16}
 
 AnimPipe apRF_A = AnimPipe();
-apRF_A.addPoint(1051.0, 154);
-apRF_A.addPoint(1051.0, 463);
-apRF_A.addPoint(1082.0, 463);
-Rectangle txtRF_A = Rectangle(activePipesLayer, 0, 0, redBrush, 1065.0,181, -32,0, 65,32, whitePen, font, "R0:0");      // {joj 1/4/06, 17/10/16}
+apRF_A.addPoint(1001.0, 154);
+apRF_A.addPoint(1001.0, 463);
+apRF_A.addPoint(1032.0, 463);
+Rectangle txtRF_A = Rectangle(activePipesLayer, 0, 0, redBrush, 1015.0,181, -32,0, 65,32, whitePen, font, "R0:0");      // {joj 1/4/06, 17/10/16}
 txtRF_A.setRounded(2, 2);	// {joj 17/10/16}
 
 //
@@ -333,9 +359,9 @@ txtRF_A.setRounded(2, 2);	// {joj 17/10/16}
 //
 // EX, A and B
 //
-InstructionRegister regEX = InstructionRegister(1132.0, 745, 54, 250, "EX");
-Register regA = Register(1132.0, 419, 54, 88, TOP, "A");
-Register regB = Register(1132.0, 507, 54, 88, BOTTOM, "B");
+InstructionRegister regEX = InstructionRegister(1082.0, 745, 54, 250, "EX");
+Register regA = Register(1082.0, 419, 54, 88, TOP, "A");
+Register regB = Register(1082.0, 507, 54, 88, BOTTOM, "B");
 
 // Other components
 Component cMUX6 = Component(1301.0, 397, 27, 110, "mux 6");   // {joj}
@@ -345,7 +371,7 @@ ALU alu = ALU(1445.0, 419, 69, 176);
 
 // EX to MA
 AnimPipe apEX_MA = AnimPipe();
-apEX_MA.addPoint(1186.0, 860);
+apEX_MA.addPoint(1136.0, 860);
 apEX_MA.addPoint(1614.0, 860);
 
 // Connections numo MUX6
@@ -364,25 +390,38 @@ apOUT1_MUX6.addPoint(1240.0, 441);
 apOUT1_MUX6.addPoint(1301.0, 441);
 
 AnimPipe apA_MUX6 = AnimPipe();
-apA_MUX6.addPoint(1186.0, 485);
+apA_MUX6.addPoint(1136.0, 485);
 apA_MUX6.addPoint(1301.0, 485);
+
+
+// Connections to ADDi
+AnimPipe apB_ADDi = AnimPipe();
+apB_ADDi.addPoint(1136.0, 529);
+apB_ADDi.addPoint(1159.0, 529);
+apB_ADDi.addPoint(1159.0, 327);
+
+AnimPipe apEX_ADDi = AnimPipe();
+apEX_ADDi.addPoint(1136.0, 860);
+apEX_ADDi.addPoint(1208.0, 860);
+apEX_ADDi.addPoint(1208.0, 327);
 
 // Connections numo MUX7
 AnimPipe apB_MUX7 = AnimPipe();
-apB_MUX7.addPoint(1186.0, 529);
+apB_MUX7.addPoint(1136.0, 529);
 apB_MUX7.addPoint(1301.0, 529);
 
 AnimPipe apEX_MUX7 = AnimPipe();
-apEX_MUX7.addPoint(1186.0, 860);
-apEX_MUX7.addPoint(1213.0, 860);
-apEX_MUX7.addPoint(1213.0, 551);
+apEX_MUX7.addPoint(1136.0, 860);
+apEX_MUX7.addPoint(1208.0, 860);
+apEX_MUX7.addPoint(1208.0, 551);
 apEX_MUX7.addPoint(1371.0, 551);
 Rectangle txtEX_MUX7 = Rectangle(activePipesLayer, 0, 0, redBrush, 1268.0,816, -27,0, 54,26, whitePen, font, "IMM");	// {joj 1/4/06, 17/27/16}
 txtEX_MUX7.setRounded(2, 2);	// {joj 17/10/16}
 
+
 //Animations to Barrel Shifter
 AnimPipe apEX_BS = AnimPipe();
-apEX_BS.addPoint(1186.0, 860);
+apEX_BS.addPoint(1136.0, 860);
 apEX_BS.addPoint(1388.0, 860);
 apEX_BS.addPoint(1388.0, 607);
 Rectangle txtEX_BS = Rectangle(activePipesLayer, 0, 0, redBrush, 1388.0,816, -27,0, 54,26, whitePen, font, "IMM");	// {joj 1/4/06, 17/27/16}
@@ -424,7 +463,8 @@ apOUT1_MUX8.addPoint(1240.0, 712);
 apOUT1_MUX8.addPoint(1301.0, 712);
 
 AnimPipe apB_MUX8 = AnimPipe();
-apB_MUX8.addPoint(1159.0, 595);
+apB_MUX8.addPoint(1136.0, 529);
+apB_MUX8.addPoint(1159.0, 529);
 apB_MUX8.addPoint(1159.0, 734);
 apB_MUX8.addPoint(1301.0, 734);
 
@@ -461,17 +501,26 @@ Component BarrelShifter = Component(1361.0, 517, 55, 90, "Barrel\nShifter");
 // CPSR Forwarding
 CPSR cpsr0 = CPSR(1660.0, 477, 40, 60, 1);
 CPSR cpsr1 = CPSR(1938.0, 477, 40, 60, 1);
-
+                                               // {joj}
+//Component cADDi = Component(1140.0, 305, 81, 22, "ADDi");  
 
 // CPSR Forwarding Connections
 Line cpsrOUT0 = Line2(activePipesLayer, ABSOLUTE, controlPen, 1680.0,477, 1680.0,450, 1545.0,450, 1545.0,480);	
 Line cpsrOUT1 = Line2(activePipesLayer, ABSOLUTE, controlPen, 1958.0,477, 1958.0,420, 1545.0,420, 1545.0,480);	
 Line cpsrCPSR = Line2(activePipesLayer, ABSOLUTE, controlPen, 1545.0,154, 1545.0,480);	
-Line cpsrEX = Line2(activePipesLayer, ABSOLUTE, controlPen, 1186,820, 1545.0,820, 1545.0,480);
+Line cpsrEX = Line2(activePipesLayer, ABSOLUTE, controlPen, 1136,820, 1545.0,820, 1545.0,480);
+
+Line cpsrOUT0B = Line2(activePipesLayer, ABSOLUTE, controlPen, 1680.0,477, 1680.0,316, 1221.0,316);	
+Line cpsrOUT1B = Line2(activePipesLayer, ABSOLUTE, controlPen, 1958.0,477, 1958.0,316, 1221.0,316);	
+Line cpsrCPSRB = Line2(activePipesLayer, ABSOLUTE, controlPen, 1545.0,154, 1545.0,316, 1221.0,316);	
+Line cpsrEXB = Line2(activePipesLayer, ABSOLUTE, controlPen, 1136,820, 1225.0,820, 1225.0,316);
 
 Line conditionMux = Line2(activePipesLayer, ABSOLUTE, controlPen, 1545.0, 480, 1545.0, 533);
 Rectangle conditionMuxTxt = Txt(valuesLayer,HLEFT | VTOP, 1550.0, 620, 0, sFont, "Condition\nCheck");
 conditionMuxTxt.rotate(-90);
+
+Line conditionMuxB = Line2(activePipesLayer, ABSOLUTE, controlPen, 1225.0, 305, 1225.0, 325, 1230,305, 1230,325);
+Rectangle conditionMuxBTxt = Txt(valuesLayer,HLEFT | VTOP, 1230.0, 260, 0, sFont, "Condition\nCheck");
 
 InstructionRegister regMA = InstructionRegister(1614.0, 745, 54, 250, "MA");
 Register regOUT0 = Register(1570.0, 480, 88, 54, LEFT, "O0");
@@ -627,9 +676,9 @@ function resetWires() {
     apIM_ID.reset();
     txtIM_ID.setOpacity(0);                             // {joj 29/10/06}
     //apIF_ID.reset();
-    apMUX3_MUX1.reset();
+//    apMUX3_MUX1.reset();
     apBTB_MUX1.reset();
-    apRF_MUX1.reset();
+//    apRF_MUX1.reset();
     apADD4_MUX1.reset();
     apMUX1_PC.reset();
     apPC_MUX2.reset();
@@ -645,13 +694,13 @@ function resetWires() {
     //apPC1_MUX5.reset();
     //apADD4_MUX5.reset();
 	apPC1_MUX5.reset()
-    apPC1_ADD4.reset();
-    apPC1_ADDi.reset();
-    ap4_ADD4.reset();
-    apID_ADDi.reset(); txtID_ADDi.setOpacity(0);            // {joj 29/10/06}
-    apADD4_MUX3.reset(); txtADD4_MUX3.setOpacity(0);        // {joj 29/10/06}
-    apADDi_MUX3.reset(); txtADDi_MUX3.setOpacity(0);        // {joj 29/10/06}
-    apMUX3_MUX4.reset(); txtMUX3_MUX4.setOpacity(0);        // {joj 29/10/06}
+//    apPC1_ADD4.reset();
+//    apPC1_ADDi.reset();
+//    ap4_ADD4.reset();
+//    apID_ADDi.reset(); txtID_ADDi.setOpacity(0);            // {joj 29/10/06}
+//    apADD4_MUX3.reset(); txtADD4_MUX3.setOpacity(0);        // {joj 29/10/06}
+//    apADDi_MUX3.reset(); txtADDi_MUX3.setOpacity(0);        // {joj 29/10/06}
+//    apMUX3_MUX4.reset(); txtMUX3_MUX4.setOpacity(0);        // {joj 29/10/06}
     apRF_MUX4.reset();
     apMUX4_BTB.reset();
     apMUX5_B.reset();
@@ -685,6 +734,9 @@ function resetWires() {
     apMUX7_OUT0.reset();
     alu.txtOp.setOpacity(0);                            // hide ALU txtOp {joj 29/10/06}
     alu.txtResult.setOpacity(0);                        // hide ALU txtResult {joj 29/10/06}
+	
+	apB_ADDi.reset();
+	apEX_ADDi.reset();
 
     //
     // MA
@@ -700,6 +752,14 @@ function resetWires() {
 	cpsrCPSR.setPen(controlPen);
 	cpsrEX.setPen(controlPen);
 	conditionMux.setPen(controlMuxPen);
+	cpsrOUT0B.setPen(controlPen);	
+	cpsrOUT1B.setPen(controlPen);	
+	cpsrCPSRB.setPen(controlPen);
+	cpsrEXB.setPen(controlPen);
+	conditionMuxB.setPen(controlMuxPen);
+
+	apADDi_MUX1.reset();
+	apB_MUX1.reset();
 
     //
     // WB
@@ -791,7 +851,7 @@ function showBTB(num opacity) {
 
     apBTB_MUX1.setOpacity(opacity);
 
-    apMUX3_MUX4.setOpacity(opacity);
+//    apMUX3_MUX4.setOpacity(opacity);
     apRF_MUX4.setOpacity(opacity);
     cMUX4.setOpacity(opacity);
     apMUX4_BTB.setOpacity(opacity);
@@ -808,26 +868,26 @@ function showALUForwarding(num opacity) {  // {joj 20/8/10}
         //
         // NOT pipelined
         //
-        apA_MUX6.setPoint(0, 1186.0, 452);
+        apA_MUX6.setPoint(0, 1136.0, 452);
         apA_MUX6.setPoint(1, 1351.0, 452);
 
-        apB_MUX7.setPoint(0, (afMode) ? 1186 : 1209.0, 551);    // {joj 28/10/06}
+        apB_MUX7.setPoint(0, (afMode) ? 1136 : 1209.0, 551);    // {joj 28/10/06}
         apB_MUX7.setPoint(1, 1301.0, 551);
 
-        apEX_MUX7.setPoint(2, 1213.0, 573);
+        apEX_MUX7.setPoint(2, 1208.0, 573);
         apEX_MUX7.setPoint(3, 1301.0, 573);
 
         apA_MUX6.setHead(0);
 
     } else {
 
-        apA_MUX6.setPoint(0, 1186.0, 485);
+        apA_MUX6.setPoint(0, 1136.0, 485);
         apA_MUX6.setPoint(1, 1301.0, 485);
 
-        apB_MUX7.setPoint(0, 1186.0, 529);
+        apB_MUX7.setPoint(0, 1136.0, 529);
         apB_MUX7.setPoint(1, 1301.0, 529);
 
-        apEX_MUX7.setPoint(2, 1213.0, 551);
+        apEX_MUX7.setPoint(2, 1208.0, 551);
         apEX_MUX7.setPoint(3, 1301.0, 551);
 
         apA_MUX6.setHead(1);
@@ -856,8 +916,9 @@ function showSMDRForwarding(num opacity) { // {joj 20/8/10}
 
     } else {
 
-        apB_MUX8.setPoint(1, 1159.0, 734);
-        apB_MUX8.setPoint(2, 1301.0, 734);
+        apB_MUX8.setPoint(1, 1159.0, 529);
+        apB_MUX8.setPoint(2, 1159.0, 734);
+        apB_MUX8.setPoint(3, 1301.0, 734);
         apB_MUX8.setHead(1);
 
     }
@@ -930,13 +991,13 @@ function showPipeline(num opacity) {   // {joj 20/8/10}
         apPC_PC1.setPoint(1, 803.0, 507);
         apPC_PC1.setPoint(2, 803.0, 529);
 
-        apPC1_ADD4.setPoint(0, 803.0, 507);
-        apPC1_ADDi.setPoint(0, 803.0, 507);
+//        apPC1_ADD4.setPoint(0, 803.0, 507);
+//        apPC1_ADDi.setPoint(0, 803.0, 507);
 
         apID_EX.setPoint(1, 1186.0, 860);
 
-        apRF_A.setPoint(1, 1051.0, 452);
-        apRF_A.setPoint(2, 1186.0, 452);
+        apRF_A.setPoint(1, 1001.0, 452);
+        apRF_A.setPoint(2, 1126.0, 452);
         apMUX5_B.setPoint(1, 1209.0, 551);             // {joj 28/10/06}
         apB_MUX8.setPoint(0, 1159.0, 551);
 
@@ -972,15 +1033,15 @@ function showPipeline(num opacity) {   // {joj 20/8/10}
         apPC_PC1.setPoint(1, 749.0, 507);
         apPC_PC1.setPoint(2, 776.0, 507);
 
-        apPC1_ADD4.setPoint(0, 803.0, 551);
-        apPC1_ADDi.setPoint(0, 803.0, 551);
+//        apPC1_ADD4.setPoint(0, 803.0, 551);
+//        apPC1_ADDi.setPoint(0, 803.0, 551);
 
-        apID_EX.setPoint(1, 1132.0, 860);
+        apID_EX.setPoint(1, 1082.0, 860);
 
-        apRF_A.setPoint(1, 1051.0, 463);
-        apRF_A.setPoint(2, 1132.0, 463);
-        apMUX5_B.setPoint(1, 1132.0, 551);
-        apB_MUX8.setPoint(0, 1159.0, 595);
+        apRF_A.setPoint(1, 1001.0, 463);
+        apRF_A.setPoint(2, 1082.0, 463);
+        apMUX5_B.setPoint(1, 1082.0, 551);
+        apB_MUX8.setPoint(0, 1136.0, 529);
 
         apMUX6_OUT0.setPoint(3, 1570.0, 507);
         apMUX7_OUT0.setPoint(3, 1570.0, 507);
@@ -1257,7 +1318,33 @@ if (example == 0) {
     regFile[9].setValue(9); 
 
 } else if (example == 5) {
+	// Fina
 
+	im.setValue( 0,   ADD,  " ", 0,0, 0, 1, 0, 0);	
+	im.setValue( 4,   B,  " ", CS,0, 0, 0x10, 0, 0);	
+	im.setValue( 8,   SUB,  " ", 0,0, 0, 1, 0, 0);	
+	im.setValue( 12,  SBC,  " ", 0,0, 0, 1, 0, 0);	
+	im.setValue( 16,  RSB,  " ", 0,0, 0, 1, 0, 0);	
+	im.setValue( 20,  ADD,  "S", 0,0, 0, 0, 0, 0);	
+	im.setValue( 24,  B,  " ", 0,0, 0, 0xE8, 0, 0);				
+
+	//im.setValue( 0,  ADD, 2, 2, 3);				// {joj 30/11/16}
+	//im.setValue( 4,  NOP, 0, 0, 0);				// {joj 30/11/16}
+	//im.setValue( 8,  ADD, 1, 2, 3);				// {joj 30/11/16}
+	//im.setValue(12, HALT, 0, 0, 0);				// {joj 30/11/16}
+
+	//im.setValue( 0,   LD, 1, 0, 0);					// {joj 5/12/16}
+	//im.setValue( 4, BEQZ, 0, 1, 28);				// {joj 5/12/16}
+	//im.setValue(32, HALT, 0, 0, 0);					// {joj 5/12/16}
+
+	//im.setValue( 0,   LD, 1, 0, 1);				// {joj 7/12/16}
+	//im.setValue( 4,  ADD, 2, 0, 0);				// {joj 7/12/16}
+	//im.setValue( 8,  ADD, 3, 0, 0);				// {joj 7/12/16}
+	//im.setValue(12, BEQZ, 0, 1, 20);				// {joj 7/12/16}
+	//im.setValue(32, HALT, 0, 0, 0);				// {joj 7/12/16}
+	
+
+}  else if (example == 6) {
 	//Factorial
 
 	//im.setValue( 0,   JR, 0, 0, 1);				
@@ -1284,30 +1371,6 @@ if (example == 0) {
 	//im.setValue(12, BEQZ, 0, 1, 20);				// {joj 7/12/16}
 	//im.setValue(32, HALT, 0, 0, 0);				// {joj 7/12/16}
 
-}  else if (example == 6) {
-
-	// Fina
-
-	//im.setValue( 0,   JR, 0, 0, 1);				// {joj 29/11/16}
-	im.setValue( 0,   B,   " ", 0,0, 0, 1, 0, 0);				// {joj 29/11/16}
-	im.setValue(32,  ADD,  " ", 0,1, 1, 1, 0, 0);				// {joj 29/11/16}
-	im.setValue(36, HALT,  " ", 0,0, 0, 0, 0, 0);				// {joj 29/11/16}
-	regFile[1].setValue(32);					// {joj 29/11/16}
-
-	//im.setValue( 0,  ADD, 2, 2, 3);				// {joj 30/11/16}
-	//im.setValue( 4,  NOP, 0, 0, 0);				// {joj 30/11/16}
-	//im.setValue( 8,  ADD, 1, 2, 3);				// {joj 30/11/16}
-	//im.setValue(12, HALT, 0, 0, 0);				// {joj 30/11/16}
-
-	//im.setValue( 0,   LD, 1, 0, 0);					// {joj 5/12/16}
-	//im.setValue( 4, BEQZ, 0, 1, 28);				// {joj 5/12/16}
-	//im.setValue(32, HALT, 0, 0, 0);					// {joj 5/12/16}
-
-	//im.setValue( 0,   LD, 1, 0, 1);				// {joj 7/12/16}
-	//im.setValue( 4,  ADD, 2, 0, 0);				// {joj 7/12/16}
-	//im.setValue( 8,  ADD, 3, 0, 0);				// {joj 7/12/16}
-	//im.setValue(12, BEQZ, 0, 1, 20);				// {joj 7/12/16}
-	//im.setValue(32, HALT, 0, 0, 0);				// {joj 7/12/16}
 
 }
 
