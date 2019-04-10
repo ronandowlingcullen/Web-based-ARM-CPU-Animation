@@ -347,6 +347,23 @@ function idExec() {																// {joj 14/11/17}
 			fork(apADDi_MUX3.animate(8));                                  		// {joj 4/11/12}
 			txtADDi_MUX3.setTxt("%02X", (regPC1.value + regID.vRs1) & 0xff);	// {joj 4/11/12}
         	txtADDi_MUX3.setOpacity(1, 8, 1, 0);          						// {joj 4/11/12}
+			//Animate blocking/allowing write if condition
+			if(regID.vCond != def) {
+				if(testCondition(regID.vCond)) {
+					conditionMuxB.setPen(controlMuxHLPen);
+				} else {
+					conditionMuxB.setPen(muxPen);
+				}
+				cpsrEXB.setPen(controlHLPen);
+
+				if(!cpsr0.invalid){
+					cpsrOUT0B.setPen(controlHLPen);
+				} else if (!cpsr1.invalid){
+					cpsrOUT1B.setPen(controlHLPen);
+				} else {
+					cpsrCPSRB.setPen(controlHLPen);
+				}
+			}
 		
 		} else {																// {joj 4/11/12}
 		
@@ -369,9 +386,12 @@ function idExec() {																// {joj 14/11/17}
 
 	if (instrIsBranch(regID.vIns)) {	
         calcNewPC();
-		txtMUX3_MUX4.setTxt("%02X", newPC); 									// {joj 3/11/12}
-		txtMUX3_MUX4.setOpacity(1, 8, 1, 0);                           			// {joj 3/11/12}
-       	fork(sendBTBOperands());
+
+		if(((regID.vCond == def) || ((regEX.vSBit != "S") && (regEX.vIns <= CMN || regEX.vIns >= TSTi))) && testCondition(regID.vCond)) {
+			txtMUX3_MUX4.setTxt("%02X", newPC); 									// {joj 3/11/12}
+			txtMUX3_MUX4.setOpacity(1, 8, 1, 0);                           			// {joj 3/11/12}
+       		fork(sendBTBOperands());
+		}
 	}
 	
     detectStall();
@@ -515,7 +535,7 @@ function exExec() {														// {joj 14/11/17}
 			mux7Src = apB_MUX7;
             op2 = regB.value;
 
-		} else if (instrOpTypeRs2(regEX.vIns) == OP_TYPE_IMM) {
+		} else if (instrOpTypeRs2(regEX.vIns) == OP_TYPE_IMM && !instrIsBranch(regEX.vIns)) {
 
             mux7Src = apEX_MUX7;
             op2 = regEX.vRs2;
@@ -643,7 +663,7 @@ function exExec() {														// {joj 14/11/17}
 		}
 	}
 
-    if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) { //Rdt is type reg or it's a compare instruction
+    if ((instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) && regEX.vIns != STALL && regEX.vIns != B) { //Rdt is type reg or it's a compare instruction
         if (mux6Src != 0 && (instrOpTypeRs1(regEX.vIns) != OP_TYPE_UNUSED))
             fork(mux6Src.animate(24));
         if (mux7Src == apEX_MUX7) {                                 // {joj 29/10/06}
@@ -684,7 +704,7 @@ function exExec() {														// {joj 14/11/17}
     if ((regEX.vIns == STR || regEX.vIns == STRi))                                           // {joj}
         fork(apMUX8_SMDR.animate(40));                         		// {joj 1/2/06}
 
-    if ((instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns))) { //Rdt is type reg or it's a compare instruction
+    if (((instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns))) && regEX.vIns != STALL && regEX.vIns != B) { //Rdt is type reg or it's a compare instruction
 
         alu.setTxtOp(regEX.vIns);
 
@@ -706,7 +726,7 @@ function exExec() {														// {joj 14/11/17}
 		}
 
 		//Animate blocking/allowing write if condition
-		if(regEX.vCond != def && testCondition(regEX.vCond)) {
+		if(regEX.vCond != def && testCondition(regEX.vCond) && !instrIsBranch(regEX.vIns)) {
 			conditionMux.setPen(controlMuxHLPen);
 			cpsrEX.setPen(controlHLPen);
 
@@ -724,16 +744,18 @@ function exExec() {														// {joj 14/11/17}
 	
 
 	//Set Validity of regOUT0
-    if (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) {
+    if ((instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) && (regEX.vIns != B) && !(regEX.vIns >= CMN && regEX.vIns <= TSTi))   {
 		regOUT0.setInvalid(0);								
 
-    } else if (regEX.vIns == NOP || !testCondition(regEX.vCond) || regEX.vIns == B || regEX.vIns == STALL) {
+    } else if (regEX.vIns == NOP || !testCondition(regEX.vCond) || regEX.vIns == B || regEX.vIns == STALL || (regEX.vIns >= CMN && regEX.vIns <= TSTi)) {
 		regOUT0.setInvalid(1);
+		regOUT0.setNewTag(-1);
+		regOUT0.setNewValue(0);
 	}
 	
 	
 		
-	if (regEX.vIns == NOP || !testCondition(regEX.vCond)) {	//Delay updating label for better visualisation
+	if ((regEX.vIns == NOP || !testCondition(regEX.vCond)) && !instrIsBranch(regEX.vIns)) {	//Delay updating label for better visualisation
 		
 		if(regEX.vCond != def) {
 			blockingCond = 1;
@@ -942,10 +964,10 @@ function wbExec() {																// {joj 14/11/17}
 //
 function nonPipelinedBranch() {										// {joj 14/11/11}
 
-    fork(ap4_ADD4.animate(24));                                		// {joj 2/11/12}
+//    fork(ap4_ADD4.animate(24));                                		// {joj 2/11/12}
     fork(apID_ADDi.animate(24));                               		// {joj 2/11/12}
 	apPC_PC1.animate(12);											// {joj 2/11/12}
-    fork(apPC1_ADD4.animate(12));									// {joj 2/11/12}
+//    fork(apPC1_ADD4.animate(12));									// {joj 2/11/12}
     fork(apPC1_ADDi.animate(12));									// {joj 2/11/12}
 	wait(12);														// {joj 2/11/12}
 
@@ -955,13 +977,13 @@ function nonPipelinedBranch() {										// {joj 14/11/11}
             apADDi_MUX3.animate(20);
             regPC.setNewValue((regPC.value + regID.vRs2) & 0x7F);
         } else {
-            apADD4_MUX3.animate(20);
+//            apADD4_MUX3.animate(20);
             regPC.setNewValue((regPC.value + 4) & 0x7F);
         }
         apMUX3_MUX1.animate(14);
     } else {
         regPC.setNewValue((regPC.value + 4) & 0x7F);
-        apADD4_MUX3.animate(20);
+//        apADD4_MUX3.animate(20);
         apMUX3_MUX1.animate(14);
     }
 
