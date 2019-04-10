@@ -3196,7 +3196,7 @@ function dlx(vplayer) {
 				$g[77].setValue(4, CMPi, " ", 0, 0, 1, 1, 0, 0)
 				$g[77].setValue(8, B, " ", LE, 0, 0, 16, 0, 0)
 				$g[77].setValue(12, SUBi, " ", 0, 1, 1, 1, 0, 0)
-				$g[77].setValue(16, MUL, " ", 0, 0, 0, 1, 0, 0)
+				$g[77].setValue(16, MUL, " ", 0, 0, 1, 0, 0, 0)
 				$g[77].setValue(20, B, " ", 0, 0, 0, 240, 0, 0)
 				$g[77].setValue(24, HALT, " ", 0, 0, 1, 1, 0, 0)
 				$g[101][1].setValue(4)
@@ -3264,7 +3264,7 @@ function dlx(vplayer) {
 				$g[200].setRounded(10, 10)
 				$g[201] = new SolidPen(SOLID, 5, RED, ROUND_START|ROUND_JOIN|ROUND_END)
 				$g[202] = new Font("Arial", 32, BOLD)
-				new Txt($g[0], $g[21], HLEFT|VTOP, 587, 639, $g[201], $g[202], "LEFT CLICK on animation background to start and stop clock.\n\nSHIFT LEFT CLICK on background to execute \"single MIPS clock cycle\".")
+				new Txt($g[0], $g[21], HLEFT|VTOP, 587, 639, $g[201], $g[202], "LEFT CLICK on animation background to start and stop clock.\n\nSHIFT LEFT CLICK on background to execute \"single ARM clock cycle\".")
 				if (!(!$g[23])) {
 					$pc = 39
 					continue

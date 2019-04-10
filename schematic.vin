@@ -1371,7 +1371,7 @@ if (example == 0) {
 	im.setValue( 4, CMPi, " ", 0, 0, 1, 1, 0, 0);				
 	im.setValue( 8, B,    " ", LE, 0, 0, 16, 0, 0);
 	im.setValue(12, SUBi, " ", 0, 1, 1, 1, 0, 0);
-	im.setValue(16, MUL,  " ", 0, 0, 0, 1, 0, 0);
+	im.setValue(16, MUL,  " ", 0, 0, 1, 0, 0, 0);
 	im.setValue(20, B,    " ", 0, 0, 0, 0xF0, 0, 0);
 	im.setValue(24, HALT, " ", 0, 0, 1, 1, 0, 0);
 
@@ -1415,7 +1415,7 @@ r.setRounded(10, 10);
 Pen helpPen = SolidPen(SOLID, 5, RED, ROUND_START | ROUND_JOIN | ROUND_END);
 Font helpFont = Font("Arial", 32, BOLD);
 
-Txt(helpLayer, HLEFT | VTOP, 587, 639, helpPen, helpFont, "LEFT CLICK on animation background to start and stop clock.\n\nSHIFT LEFT CLICK on background to execute \"single MIPS clock cycle\".");
+Txt(helpLayer, HLEFT | VTOP, 587, 639, helpPen, helpFont, "LEFT CLICK on animation background to start and stop clock.\n\nSHIFT LEFT CLICK on background to execute \"single ARM clock cycle\".");
 if (!lockCircuit) {
     r = Rectangle2(helpLayer, 0, helpPen, 0, 72, 152, 176, 25); r.setRounded(5, 5);
     r = Rectangle2(helpLayer, 0, helpPen, 0, 55, 424.0, 66, 20); r.setRounded(5, 5);
