@@ -56,7 +56,9 @@ function ifExec() {																// {joj 24/9/17}
 	
 
 	wait(8);
-
+	
+	if (instrIsBranch(regID.vIns) && (regID.vCond != def) && ((regEX.vSBit == "S") || (regEX.vIns >= CMN && regEX.vIns <= TSTi))) {
+	} else {
     //
     // look for PC is branch target buffer
     //
@@ -68,6 +70,8 @@ function ifExec() {																// {joj 24/9/17}
         regPC.setNewValue((regPC.value + 4) & 0x7F);
         mux1Src = apADD4_MUX1;
     }
+
+	}
 
 	//Update PC visualised as R15 in register file
 	regFile[15].setNewValue(regPC.newValue);
@@ -125,63 +129,33 @@ function calcNewPC() {
 
    // AnimPipe newMux1Src;
 
-    if (instrIsBranch(regID.vIns)) {
+    if (instrIsBranch(regID.vIns)){
+		newPC = regPC1.value + 4;
+		if((regID.vCond == def) || ((regEX.vSBit != "S") && (regEX.vIns <= CMN || regEX.vIns >= TSTi))) {
+		// Stall to allow for condition branching on instruction one step ahead
+        	// conditional branch
+			//Pen pen = (stall == NO_STALL) ? controlHLPen : controlPen;	// {joj 4/11/12}
+			Pen pen = controlHLPen;	// {joj 8/12/16}
 
-        // conditional branch
-		//Pen pen = (stall == NO_STALL) ? controlHLPen : controlPen;	// {joj 4/11/12}
-		Pen pen = controlHLPen;	// {joj 8/12/16}
 
-        //if (zfMode == ZERO_FORWARDING) {
-        //    if ((regEX.vRdt == regID.vRs1) && (instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) && instrIsLoadOrStore(regEX.vIns) == 0) {	// {joj 8/12/16}
-        //        clALU.setPen(pen);
-        //        zero = regOUT0.newValue;                            // where ALU result is stored
-        //    } else if (regOUT0.tagMatches(regID.vRs1)) {
-        //        clOUT0.setPen(pen);
-        //        zero = regOUT0.value;
-        //    //} else if (regOUT1.tagMatches(regID.vRs1)) {			// {joj 9/12/16}
-        //    //    clOUT1.setPen(pen);
-        //    //    zero = regOUT1.value;
-        //    } else {
-		//		mux1Src = apMUX3_MUX1;                              // {joj 3/11/12}
-        //        clA.setPen(pen);
-        //        zero = regFile[regID.vRs1].value;
-        //        txtRF_A.setTxt("R%d:%02X", regID.vRs1, zero);       // {joj 29/10/06}
-        //        txtRF_A.setOpacity(1);                            	// {joj 1/2/06}
-        //        fork(apRF_A.animate(24));                      		// {joj 1/2/06}
-        //    }
-        //} else {
-        //    clA.setPen(pen);
-        //    zero = regFile[regID.vRs1].value;
-        //}
 
-        //clMUX.setPen(pen);
-
-        ////if ((regID.vIns == BEQZ) == (zero == 0)) {
-        //if ((regID.vIns == B) == (zero == 0)) {
-        //    mux3Src = apADDi_MUX3;
-        //    newPC = (regPC1.value + regID.vRs2) & 0x7F;
-        //} else {
-        //    mux3Src = apADD4_MUX3;
-        //    newPC = (regPC1.value + 4) & 0x7F;
-        //}
-
-        //newMux1Src = apMUX3_MUX1;
-        //mux4Src = apMUX3_MUX4;
-
-		//RDC's implementation
-		mux3Src = apADDi_MUX3;
-    	mux4Src = apMUX3_MUX4;
+			//RDC's implementation
+			mux3Src = apADDi_MUX3;
+    		mux4Src = apMUX3_MUX4;
 		
-		if(testCondition(regID.vCond)){
-			if(regID.vIns == B || regID.vIns == BL) {
-    			newPC = (regPC1.value + regID.vRs2) & 0x7F;
+			if(testCondition(regID.vCond)){
+				if(regID.vIns == B || regID.vIns == BL) {
+    				newPC = (regPC1.value + regID.vRs2) & 0x7F;
+				}
+			} else {
+				newPC = regPC1.value + 4;
 			}
-		} else {
-			newPC = regPC1.value + 4;
-		}
-    	newMux1Src = apMUX3_MUX1;
+    		newMux1Src = apMUX3_MUX1;
 
-    }
+  		}
+
+	}
+
 
 	
 }
@@ -275,21 +249,6 @@ function detectStall() {
 
     }
 
-    // RAW hazards (conditional branches)
-    //if ((zfMode == ZERO_INTERLOCK) && instrIsBranch(regID.vIns)) {
-    //    if ((instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) && (regEX.vRdt == regID.vRs1))
-    //        stall = DATA_STALL;
-    //    if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG) && (regMA.vRdt == regID.vRs1))
-    //        stall = DATA_STALL;
-    //}
-
-    // RAW hazard (indirect jumps)		//--------------------May Need to Fix this------------------------
-    //if (instrIsJumpR(regID.vIns)) {
-    //    if ((instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG) && (regEX.vRdt == regID.vRs2))
-    //        stall = DATA_STALL;
-    //    if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG) && (regMA.vRdt == regID.vRs2))
-    //        stall = DATA_STALL;
-    //}
 
     // Load hazards
     //if ((liMode == LOAD_INTERLOCK) && (regEX.vIns == LD)) {     // {joj}
@@ -330,6 +289,11 @@ function detectStall() {
 		}
     }
 
+	// Stall to allow for condition branching on instruction one step ahead
+	if ((stall == NO_STALL) && instrIsBranch(regID.vIns) && (regID.vCond != def) && ((regEX.vSBit == "S") || (regEX.vIns >= CMN && regEX.vIns <= TSTi))) {
+		stall = CTRL_STALL;
+    }
+
 	
     if (stall == DATA_STALL) {
         animClock.setStall(1, 0);
@@ -366,13 +330,13 @@ function idExec() {																// {joj 14/11/17}
     fork(apID_EX.animate(64));
 
 	
-	if(instrIsBranch(regID.vIns) ) {
+	if(instrIsBranch(regID.vIns)) {
 		
 		if (regID.vIns == BL) {												
 			regB.setNewValue(regPC1.value);                        			
 		}
 		
-		if (stall == NO_STALL) {												// {joj 4/11/12}
+		if((regID.vCond == def) || ((regEX.vSBit != "S") && (regEX.vIns <= CMN || regEX.vIns >= TSTi))) {
 		
 			fork(apPC1_ADDi.animate(16));                          				// {joj 4/11/12}
         	fork(apID_ADDi.animate(16));                           				// {joj 4/11/12}
@@ -401,17 +365,14 @@ function idExec() {																// {joj 14/11/17}
     //
     // second half of the clock cycle
     //
-    if (instrIsBranch(regID.vIns))
+
+
+	if (instrIsBranch(regID.vIns)) {	
         calcNewPC();
-	
-	//if (instrIsBranch(regID.vIns) && (stall == NO_STALL)) {					// {joj 3/11/12}
-	if (instrIsBranch(regID.vIns)) {											// {joj 9/12/16}
 		txtMUX3_MUX4.setTxt("%02X", newPC); 									// {joj 3/11/12}
 		txtMUX3_MUX4.setOpacity(1, 8, 1, 0);                           			// {joj 3/11/12}
-	}																			// {joj 3/11/12}
-	
-	if (instrIsBranch(regID.vIns))										// {joj 9/12/16}
-       fork(sendBTBOperands());
+       	fork(sendBTBOperands());
+	}
 	
     detectStall();
 	//debug("stall=%d", stall);
@@ -427,9 +388,6 @@ function idExec() {																// {joj 14/11/17}
     wait(7);																	// {joj 4/11/12}
 
     // Send source registers to A and B
-	debug("%d", regEX.vIns);
-	debug("%d", stall);
-	debug("-------");
     if ((instrOpTypeRdt(regID.vIns) == OP_TYPE_REG || instrHasNoDstRR(regID.vIns) || instrHasNoDstRI(regID.vIns)) && (regID.vIns != B) && (regEX.vIns != MUL || stall != MUL_STALL)){//!instrIsBranch(regID.vIns)) { //Rdt is type reg or it's a compare instruction
 		
         if(instrOpTypeRs1(regID.vRs1) != OP_TYPE_IMM)

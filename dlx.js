@@ -32,7 +32,6 @@ function dlx(vplayer) {
 	var $g = vplayer.$g
 	var addWaitToEventQ = vplayer.addWaitToEventQ
 	var checkPoint = vplayer.checkPoint
-	var debug = vplayer.debug
 	var Font = vplayer.Font
 	var fork = vplayer.fork
 	var getArg = vplayer.getArg
@@ -2229,17 +2228,20 @@ function dlx(vplayer) {
 
 	function calcNewPC() {
 		if (instrIsBranch($g[99].vIns)) {
-			let pen = $g[109]
-			$g[199]=$g[122]
-			$g[200]=$g[124]
-			if (testCondition($g[99].vCond)) {
-				if ($g[99].vIns==B || $g[99].vIns==BL) {
-					$g[203]=($g[100].value+$g[99].vRs2)&127
+			$g[203]=$g[100].value+4
+			if (($g[99].vCond==def) || (($g[134].vSBit!="S") && ($g[134].vIns<=CMN || $g[134].vIns>=TSTi))) {
+				let pen = $g[109]
+				$g[199]=$g[122]
+				$g[200]=$g[124]
+				if (testCondition($g[99].vCond)) {
+					if ($g[99].vIns==B || $g[99].vIns==BL) {
+						$g[203]=($g[100].value+$g[99].vRs2)&127
+					}
+				} else {
+					$g[203]=$g[100].value+4
 				}
-			} else {
-				$g[203]=$g[100].value+4
+				$g[204]=$g[89]
 			}
-			$g[204]=$g[89]
 		}
 	}
 
@@ -2315,6 +2317,9 @@ function dlx(vplayer) {
 			if ($g[28]==BRANCH_INTERLOCK) {
 				$g[24]=CTRL_STALL
 			}
+		}
+		if (($g[24]==NO_STALL) && instrIsBranch($g[99].vIns) && ($g[99].vCond!=def) && (($g[134].vSBit=="S") || ($g[134].vIns>=CMN && $g[134].vIns<=TSTi))) {
+			$g[24]=CTRL_STALL
 		}
 		if ($g[24]==DATA_STALL) {
 			$g[78].setStall(1, 0)
@@ -3380,198 +3385,195 @@ function dlx(vplayer) {
 				return
 				$pc = 54
 			case 54:
-				if (!(($g[28]==BRANCH_PREDICTION) && (btbIndex($g[79].value)!=-1))) {
+				if (!(instrIsBranch($g[99].vIns) && ($g[99].vCond!=def) && (($g[134].vSBit=="S") || ($g[134].vIns>=CMN && $g[134].vIns<=TSTi)))) {
 					$pc = 55
+					continue
+				}
+				$pc = 58
+				continue
+			case 55:
+				if (!(($g[28]==BRANCH_PREDICTION) && (btbIndex($g[79].value)!=-1))) {
+					$pc = 56
 					continue
 				}
 				$g[25]=btbIndex($g[79].value)
 				$g[79].setNewValue($g[82][$g[25]].value)
 				$g[198]=$g[90]
-				$pc = 56
+				$pc = 57
 				continue
-			case 55:
+			case 56:
 				$g[79].setNewValue(($g[79].value+4)&127)
 				$g[198]=$g[92]
-				$pc = 56
-			case 56:
+				$pc = 57
+			case 57:
+				$pc = 58
+			case 58:
 				$g[101][15].setNewValue($g[79].newValue)
 				$g[100].setNewValue($g[79].value)
 				$g[99].setNewInstruction($g[77].instruction[$g[79].value/4])
 				if (!(($g[99].vIns>=LSL && $g[99].vIns<=ROR) || ($g[99].vIns>=LSLi && $g[99].vIns<=RORi))) {
-					$pc = 57
+					$pc = 59
 					continue
 				}
 				$g[99].vIns2=$g[99].vIns
 				$g[99].vIns=MOV
 				$g[99].vRs3=$g[99].vRs2
 				$g[99].vRs2=$g[99].vRs1
-				$pc = 57
-			case 57:
+				$pc = 59
+			case 59:
 				if (wait(8))
 				return
-				$pc = 58
-			case 58:
+				$pc = 60
+			case 60:
 				fork(41, $g[96], 64)
 				fork(41, $g[88], 24)
 				fork(41, $g[95], 24)
 				if (!(($g[28]==BRANCH_PREDICTION) && (instrIsBranch($g[99].vIns)))) {
-					$pc = 64
+					$pc = 66
 					continue
 				}
 				if (!($g[24]==CTRL_STALL)) {
-					$pc = 60
+					$pc = 62
 					continue
 				}
 				callf(41, $g[94], 12)
 				continue
-			case 59:
-				$pc = 62
+			case 61:
+				$pc = 64
 				continue
-			case 60:
+			case 62:
 				callf(41, $g[113], 12)
 				continue
-			case 61:
-				$pc = 62
-			case 62:
+			case 63:
+				$pc = 64
+			case 64:
 				callf(41, $g[97], 12)
 				continue
-			case 63:
-				$pc = 66
+			case 65:
+				$pc = 68
 				continue
-			case 64:
+			case 66:
 				if (wait(24))
 				return
-				$pc = 65
-			case 65:
-				$pc = 66
-			case 66:
+				$pc = 67
+			case 67:
+				$pc = 68
+			case 68:
 				fork(41, $g[86], 40)
 				if (!(($g[28]==BRANCH_PREDICTION) && (btbIndex($g[79].value)!=-1))) {
-					$pc = 67
+					$pc = 69
 					continue
 				}
 				$g[81][btbIndex($g[79].value)].highlight($g[22])
 				$g[82][btbIndex($g[79].value)].highlight($g[22])
-				$pc = 67
-			case 67:
+				$pc = 69
+			case 69:
 				$g[87].setTxt($g[99].getNewInstrTxt())
 				if ($g[87].setOpacity(1, 16, 1, 1))
 				return
-				$pc = 68
-			case 68:
+				$pc = 70
+			case 70:
 				callf(41, $g[198], 16)
 				continue
-			case 69:
+			case 71:
 				callf(41, $g[93], 8)
 				continue
-			case 70:
+			case 72:
 				returnf(0)
 				continue
-			case 71:
+			case 73:
 				enterf(0);	// sendBTBOperands
 				callf(41, $g[200], 18)
 				continue
-			case 72:
+			case 74:
 				callf(41, $g[126], 6)
 				continue
-			case 73:
+			case 75:
 				returnf(0)
 				continue
-			case 74:
+			case 76:
 				enterf(1);	// idExec
 				if (!($g[24]==NO_STALL)) {
-					$pc = 75
+					$pc = 77
 					continue
 				}
 				fork(37, $g[100])
 				fork(35, $g[99])
-				$pc = 75
-			case 75:
+				$pc = 77
+			case 77:
 				if (!($g[26] && ($g[28]==BRANCH_PREDICTION))) {
-					$pc = 76
+					$pc = 78
 					continue
 				}
 				fork(37, $g[81][$g[25]])
 				fork(37, $g[82][$g[25]])
-				$pc = 76
-			case 76:
+				$pc = 78
+			case 78:
 				if (wait(16))
 				return
-				$pc = 77
-			case 77:
+				$pc = 79
+			case 79:
 				fork(41, $g[98], 64)
 				if (!(instrIsBranch($g[99].vIns))) {
-					$pc = 84
+					$pc = 86
 					continue
 				}
 				if (!($g[99].vIns==BL)) {
-					$pc = 78
+					$pc = 80
 					continue
 				}
 				$g[136].setNewValue($g[100].value)
-				$pc = 78
-			case 78:
-				if (!($g[24]==NO_STALL)) {
-					$pc = 81
+				$pc = 80
+			case 80:
+				if (!(($g[99].vCond==def) || (($g[134].vSBit!="S") && ($g[134].vIns<=CMN || $g[134].vIns>=TSTi)))) {
+					$pc = 83
 					continue
 				}
 				fork(41, $g[116], 16)
 				fork(41, $g[118], 16)
 				if (wait(12))
 				return
-				$pc = 79
-			case 79:
+				$pc = 81
+			case 81:
 				$g[119].setTxt("%02X", $g[99].vRs1)
 				$g[119].setOpacity(1)
 				if (wait(4))
 				return
-				$pc = 80
-			case 80:
+				$pc = 82
+			case 82:
 				fork(41, $g[122], 8)
 				$g[123].setTxt("%02X", ($g[100].value+$g[99].vRs1)&255)
 				$g[123].setOpacity(1, 8, 1, 0)
-				$pc = 83
+				$pc = 85
 				continue
-			case 81:
-				if (wait(24))
-				return
-				$pc = 82
-			case 82:
-				$pc = 83
 			case 83:
-				$pc = 86
-				continue
-			case 84:
 				if (wait(24))
 				return
+				$pc = 84
+			case 84:
 				$pc = 85
 			case 85:
-				$pc = 86
+				$pc = 88
+				continue
 			case 86:
-				if (wait(9))
+				if (wait(24))
 				return
 				$pc = 87
 			case 87:
-				if (!(instrIsBranch($g[99].vIns))) {
-					$pc = 88
-					continue
-				}
-				calcNewPC()
 				$pc = 88
 			case 88:
-				if (!(instrIsBranch($g[99].vIns))) {
-					$pc = 89
-					continue
-				}
-				$g[125].setTxt("%02X", $g[203])
-				$g[125].setOpacity(1, 8, 1, 0)
+				if (wait(9))
+				return
 				$pc = 89
 			case 89:
 				if (!(instrIsBranch($g[99].vIns))) {
 					$pc = 90
 					continue
 				}
-				fork(71, $obj)
+				calcNewPC()
+				$g[125].setTxt("%02X", $g[203])
+				$g[125].setOpacity(1, 8, 1, 0)
+				fork(73, $obj)
 				$pc = 90
 			case 90:
 				detectStall()
@@ -3597,9 +3599,6 @@ function dlx(vplayer) {
 				return
 				$pc = 94
 			case 94:
-				debug("%d", $g[134].vIns)
-				debug("%d", $g[24])
-				debug("-------")
 				if (!((instrOpTypeRdt($g[99].vIns)==OP_TYPE_REG || instrHasNoDstRR($g[99].vIns) || instrHasNoDstRI($g[99].vIns)) && ($g[99].vIns!=B) && ($g[134].vIns!=MUL || $g[24]!=MUL_STALL))) {
 					$pc = 110
 					continue
@@ -4849,7 +4848,7 @@ function dlx(vplayer) {
 					continue
 				}
 				fork(52, $obj)
-				fork(74, $obj)
+				fork(76, $obj)
 				fork(115, $obj)
 				fork(197, $obj)
 				fork(225, $obj)
