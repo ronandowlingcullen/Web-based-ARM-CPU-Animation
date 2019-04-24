@@ -1,23 +1,9 @@
 //
 // register.vin
 //
-// Simulation of the DLX
-// Written by Edsko de Vries, Summer 2003
-//
-// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
-//
-// This program is free software; you can redistribute it and/or modify it under
-// the terms of the GNU General Public License as published by the Free Software Foundation;
-// either version 2 of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation Inc.,
-// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-//
+// Simulation of the ARM
+// Written by Rónán Dowling-Cullen, Final Year Computer Science 2018/19DLX
+// Building on the simulation of the DLX written by Edsko de Vries, Summer 2003
 
 const num HORIZONTAL = 0;
 const num VERTICAL = 1;
@@ -36,13 +22,13 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
     num value = 0, newValue = 0;
     num tag = 0, newTag = 0;
     num useTag = 0, invalid = 0;
-    num fixed = 0;                      // for r0 {joj 29/10/06}
+    num fixed = 0;                      // for r0 
     Rectangle label;
 
     Rectangle r1 = Rectangle2(0, 0, blackPen, regBrush, x, y, w, h);
-	r1.setRounded(2, 2);	// {joj 16/10/16}
-    Rectangle bg1 = Rectangle2(valuesLayer, 0, 0, whiteBrush, vx, vy, vw / 2, vh);           	// joj
-    Rectangle bg2 = Rectangle2(valuesLayer, 0, 0, whiteBrush, vx + vw / 2, vy, vw / 2, vh);  	// joj
+	r1.setRounded(2, 2);	
+    Rectangle bg1 = Rectangle2(valuesLayer, 0, 0, whiteBrush, vx, vy, vw / 2, vh);           	
+    Rectangle bg2 = Rectangle2(valuesLayer, 0, 0, whiteBrush, vx + vw / 2, vy, vw / 2, vh);  	
 
     if (w >= h) {
 
@@ -54,8 +40,8 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
         vh = h - 9;
 
         if (labelPos == LEFT) {
-			Rectangle r2 = Rectangle(0, 0, 0, 0, x + 17 - 1, y + h/2, -17, -h/2, 34, h, 0, font, caption);	// {joj 7/10/16}
-			r2.rotate(-90);	// {joj 7/10/16}
+			Rectangle r2 = Rectangle(0, 0, 0, 0, x + 17 - 1, y + h/2, -17, -h/2, 34, h, 0, font, caption);	
+			r2.rotate(-90);	
             vx = x + 32;
         } else if (labelPos == RIGHT) {
           r2 = Rectangle(0, 0, 0, 0, x + w - 19, y + h/2, -19, -h/2, 38, h, 0, font, caption);
@@ -90,12 +76,12 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
     } else {
         label = Rectangle(valuesLayer, 0, 0, yellowBrush, vx + vw/2, vy + vh/2, -vw/2, -vh/2, vw, vh, 0, font, "%02X", value);
     }
-	label.setRounded(2, 2); 	// {joj 16/10/16}
+	label.setRounded(2, 2); 	
 
     //
     // setFixed
     //
-    function setFixed() {                    // {joj 29/10/06}
+    function setFixed() {                   
         fixed = 1;
     }
 
@@ -105,7 +91,6 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
     function setOpacity(num opacity) {
         r1.setOpacity(opacity);
         r2.setOpacity(opacity);
-        //r3.setOpacity(opacity);
         bg1.setOpacity(opacity);
         bg2.setOpacity(opacity);
         label.setOpacity(opacity);
@@ -121,7 +106,7 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
     //
     // updateLabel
     //
-    num function updateLabel() {								// {joj 24/9/17}
+    num function updateLabel() {								
         if (invalid) {
             label.setTxt("INV");
         } else if (useTag) {
@@ -138,16 +123,16 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
 	//
     // mouse enter exit event handler
     //
-    when label ~> eventEE(num enter, num x, num y) {			// {joj 24/10/17}
+    when label ~> eventEE(num enter, num x, num y) {			
         if (fixed == 0)
-            label.setBrush(enter ? whiteBrush : yellowBrush);	// {joj 7/10/16}
+            label.setBrush(enter ? whiteBrush : yellowBrush);	
 		return 0;
     }
 
     //
     // mouse left button event handler
     //
-    when label ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/10/17}
+    when label ~> eventMB(num down, num flags, num x, num y) {	
         if (fixed == 0 && down) {
 			if (flags & MB_LEFT) {
             	value = (value + 1) & 0xFF;
@@ -194,15 +179,15 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
     //
     // update
     //
-    function update() {			// {joj 14/11/17}
+    function update() {			
         value = newValue;
         tag = newTag;
         updateLabel();
-        bg1.setBrush(yellowBrush);  // joj
-        bg2.setBrush(yellowBrush);  // joj
+        bg1.setBrush(yellowBrush);  
+        bg2.setBrush(yellowBrush);  
         wait(16);
-        bg1.setBrush(whiteBrush);   // joj
-        bg2.setBrush(whiteBrush);   // joj
+        bg1.setBrush(whiteBrush);  
+        bg2.setBrush(whiteBrush);  
     }
 
     //
@@ -217,7 +202,7 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
     // tagMatches
     //
     num function tagMatches(num t) {
-        return (invalid) ? 0 : (tag == t) ? 1 : 0;  // {joj 27/10/06}
+        return (invalid) ? 0 : (tag == t) ? 1 : 0;  
     }
 
     num hmode = 0;
@@ -227,11 +212,11 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
     //
     function highlight(Brush brush) {
         if (hmode == 0) {
-            bg1.setBrush(brush);    // joj
-            bg2.setBrush(brush);    // joj
+            bg1.setBrush(brush);    
+            bg2.setBrush(brush);    
             hmode = 1;
         } else {
-            bg2.setBrush(brush);    // joj
+            bg2.setBrush(brush);    
         }
     }
 
@@ -239,8 +224,8 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
     // unHighlight
     //
     function unHighlight() {
-        bg1.setBrush(whiteBrush);   // joj
-        bg2.setBrush(whiteBrush);   // joj
+        bg1.setBrush(whiteBrush);  
+        bg2.setBrush(whiteBrush);  
         hmode = 0;
     }
 
@@ -269,7 +254,6 @@ class Register(num x, num y, num w, num h, num labelPos, string caption) {
         reg2.updateLabel();
         reg2.bg1.setBrush(yellowBrush);
         reg2.bg2.setBrush(yellowBrush);
-        //reg2.wait(16);
         reg2.bg1.setBrush(whiteBrush);
         reg2.bg2.setBrush(whiteBrush);
 	}

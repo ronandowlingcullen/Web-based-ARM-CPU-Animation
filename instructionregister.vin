@@ -1,23 +1,9 @@
 //
 // instructionregister.vin
 //
-// Simulation of the DLX
-// Written by Edsko de Vries, Summer 2003
-//
-// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
-//
-// This program is free software; you can redistribute it and/or modify it under
-// the terms of the GNU General Public License as published by the Free Software Foundation;
-// either version 2 of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation Inc.,
-// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-//
+// Simulation of the ARM
+// Written by Rónán Dowling-Cullen, Final Year Computer Science 2018/19DLX
+// Building on the simulation of the DLX written by Edsko de Vries, Summer 2003
 
 class InstructionRegister(num x, num y, num w, num h, string caption) {
 
@@ -31,12 +17,12 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     string txt = "EMPTY";
 
     Rectangle r1 = Rectangle2(0, 0, blackPen, blackBrush, x, y, w, h);
-	r1.setRounded(2, 2); // {joj 16/10/16}
+	r1.setRounded(2, 2); 
     Rectangle r2 = Rectangle2(0, 0, blackPen, whiteBrush, x + 5, y + 4, w - 11, h - 24);
-	r2.setRounded(2, 2); // {joj 16/10/16}
+	r2.setRounded(2, 2); 
     Rectangle r3 = Rectangle2(0, 0, 0, 0, x, y + h - 20, w, 22, whitePen, font, caption);
-    Rectangle label = Txt(valuesLayer, 0, x + w/2, y + (h - 24)/2 + 4, 0, IMFont, txt); // {joj 16/10/16}
-	label.rotate(-90); // {joj 14/10/16}
+    Rectangle label = Txt(valuesLayer, 0, x + w/2, y + (h - 24)/2 + 4, 0, IMFont, txt); 
+	label.rotate(-90); 
 
     //
     // setNewValue
@@ -70,13 +56,13 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
     // getNewInstrTxt
     //
     string function getNewInstrTxt() {
-        return instrText(nIns, nSBit, nCond, nRdt, nRs1, nRs2, nIns2, nRs3);       // {joj 28/10/10}
+        return instrText(nIns, nSBit, nCond, nRdt, nRs1, nRs2, nIns2, nRs3);       
     }
 
     //
     // update
     //
-   function update() {									// {joj 14/11/17}
+   function update() {									
         vIns = nIns;
 		vSBit = nSBit;
 		vCond = nCond;
@@ -85,17 +71,17 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
         vRs2 = nRs2;									
         vIns2 = nIns2;
 		vRs3 = nRs3;
-        txt = instrText(vIns, vSBit, vCond, vRdt, vRs1, vRs2, nIns2, nRs3);        // {joj 28/10/10}
+        txt = instrText(vIns, vSBit, vCond, vRdt, vRs1, vRs2, nIns2, nRs3);        
         label.setTxt(txt);
-        r2.setBrush(yellowBrush);                       // {joj}
+        r2.setBrush(yellowBrush);                      
         wait(16);
-        r2.setBrush(whiteBrush);                        // {joj}
+        r2.setBrush(whiteBrush);                      
     }
 
     //
     // setOpacity
     //
-    function setOpacity(num opacity) {					// {joj 20/8/10}
+    function setOpacity(num opacity) {					
         r1.setOpacity(opacity);
         r2.setOpacity(opacity);
         r3.setOpacity(opacity);
@@ -114,7 +100,7 @@ class InstructionRegister(num x, num y, num w, num h, string caption) {
 		nIns2 = EMPTY;
 		nSBit = " ";
         nRdt = nRs1 = nRs2 = nRs3 = 0;
-        txt = instrText(vIns, vSBit, vCond, vRdt, vRs1, vRs2, nIns2, nRs3);        // {joj 28/10/10}
+        txt = instrText(vIns, vSBit, vCond, vRdt, vRs1, vRs2, nIns2, nRs3);      
         label.setTxt(txt);
     }
 

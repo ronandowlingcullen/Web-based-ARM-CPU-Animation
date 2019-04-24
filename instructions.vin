@@ -1,23 +1,9 @@
 //
 // instructions.vin
 //
-// Simulation of the DLX
-// Written by Edsko de Vries, Summer 2003
-//
-// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
-//
-// This program is free software; you can redistribute it and/or modify it under
-// the terms of the GNU General Public License as published by the Free Software Foundation;
-// either version 2 of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation Inc.,
-// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-//
+// Simulation of the ARM
+// Written by Rónán Dowling-Cullen, Final Year Computer Science 2018/19DLX
+// Building on the simulation of the DLX written by Edsko de Vries, Summer 2003
 
 
 //
@@ -175,44 +161,6 @@ string instrNames[51];
 // NOP
 instrNames[NOP] = "NOP";
 
-// Arithmetic //instructions (register-register)
-//instrNames[ADD] = "ADD";    // Add
-//instrNames[SUB] = "SUB";    // Subtract
-//instrNames[AND] = "AND";    // Logical AND
-//instrNames[OR]  = "OR";     // Logical OR
-//instrNames[XOR] = "XOR";    // Logical exclusive OR
-//instrNames[SLL] = "SLL";    // Logical shift left
-//instrNames[SRL] = "SRL";    // Logical shift right
-//instrNames[SLT] = "SLT";    // Set if less than
-//instrNames[SGT] = "SGT";    // Set if greater than
-//instrNames[SLE] = "SLE";    // Set if less or equal
-//instrNames[SGE] = "SGE";    // Set if greater or equal
-
-// Arithmetic //instructions (register-immediate)
-//instrNames[ADDi]    = "ADDi";
-//instrNames[SUBi]    = "SUBi";
-//instrNames[ANDi]    = "ANDi";
-//instrNames[ORi]     = "ORi";
-//instrNames[XORi]    = "XORi";
-//instrNames[SLLi]    = "SLLi";
-//instrNames[SRLi]    = "SRLi";
-//instrNames[SLTi]    = "SLTi";
-//instrNames[SGTi]    = "SGTi";
-//instrNames[SLEi]    = "SLEi";
-//instrNames[SGEi]    = "SGEi";
-
-// Load/store //instructions
-//instrNames[LD]      = "LD";     // Load             // joj
-//instrNames[ST]      = "ST";     // Store            // joj
-
-// Control //instructions
-//instrNames[BEQZ]    = "BEQZ";   // Branch if equal to zero
-//instrNames[BNEZ]    = "BNEZ";   // Branch if not equal to zero
-//instrNames[J]       = "J";      // Jump
-//instrNames[JAL]     = "JAL";    // Jump and link
-//instrNames[JR]      = "JR";     // Jump register
-//instrNames[JALR]    = "JALR";   // Jump and link register
-
 instrNames[ADD] = "ADD";    // Add
 instrNames[ADC]	= "ADC";	// Add with Carry
 instrNames[SUB] = "SUB";    // Subtract
@@ -292,49 +240,27 @@ instrNames[EMPTY] = "EMPTY";
 // Instruction classes
 //
 num function instrIsNop(num instr) {
-    return (instr == NOP || instr == STALL || instr == EMPTY || instr == HALT) ? 1 : 0; // {joj 28/10/06}
+    return (instr == NOP || instr == STALL || instr == EMPTY || instr == HALT) ? 1 : 0;
 }
 
 num function instrIsArRR(num instr) {
-    //return (instr >= ADD && instr <= SGE) ? 1 : 0;          // {joj 28/10/06}
 	return (instr >= ADD && instr <= ROR) ? 1 : 0;
 }
 
 num function instrIsArRI(num instr) {
-    return ((instr >= ADDi) && (instr <= RORi)) ? 1 : 0;	// {joj 28/10/06}
+    return ((instr >= ADDi) && (instr <= RORi)) ? 1 : 0;
 	return 0;
 }
 
 num function instrIsBranch(num instr) {
-    //return ((instr == BEQZ) || (instr == BNEZ)) ? 1 : 0;    // {joj 28/10/06}
 	return (instr == B || instr == BL) ? 1 : 0;
 }
 
-//num function isJorJAL(num instr) {							// {joj 3/11/12}
-//    //return ((instr == J) || (instr == JAL)) ? 1 : 0;        // {joj 28/10/06}
-//	return ((instr == B) || (instr == BL)) ? 1 : 0;
-//}
-
-//num function instrIsJumpR(num instr) {						
-    //return ((instr == JR) || (instr == JALR)) ? 1 : 0;		// {joj 28/10/06}
-//	return 0;
-//}
-
-//num function instrIsBranchOrJump(num instr) {
-//    return (instrIsBranch(instr) || isJorJAL(instr) || instrIsJumpR(instr)) ? 1 : 0;    // {joj 28/10/06}
-//}
-
-//num function instrIsJumpAndLink(num instr) {
-    //return ((instr == JAL) || (instr == JALR)) ? 1 : 0;     // {joj 28/10/06}
-//    return (instr == BL) ? 1 : 0;     // {joj 28/10/06}
-//}
 
 num function instrIsLoadOrStore(num instr) {
-    //return ((instr == LD) || (instr == ST)) ? 1 : 0;            // {joj 28/10/06}
-    return ((instr == LDR) || (instr == STR) || (instr == LDRi) || (instr == STRi)) ? 1 : 0;            // {joj 28/10/06}
-}
+    return ((instr == LDR) || (instr == STR) || (instr == LDRi) || (instr == STRi)) ? 1 : 0; 
 
-// My ones
+
 // Shift immediate
 
 num function instrIsShI(num instr) {
@@ -379,14 +305,12 @@ num function instrOpTypeRdt(num instr) {
 num function instrOpTypeRs1(num instr) {
     if (instrIsNop(instr) || instrHasNoOp1RR(instr) ||  instrHasNoOp1RI(instr) || instrIsBranch(instr))
         return OP_TYPE_UNUSED;
-	//else if (instr == B || instr == BL)
-	//	return OP_TYPE_IMM;
     else
         return OP_TYPE_REG;
 }
 
 num function instrOpTypeRs2(num instr) {
-    if (instrIsNop(instr))// || instrIsBranch(instr))
+    if (instrIsNop(instr))
         return OP_TYPE_UNUSED;
     else if ((instrIsArRR(instr) || instrHasNoDstRR(instr) || (instr == LDR) || (instr == STR) ||  instrHasNoOp1RR(instr)) && !instrIsBranch(instr))
         return OP_TYPE_REG;
@@ -418,30 +342,6 @@ num function sAllowed(num instr){
 //
 // Instruction formatting
 //
-//string function instrText(num instr, num rdt, num rs1, num rs2) {				// {joj 28/10/10}
-//    if (instrIsNop(instr))
-//        return sprintf("%s", instrNames[instr]);                             	// {joj 28/10/10}
-//    else if (instrIsArRR(instr))
-//        return sprintf("%s R%d,R%d,R%d", instrNames[instr], rdt, rs1, rs2);  	// {joj 28/10/10}
-//    else if (instrIsArRI(instr))
-//        return sprintf("%s R%d,R%d,%02X", instrNames[instr], rdt, rs1, rs2); 	// {joj 28/10/10}
-//    else if (instr == LD)														// {joj}
-//       return sprintf("LD R%d,R%d+%02X", rdt, rs1, rs2);                     	// {joj 28/10/06}
-//    else if (instr == ST)                                                		// {joj 28/10/06}
-//        return sprintf("ST R%d,R%d+%02X", rdt, rs1, rs2);                    	// {joj 28/10/06}
-//    else if (instrIsBranch(instr))
-//        return sprintf("%s R%d,%02X", instrNames[instr], rs1, rs2);          	// {joj 28/10/10}
-//    else if (instr == J)
-//        return sprintf("%s %02X", instrNames[instr], rs2);                   	// {joj 28/10/10}
-//    else if (instr == JAL)
-//        return sprintf("%s R%d, %02X", instrNames[instr], rdt, rs2);         	// {joj 28/10/10}
-//    else if (instr == JR)
-//        return sprintf("%s R%d", instrNames[instr], rs2);                    	// {joj 28/10/10}
-//    else if (instr == JALR)
-//        return sprintf("%s R%d, R%d", instrNames[instr], rdt, rs2);          	// {joj 28/10/10}
-//    return "EMPTY";                                                         	// {joj 28/10/10}
-//}
-
 string function instrText(num instr, string s, num cond, num rdt, num rs1, num rs2, num instr2, num rs3) {	
     if (instrIsNop(instr))
         return sprintf("%s", instrNames[instr]);                             	
@@ -596,11 +496,6 @@ num function testCondition(num cond) {
 }
 
 num function instrExecute(num instr, string s, num cond, num op1, num op2, num shiftIns, num op3, num n, num z, num c, num v) {
-
-	//if(instr == MOV || instr == MOVi && ((instr >= LSL && instr <= ROR) || (instr >= LSL && instr <= ROR))){
-	//	op2 = op1;
-	//}
-
 	
 	//Perform Shift on OP2
 	if(shiftIns == LSL || shiftIns == LSLi){
@@ -617,11 +512,6 @@ num function instrExecute(num instr, string s, num cond, num op1, num op2, num s
 		op3 = op3%8;
 		op2 = ((op2 >> op3) | (op2 << (8-op3))) & 0xFF;
 	}
-
-	//if(instr == MOV || instr == MOVi && ((instr >= LSL && instr <= ROR) || (instr >= LSL && instr <= ROR))){
-	//	op1 = op2;
-	//}
-
 
 	num res = 0;				// Init result to zero	
 	num add = 0;				// Init is Add instruction	to zero
@@ -659,7 +549,7 @@ num function instrExecute(num instr, string s, num cond, num op1, num op2, num s
 		res = (op1 >> op2) & 0xFF;
 
 
-	} else if (instr == LDR || instr == STR || instr == LDRi || instr == STRi)   {               // joj
+	} else if (instr == LDR || instr == STR || instr == LDRi || instr == STRi)   {              
         res = (se8(op1) + se8(op2)) & 0xFF;
 		add = 1;
 		sOK = 0;
@@ -682,9 +572,9 @@ num function instrExecute(num instr, string s, num cond, num op1, num op2, num s
 	else if (instr == MOV || instr == MOVi) {
 		res =((op2) & 0xFF);
 	}
-	else if (instr == MUL) { // Multiply ********(If S set V preserved)******************
+	else if (instr == MUL) { 
 		res =((op1 * op2) & 0xFF);
-		mul = 1;
+		mul = 1;	//If S set V preserved on MUL
 	}
 	else if (instr == MVN || instr == MVNi) {
 		res =((~op1) & 0xFF);
@@ -719,7 +609,6 @@ num function instrExecute(num instr, string s, num cond, num op1, num op2, num s
 		setFlags(res,op1,op2,add,mul);
 	}
 
-	// 
  
 	return res;
 }

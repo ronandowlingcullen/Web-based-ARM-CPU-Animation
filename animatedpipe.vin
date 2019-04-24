@@ -1,23 +1,9 @@
 //
 // animatedpipe.vin
 //
-// Simulation of the DLX
-// Written by Edsko de Vries, Summer 2003
-//
-// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
-//
-// This program is free software; you can redistribute it and/or modify it under
-// the terms of the GNU General Public License as published by the Free Software Foundation;
-// either version 2 of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation Inc.,
-// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-//
+// Simulation of the ARM
+// Written by Rónán Dowling-Cullen, Final Year Computer Science 2018/19DLX
+// Building on the simulation of the DLX written by Edsko de Vries, Summer 2003
 
 class AnimPipe() {
 
@@ -35,10 +21,10 @@ class AnimPipe() {
     Pen fgPen0 = SolidPen(SOLID, w, RED, BEVEL_JOIN | BUTT_END);			// could be static / global
     Pen fgPen1 = SolidPen(SOLID, w, RED, BEVEL_JOIN | ARROW60_END);			// could be static / global
 
-    Line bgLine = Line(inactivePipesLayer, 0, bgPen1, 0, 0);	// {joj 17/10/16}
-	Line fgLine = Line(activePipesLayer, 0, fgPen0, 0, 0);		// {joj 17/10/16}
+    Line bgLine = Line(inactivePipesLayer, 0, bgPen1, 0, 0);	
+	Line fgLine = Line(activePipesLayer, 0, fgPen0, 0, 0);		
 
-    function setOpacity(num opacity) { // {joj 20/8/10}
+    function setOpacity(num opacity) { 
         bgLine.setOpacity(opacity);
         fgLine.setOpacity(opacity);
     }
@@ -78,7 +64,7 @@ class AnimPipe() {
         fgLine.setPen(fgPen0);
     }
 
-    function animate(num steps) {	// {joj 14/11/17}
+    function animate(num steps) {	
 		num l = 0, s, ss = 0;
 		num d = 0;
 		calcLength();

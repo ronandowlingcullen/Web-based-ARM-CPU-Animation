@@ -1,31 +1,17 @@
 //
 // execution.vin
 //
-// Simulation of the DLX
-// Written by Edsko de Vries, Summer 2003
-//
-// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
-//
-// This program is free software; you can redistribute it and/or modify it under
-// the terms of the GNU General Public License as published by the Free Software Foundation;
-// either version 2 of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation Inc.,
-// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-//
+// Simulation of the ARM
+// Written by Rónán Dowling-Cullen, Final Year Computer Science 2018/19DLX
+// Building on the simulation of the DLX written by Edsko de Vries, Summer 2003
 
 AnimPipe mux1Src, mux3Src, mux4Src;
 
 num blockingCond = 0;			//Indicates conditional unexecution
-num zero;																		// {joj 3/11/12}
-num newPC;																		// {joj 3/11/12}
-//num branchMissPredict;														// {joj 4/11/12}
-AnimPipe newMux1Src;															// {joj 9/12/16}
+num zero;																		
+num newPC;																		
+//num branchMissPredict;														
+AnimPipe newMux1Src;															
 
 num mulStall = 0;
 
@@ -34,7 +20,7 @@ num mulStall = 0;
 //
 num function btbIndex(num pc) {
     for (num lp1 = 0; lp1 < 2; lp1++)
-        if (btbPC[lp1].value == pc)                                             // {joj 1/2/06}
+        if (btbPC[lp1].value == pc)                                             
             return lp1;
     return -1;
 }
@@ -44,7 +30,7 @@ num function btbIndex(num pc) {
 //
 // 80 ticks per clock cycle (40 + 40)
 // 
-function ifExec() {																// {joj 24/9/17}
+function ifExec() {																
 
 
 	if ((stall == NO_STALL) || (stall == CTRL_STALL)) {
@@ -64,7 +50,7 @@ function ifExec() {																// {joj 24/9/17}
     //
     if ((bpMode == BRANCH_PREDICTION) && (btbIndex(regPC.value) != -1)) {
         btbLast = btbIndex(regPC.value);
-        regPC.setNewValue(btbPPC[btbLast].value);                               // {joj 1/2/06}
+        regPC.setNewValue(btbPPC[btbLast].value);                               
         mux1Src = apBTB_MUX1;
     } else {
         regPC.setNewValue((regPC.value + 4) & 0x7F);
@@ -93,11 +79,11 @@ function ifExec() {																// {joj 24/9/17}
  	fork(apPC_IM.animate(24));
    	fork(apPC_ADD4.animate(24));
 
-    if ((bpMode == BRANCH_PREDICTION) && (instrIsBranch(regID.vIns))) {	// {joj 1/2/06}
-		if (stall == CTRL_STALL) {												// {joj 3/11/12}
-			apPC_MUX2.animate(12);												// {joj 3/11/12}
-		} else {																// {joj 3/11/12}
-        	apPC1_MUX2.animate(12);												// {joj 3/11/12}
+    if ((bpMode == BRANCH_PREDICTION) && (instrIsBranch(regID.vIns))) {	
+		if (stall == CTRL_STALL) {												
+			apPC_MUX2.animate(12);												
+		} else {																
+        	apPC1_MUX2.animate(12);												
 		}
         apMUX2_BTB.animate(12);
     } else {
@@ -110,12 +96,12 @@ function ifExec() {																// {joj 24/9/17}
     fork(apIM_ID.animate(40));
 
     if ((bpMode == BRANCH_PREDICTION) && (btbIndex(regPC.value) != -1)) {
-        btbPC[btbIndex(regPC.value)].highlight(bhighlight);                    // {joj 1/2/06}
-        btbPPC[btbIndex(regPC.value)].highlight(bhighlight);                   // {joj 1/2/06}
+        btbPC[btbIndex(regPC.value)].highlight(bhighlight);                    
+        btbPPC[btbIndex(regPC.value)].highlight(bhighlight);                   
     }
 
-    txtIM_ID.setTxt(regID.getNewInstrTxt());                                    // {joj 29/10/06}
-    txtIM_ID.setOpacity(1, 16, 1, 1);                                           // {joj 29/10/06}
+    txtIM_ID.setTxt(regID.getNewInstrTxt());                                    
+    txtIM_ID.setOpacity(1, 16, 1, 1);                                           
 
     mux1Src.animate(16);
     apMUX1_PC.animate(8);
@@ -134,12 +120,7 @@ function calcNewPC() {
 		if((regID.vCond == def) || ((regEX.vSBit != "S") && (regEX.vIns <= CMN || regEX.vIns >= TSTi))) {
 		// Stall to allow for condition branching on instruction one step ahead
         	// conditional branch
-			//Pen pen = (stall == NO_STALL) ? controlHLPen : controlPen;	// {joj 4/11/12}
-			Pen pen = controlHLPen;	// {joj 8/12/16}
-
-
-
-			//RDC's implementation
+			Pen pen = controlHLPen;	
 			mux3Src = apADDi_MUX3;
     		mux4Src = apMUX3_MUX4;
 		
@@ -180,25 +161,25 @@ function updBTB() {
             //
             // remove "branch" entry if branch doesn't branch
             //
-            if (newPC == regPC1.value + 4) {                        // {joj 1/11/06}
+            if (newPC == regPC1.value + 4) {                        
 
-                if (btbIndex(regPC1.value) >= 0)                    // {joj 1/11/06}
-                    btbPC[btbIndex(regPC1.value)].setInvalid(1);    // {joj 1/11/06}
+                if (btbIndex(regPC1.value) >= 0)                    
+                    btbPC[btbIndex(regPC1.value)].setInvalid(1);   
 
             } else {
 
                 //
                 // re-use entry if present
                 //
-                if (btbIndex(regPC1.value) >= 0)					// {joj 1/11/06}
-                    btbLast = btbIndex(regPC1.value)       	        // {joj 1/11/06}
+                if (btbIndex(regPC1.value) >= 0)					
+                    btbLast = btbIndex(regPC1.value)       	        
                 else
-                    btbLast = (btbLast) ? 0 : 1;                    // {joj 1/2/06}
+                    btbLast = (btbLast) ? 0 : 1;                    
 
-                btbPC[btbLast].setNewValue(regPC1.value);           // {joj 1/2/06}
-                btbPC[btbLast].setInvalid(0);                       // {joj 1/2/06}
-                btbPC[btbLast].useTag = 0;                          // {joj 1/2/06}
-                btbPPC[btbLast].setNewValue(newPC);                 // {joj 1/2/06}
+                btbPC[btbLast].setNewValue(regPC1.value);           
+                btbPC[btbLast].setInvalid(0);                       
+                btbPC[btbLast].useTag = 0;                          
+                btbPPC[btbLast].setNewValue(newPC);                 
 
             }
 
@@ -236,8 +217,7 @@ function detectStall() {
     }
 
     // RAW hazards (stores)
-    //if ((sfMode == STORE_INTERLOCK) && (regID.vIns == ST)) {        // {joj}
-    if ((sfMode == STORE_INTERLOCK) && (regID.vIns == STR || regID.vIns == STR)) {        // {joj}
+    if ((sfMode == STORE_INTERLOCK) && (regID.vIns == STR || regID.vIns == STR)) {        
 
         //
         // NB: ST stores the value of Rdt into memory (Rs1 and Rs2 are used to specify the memory address)
@@ -251,8 +231,7 @@ function detectStall() {
 
 
     // Load hazards
-    //if ((liMode == LOAD_INTERLOCK) && (regEX.vIns == LD)) {     // {joj}
-    if ((liMode == LOAD_INTERLOCK) && (regEX.vIns == LDR || regEX.vIns == LDRi)) {     // {joj}
+    if ((liMode == LOAD_INTERLOCK) && (regEX.vIns == LDR || regEX.vIns == LDRi)) {     
         if ((instrOpTypeRs1(regID.vIns) == OP_TYPE_REG) && (regID.vRs1 == regEX.vRdt))
             stall = DATA_STALL;
         if ((instrOpTypeRs2(regID.vIns) == OP_TYPE_REG) && (regID.vRs2 == regEX.vRdt))
@@ -280,8 +259,7 @@ function detectStall() {
 
 
     // control hazards (real detection for control hazards is done in calcNewPC)
-    //if ((stall == NO_STALL) && (bpMode != DELAYED_BRANCHES) && instrIsBranchOrJump(regID.vIns) && branchMissPredict) {	// {joj 1/2/06}
-	if ((stall == NO_STALL) && instrIsBranch(regID.vIns) && (newPC != regPC.value)) {	// {joj 9/12/16}
+	if ((stall == NO_STALL) && instrIsBranch(regID.vIns) && (newPC != regPC.value)) {
 		if (bpMode == BRANCH_PREDICTION) {
 			updateBTB = 1;
 		} else if (bpMode == BRANCH_INTERLOCK) {
@@ -303,24 +281,24 @@ function detectStall() {
 
 }
 
-function sendBTBOperands() {	// {joj 14/11/17}
-    mux4Src.animate(18);		// {joj 3/11/12}
-    apMUX4_BTB.animate(6);		// {joj 3/11/12}
+function sendBTBOperands() {	
+    mux4Src.animate(18);		
+    apMUX4_BTB.animate(6);		
 }
 
 //
 // idExec
 //
-function idExec() {																// {joj 14/11/17}
+function idExec() {																
 
     if (stall == NO_STALL) {
     	fork(regPC1.update());									
         fork(regID.update());
     }
 
-    if (updateBTB && (bpMode == BRANCH_PREDICTION))	{							// {joj 3/11/12}
-        fork(btbPC[btbLast].update());											// {joj 1/2/06}
-        fork(btbPPC[btbLast].update());											// {joj 1/2/06}
+    if (updateBTB && (bpMode == BRANCH_PREDICTION))	{							
+        fork(btbPC[btbLast].update());											
+        fork(btbPPC[btbLast].update());											
     }
 
 	
@@ -338,15 +316,15 @@ function idExec() {																// {joj 14/11/17}
 		
 		if((regID.vCond == def) || ((regEX.vSBit != "S") && (regEX.vIns <= CMN || regEX.vIns >= TSTi))) {
 		
-			fork(apPC1_ADDi.animate(16));                          				// {joj 4/11/12}
-        	fork(apID_ADDi.animate(16));                           				// {joj 4/11/12}
-        	wait(12);                                           				// {joj 4/11/12}
-        	txtID_ADDi.setTxt("%02X", regID.vRs1);                      		// {joj 4/11/12}
-        	txtID_ADDi.setOpacity(1);                                 			// {joj 4/11/12}
-        	wait(4);                                                   			// {joj 4/11/12}
-			fork(apADDi_MUX3.animate(8));                                  		// {joj 4/11/12}
-			txtADDi_MUX3.setTxt("%02X", (regPC1.value + regID.vRs1) & 0xff);	// {joj 4/11/12}
-        	txtADDi_MUX3.setOpacity(1, 8, 1, 0);          						// {joj 4/11/12}
+			fork(apPC1_ADDi.animate(16));                          				
+        	fork(apID_ADDi.animate(16));                           				
+        	wait(12);                                           				
+        	txtID_ADDi.setTxt("%02X", regID.vRs1);                      		
+        	txtID_ADDi.setOpacity(1);                                 			
+        	wait(4);                                                   			
+			fork(apADDi_MUX3.animate(8));                                  		
+			txtADDi_MUX3.setTxt("%02X", (regPC1.value + regID.vRs1) & 0xff);	
+        	txtADDi_MUX3.setOpacity(1, 8, 1, 0);          						
 			//Animate blocking/allowing write if condition
 			if(regID.vCond != def) {
 				if(testCondition(regID.vCond)) {
@@ -365,11 +343,11 @@ function idExec() {																// {joj 14/11/17}
 				}
 			}
 		
-		} else {																// {joj 4/11/12}
+		} else {																
 		
-			wait(24);															// {joj 4/11/12}
+			wait(24);															
 			
-		}																		// {joj 4/11/12}
+		}																		
 		
     } else {
 
@@ -377,7 +355,7 @@ function idExec() {																// {joj 14/11/17}
 
     };
 	
-    wait(9); // register file now updated {joj 4/11/12}
+    wait(9); // register file now updated 
     
     //
     // second half of the clock cycle
@@ -388,16 +366,15 @@ function idExec() {																// {joj 14/11/17}
         calcNewPC();
 
 		if(((regID.vCond == def) || ((regEX.vSBit != "S") && (regEX.vIns <= CMN || regEX.vIns >= TSTi))) && testCondition(regID.vCond)) {
-			txtMUX3_MUX4.setTxt("%02X", newPC); 									// {joj 3/11/12}
-			txtMUX3_MUX4.setOpacity(1, 8, 1, 0);                           			// {joj 3/11/12}
+			txtMUX3_MUX4.setTxt("%02X", newPC); 									
+			txtMUX3_MUX4.setOpacity(1, 8, 1, 0);                           			
        		fork(sendBTBOperands());
 		}
 	}
 	
     detectStall();
-	//debug("stall=%d", stall);
-	if (instrIsBranch(regID.vIns) && (stall != DATA_STALL))				// {joj 10/12/16}
-		updBTB();																// {joj 9/12/16}
+	if (instrIsBranch(regID.vIns) && (stall != DATA_STALL))				
+		updBTB();																
 
     if (stall == NO_STALL || stall == MUL_STALL) {
         regEX.setNewValue(regID.vIns, regID.vSBit, regID.vCond, regID.vRdt, regID.vRs1, regID.vRs2, regID.vIns2, regID.vRs3);
@@ -405,29 +382,29 @@ function idExec() {																// {joj 14/11/17}
         regEX.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
     }
     
-    wait(7);																	// {joj 4/11/12}
+    wait(7);																	
 
     // Send source registers to A and B
     if ((instrOpTypeRdt(regID.vIns) == OP_TYPE_REG || instrHasNoDstRR(regID.vIns) || instrHasNoDstRI(regID.vIns)) && (regID.vIns != B) && (regEX.vIns != MUL || stall != MUL_STALL)){//!instrIsBranch(regID.vIns)) { //Rdt is type reg or it's a compare instruction
 		
         if(instrOpTypeRs1(regID.vRs1) != OP_TYPE_IMM)
-			regFile[regID.vRs1].highlight(bhighlight);                             // {joj}
+			regFile[regID.vRs1].highlight(bhighlight);                             
         if(instrOpTypeRs1(regID.vIns) != OP_TYPE_UNUSED)	//Don't set if not in use
 			regA.setNewValue(regFile[regID.vRs1].value);
 
         // decision facilitated by the opcode format and does not need a MUX
         if (instrOpTypeRs2(regID.vIns) == OP_TYPE_REG) {
-            regFile[regID.vRs2].highlight(bhighlight);                         // {joj}
+            regFile[regID.vRs2].highlight(bhighlight);                         
             regB.setNewValue(regFile[regID.vRs2].value);
         } else if (regID.vIns != BL) {
             if(instrOpTypeRdt(regID.vRdt) != OP_TYPE_UNUSED)
-				regFile[regID.vRdt].highlight(bhighlight);                         // {joj}
+				regFile[regID.vRdt].highlight(bhighlight);                         
             regB.setNewValue(regFile[regID.vRdt].value);
         }
 
 		if(instrOpTypeRs1(regID.vIns) != OP_TYPE_UNUSED) {	//Don't animate if not in use
-           	txtRF_A.setTxt("R%d:%02X", regID.vRs1, regFile[regID.vRs1].value);      // {joj 29/10/06}
-           	txtRF_A.setOpacity(1);													// {joj}
+           	txtRF_A.setTxt("R%d:%02X", regID.vRs1, regFile[regID.vRs1].value);      
+           	txtRF_A.setOpacity(1);													
 			fork(apRF_A.animate(24));
 		}
 			
@@ -435,19 +412,19 @@ function idExec() {																// {joj 14/11/17}
         //
         // read Register file B port
         // don't read if immediate addressing
-        // don't read if LD
-        // read destination register if ST
+        // don't read if LDR
+        // read destination register if STR
         // otherwise read source 2 register
         //
         if ((!instrIsArRI(regID.vIns)) && (regID.vIns != LDR &&  regID.vIns != LDRi) && (!instrHasNoOp1RI(regID.vIns))) { 
-            num vr = (regID.vIns == STR || regID.vIns == STRi) ? regID.vRdt : regID.vRs2;  // {joj 28/10/06}
+            num vr = (regID.vIns == STR || regID.vIns == STRi) ? regID.vRdt : regID.vRs2;  
             if(regID.vIns == BL) {
 				apPC1_MUX5.animate(18);                               		
                	apMUX5_B.animate(6);
 			} else if(instrOpTypeRs2(regID.vIns) != OP_TYPE_UNUSED) {	//Don't animate if not in use
-				txtRF_MUX5.setTxt("R%d:%02X", vr, regFile[vr].value);   // {joj 29/10/06}
-                txtRF_MUX5.setOpacity(1);								// {joj}
-              	apRF_MUX5.animate(18);                             		// {joj}
+				txtRF_MUX5.setTxt("R%d:%02X", vr, regFile[vr].value);   
+                txtRF_MUX5.setOpacity(1);								
+              	apRF_MUX5.animate(18);                             		
                	apMUX5_B.animate(6);
 			}
 		}
@@ -459,12 +436,6 @@ function idExec() {																// {joj 14/11/17}
     }
 
 
-	//Flush regID if Branch Instr and not conditionally unexecuted
-	//if(instrIsBranch(regID.vIns) && testCondition(regID.vCond)){
-		//if(bpMode == BRANCH_PREDICTION){
-			//regID.setNewValue(STALL, " ", 0, 0, 0, 0, STALL, 0);
-		//}
-	//}
 
 	//Flush regID if Branch Instr and not conditionally unexecuted
 	if(instrIsBranch(regID.vIns)){
@@ -563,19 +534,19 @@ function exExec() {														// {joj 14/11/17}
 		// Choose correct source for operand 3
 		if (instrOpTypeRs3(regEX.vIns,regEX.vIns2) == OP_TYPE_IMM) {
 
-            //mux7Src = apEX_MUX7;
+            
             op3 = regEX.vRs3;
 
         } else if (afMode == ALU_FORWARDING && regEX.vIns != BL) {	//If it's BL op2 <- regB (the address of the BL instruction)
 
             if (regOUT0.tagMatches(regEX.vRs3)) {
-                //mux7Src = apOUT0_MUX7;
+                
                 op3 = regOUT0.value;
             } else if (regOUT1.tagMatches(regEX.vRs3)) {
-                //mux7Src = apOUT1_MUX7;
+                
                 op3 = regOUT1.value;
             } else {
-                //mux7Src = apB_MUX7;
+                
                 op3 = regFile[regEX.vRs3].value;
             }
 
@@ -586,14 +557,7 @@ function exExec() {														// {joj 14/11/17}
 
         }
 		
-        num result = instrExecute(regEX.vIns, regEX.vSBit, regEX.vCond, op1, op2, regEX.vIns2, op3, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
-
-        // R0 is always 0
-        //if (regEX.vRdt == 0)
-        //    result = 0;
-
-		
-		
+        num result = instrExecute(regEX.vIns, regEX.vSBit, regEX.vCond, op1, op2, regEX.vIns2, op3, cpsr.n, cpsr.z, cpsr.c, cpsr.v);	
         
 
         if (instrIsLoadOrStore(regEX.vIns)) {
@@ -617,14 +581,11 @@ function exExec() {														// {joj 14/11/17}
 		}
 			
 
-        //regOUT0.setInvalid(0);								
+								
 
-    } //else if (regEX.vIns == NOP || !testCondition(regEX.vCond)) {
-		//regOUT0.setInvalid(1);
-	//}
+    } 
 
     // For stores, send correct operand to SMDR
-    //if (regEX.vIns == ST) {  // {joj}
     if ((regEX.vIns == STR || regEX.vIns == STRi)) {  // {joj}
         if (sfMode == FORWARDING_TO_SMDR) {
             if (regOUT0.tagMatches(regEX.vRdt)) {
@@ -647,16 +608,13 @@ function exExec() {														// {joj 14/11/17}
 
     fork(apEX_MA.animate(64));
 
-    //if (regEX.vIns == ST)                                           // {joj}
     if ((regEX.vIns == STR || regEX.vIns == STRi))    {   
         fork(mux8Src.animate(24));
 		//Deal with barrel shift ops
 		if(regEX.vIns2 != NOP){
 			if(instrIsShI(regEX.vIns2)){
-				//fork(apEX_BS.animate(24));
 				txtEX_BS.setTxt("%02X", op3); 
 			} else {
-				//fork(apRF_BS.animate(24));
 				txtRF_BS.setTxt("R%d:%02X", regEX.vRs3, regFile[regEX.vRs3].value);
 				txtRF_BS.setOpacity(1);
 			}
@@ -666,9 +624,9 @@ function exExec() {														// {joj 14/11/17}
     if ((instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns)) && regEX.vIns != STALL && regEX.vIns != B) { //Rdt is type reg or it's a compare instruction
         if (mux6Src != 0 && (instrOpTypeRs1(regEX.vIns) != OP_TYPE_UNUSED))
             fork(mux6Src.animate(24));
-        if (mux7Src == apEX_MUX7) {                                 // {joj 29/10/06}
-            txtEX_MUX7.setTxt("%02X", op2);                         // {joj 29/10/06}
-            txtEX_MUX7.setOpacity(1);                             	// {joj 29/10/06}
+        if (mux7Src == apEX_MUX7) {                                 
+            txtEX_MUX7.setTxt("%02X", op2);                         
+            txtEX_MUX7.setOpacity(1);                             	
         }  
 		if(instrOpTypeRs2(regEX.vIns) != OP_TYPE_UNUSED)  
 			fork(mux7Src.animate(24));
@@ -700,9 +658,8 @@ function exExec() {														// {joj 14/11/17}
     // Second half of the clock cycle
     //
 
-    //if (regEX.vIns == ST)                                           // {joj}
-    if ((regEX.vIns == STR || regEX.vIns == STRi))                                           // {joj}
-        fork(apMUX8_SMDR.animate(40));                         		// {joj 1/2/06}
+    if ((regEX.vIns == STR || regEX.vIns == STRi))                                           
+        fork(apMUX8_SMDR.animate(40));                         		
 
     if (((instrOpTypeRdt(regEX.vIns) == OP_TYPE_REG || instrHasNoDstRR(regEX.vIns) || instrHasNoDstRI(regEX.vIns))) && regEX.vIns != STALL && regEX.vIns != B) { //Rdt is type reg or it's a compare instruction
 
@@ -783,7 +740,7 @@ function exExec() {														// {joj 14/11/17}
 //
 // maExec - Memory Access phase
 //
-function maExec() {													// {joj 14/11/17}
+function maExec() {													
 
 
 	if(stall == MUL_STALL) {	//Stall ahead of MUL op
@@ -813,25 +770,17 @@ function maExec() {													// {joj 14/11/17}
 		cpsr0.setInvalid(1);
 	}
 
-	
-
-	
-	
 		
 
-    //if (regMA.nIns == ST) // {joj}
-    if (regMA.nIns == STR || regMA.nIns == STRi) // {joj}
+    if (regMA.nIns == STR || regMA.nIns == STRi) 
         fork(regSMDR.update());
 
     wait(7);
 
     regWB.setNewValue(regMA.vIns, regMA.vSBit, regMA.vCond, regMA.vRdt, regMA.vRs1, regMA.vRs2, regMA.vIns2, regMA.vRs3);
-
-    //if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG) && (regMA.vIns != ST)) {  // {joj}
     if ((instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns) || regEX.vIns == BL) && (regMA.vIns != STR)&& (regMA.vIns != STRi)) {  // {joj}
 
-        //if (regMA.vIns == LD) {   // {joj}
-        if ((regMA.vIns == LDR) || (regMA.vIns == LDRi)) {   // {joj}
+        if ((regMA.vIns == LDR) || (regMA.vIns == LDRi)) { 
             regOUT1.setNewValue(memory[(regOUT0.value / 4) % 16].value);
 			if(regOUT1.tag != -2) {
             	regOUT1.setNewTag(regMA.vRdt);
@@ -849,21 +798,19 @@ function maExec() {													// {joj 14/11/17}
     wait(8);
 
     fork(apMA_WB.animate(64));
-    //if (regMA.vIns == ST) {                                         // {joj}
-    if ((regMA.vIns == STR || regMA.vIns == STRi) && (regOUT0.tag != -2)) {                                         // {joj}
+    if ((regMA.vIns == STR || regMA.vIns == STRi) && (regOUT0.tag != -2)) {                                       
 		
 		
         memory[(regOUT0.value / 4) % 16].setNewValue(regSMDR.value);
-        fork(apSMDR_Mem.animate(24));                          		// {joj 1/2/06}
+        fork(apSMDR_Mem.animate(24));                      
         apOUT0_Mem.animate(24);
         memory[(regOUT0.value / 4) % 16].doubleUpdate(stack[((regOUT0.value / 4) % 16) -8]);
 
     } else if (instrOpTypeRdt(regMA.vIns) == OP_TYPE_REG || instrHasNoDstRR(regMA.vIns) || instrHasNoDstRI(regMA.vIns) || regEX.vIns == BL) { //Rdt is type reg or it's a compare instruction
 
-        //if (regMA.vIns == LD) {                                     // {joj}
-        if ((regMA.vIns == LDR || regMA.vIns == LDRi) && (regOUT0.tag != -2)) {                                     // {joj}
+        if ((regMA.vIns == LDR || regMA.vIns == LDRi) && (regOUT0.tag != -2)) {                              
             apOUT0_Mem.animate(24);
-            memory[(regOUT0.value / 4) % 16].highlight(bhighlight);		// {joj}
+            memory[(regOUT0.value / 4) % 16].highlight(bhighlight);	
             apMem_MUX9.animate(24);
         } else {
             apOUT0_MUX9.animate(48);
@@ -891,7 +838,7 @@ function maExec() {													// {joj 14/11/17}
 //
 // wbExec - write back phase
 //
-function wbExec() {																// {joj 14/11/17}
+function wbExec() {															
 
     fork(regWB.update());
 	
@@ -930,7 +877,7 @@ function wbExec() {																// {joj 14/11/17}
 		}
 
         //
-        // Second half of the clock cycle ---------------------------------------khgjhgjfj---------------
+        // Second half of the clock cycle
         //
         regFile[regOUT1.tag].update();
 		//Update CPSR1 if S set or comparison instruction
@@ -950,26 +897,23 @@ function wbExec() {																// {joj 14/11/17}
 
     }
 
-    if (regWB.vIns != STALL && regWB.vIns != EMPTY) {                   // {joj 30/10/06}
-        instrCount++;                                                   // {joj 30/10/06}
-        statIC.setTxt("%4d", instrCount);                               // {joj 30/10/06}
-    }                                                                   // {joj 30/10/06}
-    tickCount++;                                                        // {joj 30/10/06}
-    statTE.setTxt("%4d", tickCount);                                    // {joj 30/10/06}
+    if (regWB.vIns != STALL && regWB.vIns != EMPTY) {                   
+        instrCount++;                                                   
+        statIC.setTxt("%4d", instrCount);                               
+    }                                                                   
+    tickCount++;                                                        
+    statTE.setTxt("%4d", tickCount);                                    
 
 }
 
 //
 // nonPipelinedBranch
 //
-function nonPipelinedBranch() {										// {joj 14/11/11}
-
-//    fork(ap4_ADD4.animate(24));                                		// {joj 2/11/12}
-    fork(apID_ADDi.animate(24));                               		// {joj 2/11/12}
-	apPC_PC1.animate(12);											// {joj 2/11/12}
-//    fork(apPC1_ADD4.animate(12));									// {joj 2/11/12}
-    fork(apPC1_ADDi.animate(12));									// {joj 2/11/12}
-	wait(12);														// {joj 2/11/12}
+function nonPipelinedBranch() {										
+    fork(apID_ADDi.animate(24));                               		
+	apPC_PC1.animate(12);											
+    fork(apPC1_ADDi.animate(12));									
+	wait(12);														
 
 
 	if (instrIsBranch(regID.vIns)) {
@@ -977,13 +921,11 @@ function nonPipelinedBranch() {										// {joj 14/11/11}
             apADDi_MUX3.animate(20);
             regPC.setNewValue((regPC.value + regID.vRs2) & 0x7F);
         } else {
-//            apADD4_MUX3.animate(20);
             regPC.setNewValue((regPC.value + 4) & 0x7F);
         }
         apMUX3_MUX1.animate(14);
     } else {
         regPC.setNewValue((regPC.value + 4) & 0x7F);
-//        apADD4_MUX3.animate(20);
         apMUX3_MUX1.animate(14);
     }
 
@@ -996,7 +938,7 @@ function nonPipelinedBranch() {										// {joj 14/11/11}
 //
 // execNonPipelined()
 //
-function execNonPipelined() {													// {joj 14/11/17}
+function execNonPipelined() {													
 
     num regA, regB, result, smdr;
 
@@ -1010,10 +952,10 @@ function execNonPipelined() {													// {joj 14/11/17}
 
     apPC_IM.animate(24);
 
-    apIM_ID.animate(40);                                             			// {joj 29/10/06}
-    regID.setNewInstruction(im.instruction[regPC.value / 4]);                   // {joj 29/10/06}
-    txtIM_ID.setTxt(regID.getNewInstrTxt());                                    // {joj 29/10/06}
-    txtIM_ID.translate(60/2+70, 0, 20, 1, 0);                                   // {joj 29/10/06}
+    apIM_ID.animate(40);                                             			
+    regID.setNewInstruction(im.instruction[regPC.value / 4]);                   
+    txtIM_ID.setTxt(regID.getNewInstrTxt());                                    
+    txtIM_ID.translate(60/2+70, 0, 20, 1, 0);                                   
 
 	/// ID
 
@@ -1029,53 +971,43 @@ function execNonPipelined() {													// {joj 14/11/17}
 
     // Second half of the clock cycle
 
-	//----------------May need to fix this-------------------------------
-    //if (instrIsJumpAndLink(regID.vIns)) {
-
-    //    apADD4_MUX5.animate(20);
-    //    apMUX5_B.animate(20);
-    //    regA = 0;
-    //    regB = (regPC.value + 4) & 0x7F;
-
     //} else 
 	if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) {
 
         regA = regFile[regID.vRs1].value;
 		if(instrOpTypeRs1(regID.vRs1 != OP_TYPE_IMM))
-        	regFile[regID.vRs1].highlight(bhighlight);                                 // {joj}
+        	regFile[regID.vRs1].highlight(bhighlight);                                 
 
-        txtRF_A.setTxt("R%d:%02X", regID.vRs1, regFile[regID.vRs1].value);          // {joj 29/10/06}
-        txtRF_A.setOpacity(1);                                                      // {joj}
+        txtRF_A.setTxt("R%d:%02X", regID.vRs1, regFile[regID.vRs1].value);          
+        txtRF_A.setOpacity(1);                                                      
         fork(apRF_A.animate(40));
 
-        ///if ((instrOpTypeRs2(regID.vIns) == OP_TYPE_REG) || (regID.vIns == ST)) {    // {joj}
-        if ((instrOpTypeRs2(regID.vIns) == OP_TYPE_REG) || (regID.vIns == STR || regID.vIns == STRi)) {    // {joj}
+        if ((instrOpTypeRs2(regID.vIns) == OP_TYPE_REG) || (regID.vIns == STR || regID.vIns == STRi)) {  
 
             if (instrOpTypeRs2(regID.vIns) == OP_TYPE_IMM) {
                 regB = regFile[regID.vRdt].value;
 				if(instrOpTypeRdt(regID.vIns != OP_TYPE_UNUSED))
-                	regFile[regID.vRdt].highlight(bhighlight);                     		// {joj}
+                	regFile[regID.vRdt].highlight(bhighlight);                     		
             } else {
                 regB = regFile[regID.vRs2].value;
-                regFile[regID.vRs2].highlight(bhighlight);                    		 // {joj}
+                regFile[regID.vRs2].highlight(bhighlight);                    		
             }
 
             //
             // read Register file B port
             // don't read if immediate addressing
-            // don't read if LD
-            // read destination register if ST
+            // don't read if LDR
+            // read destination register if STR
             // otherwise read source 2 register
             //
-            //if ((!instrIsArRI(regID.vIns)) && (regID.vIns != LD)) {         // {joj 28/10/06}
-            if ((!instrIsArRI(regID.vIns)) && (regID.vIns != LDR && regID.vIns != LDRi)) {         // {joj 28/10/06}
-                //num vr = (regID.vIns == ST) ? regID.vRdt : regID.vRs2;      // {joj 28/10/06}
-                num vr = (regID.vIns == STR || regID.vIns == STRi) ? regID.vRdt : regID.vRs2;      // {joj 28/10/06}
-                txtRF_MUX5.setTxt("R%d:%02X", vr, regFile[vr].value);       // {joj 29/10/06}
-                txtRF_MUX5.setOpacity(1);                                 	// {joj}
-                apRF_MUX5.animate(20);                                 		// {joj}
-                apMUX5_B.animate(20);                                  		// {joj}
-            }                                                               // {joj}
+
+            if ((!instrIsArRI(regID.vIns)) && (regID.vIns != LDR && regID.vIns != LDRi)) {        
+                num vr = (regID.vIns == STR || regID.vIns == STRi) ? regID.vRdt : regID.vRs2;      
+                txtRF_MUX5.setTxt("R%d:%02X", vr, regFile[vr].value);       
+                txtRF_MUX5.setOpacity(1);                                 	
+                apRF_MUX5.animate(20);                                 		
+                apMUX5_B.animate(20);                                  		
+            }                                                               
 
         } else {
 
@@ -1093,9 +1025,8 @@ function execNonPipelined() {													// {joj 14/11/17}
 
 
     if (instrOpTypeRdt(regID.vIns) == OP_TYPE_REG)
-        alu.setTxtOp(regID.vIns);                                           // {joj 29/10/06}
-
-//    if (regID.vIns == ST) {                                                 // {joj}
+        alu.setTxtOp(regID.vIns);                                           
+                                          
     if (regID.vIns == STR || regID.vIns == STRi) {   
 
 		//Deal with barrel shift ops
@@ -1113,9 +1044,9 @@ function execNonPipelined() {													// {joj 14/11/17}
 
         fork(apB_MUX8.animate(40));
         fork(apA_MUX6.animate(40));
-        txtEX_MUX7.setTxt("%02X", regID.vRs2);                              // {joj 29/10/06}
-        txtEX_MUX7.setOpacity(1);                                           // {joj 29/10/06}
-        apEX_MUX7.animate(40);                                         // {joj 28/10/06}
+        txtEX_MUX7.setTxt("%02X", regID.vRs2);                             
+        txtEX_MUX7.setOpacity(1);                                           
+        apEX_MUX7.animate(40);                                        
 
         fork(apMUX8_SMDR.animate(40));
         fork(apMUX7_OUT0.animate(40));
@@ -1144,8 +1075,8 @@ function execNonPipelined() {													// {joj 14/11/17}
 		}
 
         if (instrOpTypeRs2(regID.vIns) == OP_TYPE_IMM) {
-            txtEX_MUX7.setTxt("%02X", regID.vRs2);                          // {joj 29/10/06}
-            txtEX_MUX7.setOpacity(1);                                     // {joj 29/10/06}
+            txtEX_MUX7.setTxt("%02X", regID.vRs2);                          
+            txtEX_MUX7.setOpacity(1);                                     
             apEX_MUX7.animate(40);
             result = instrExecute(regID.vIns, regID.vSBit, regID.vCond, regA, regID.vRs2, regID.vIns2, regID.vRs3, cpsr.n, cpsr.z, cpsr.c, cpsr.v);
         } else {
@@ -1175,13 +1106,13 @@ function execNonPipelined() {													// {joj 14/11/17}
 		}
 
 
-    	if (regID.vIns == LDR || regID.vIns == LDRi) {                                                 // {joj}
+    	if (regID.vIns == LDR || regID.vIns == LDRi) {                                                 
     	    apOUT0_Mem.animate(20);
-    	    memory[((result) / 4) % 16].highlight(bhighlight);                        // {joj}
+    	    memory[((result) / 4) % 16].highlight(bhighlight);                        
     	    apMem_MUX9.animate(20);
         	apMUX9_OUT1.animate(40);
-        	result = memory[((result) / 4) % 16].value;                                         // {joj}
-    	} else if (regID.vIns == STR || regID.vIns == STRi) {                                          // {joj}
+        	result = memory[((result) / 4) % 16].value;                                         
+    	} else if (regID.vIns == STR || regID.vIns == STRi) {                                          
         	fork(apSMDR_Mem.animate(20));
         	apOUT0_Mem.animate(20);
         	memory[((result) / 4) % 16].setNewValue(smdr);
@@ -1200,7 +1131,7 @@ function execNonPipelined() {													// {joj 14/11/17}
     	regFile[2].unHighlight();
     	regFile[3].unHighlight();
 
-    	if ((instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) && (regID.vIns != STR) && (regID.vIns != STRi)) {    // {joj}
+    	if ((instrOpTypeRdt(regID.vIns) == OP_TYPE_REG) && (regID.vIns != STR) && (regID.vIns != STRi)) {    
     	    apOUT1_RF.animate(40);
     	    regFile[regID.vRdt].setNewValue(result);
     	    regFile[regID.vRdt].update();
@@ -1217,10 +1148,10 @@ function execNonPipelined() {													// {joj 14/11/17}
 	
 	}
 
-    tickCount += 5;                                                     // {joj 30/10/06}
-    instrCount++;                                                       // {joj 30/10/06}
-    statIC.setTxt("%4d", instrCount);                                   // {joj 30/10/06}
-    statTE.setTxt("%4d", tickCount);                                    // {joj 30/10/06}
+    tickCount += 5;                                                    
+    instrCount++;                                                       
+    statIC.setTxt("%4d", instrCount);                                  
+    statTE.setTxt("%4d", tickCount);                                    
 
 }
 
@@ -1239,10 +1170,10 @@ function exec() {
     memory[2].unHighlight();
     memory[3].unHighlight();
 
-    btbPC[0].unHighlight();                                                 // {joj 2/1/06}
-    btbPC[1].unHighlight();                                                 // {joj 2/1/06}
-    btbPPC[0].unHighlight();                                                // {joj 2/1/06}
-    btbPPC[1].unHighlight();                                                // {joj 2/1/06}
+    btbPC[0].unHighlight();                                                 
+    btbPC[1].unHighlight();                                                 
+    btbPPC[0].unHighlight();                                                
+    btbPPC[1].unHighlight();                                                
 
     //
     // Run the individual pipeline phases

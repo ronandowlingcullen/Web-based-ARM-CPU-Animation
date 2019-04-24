@@ -1,26 +1,12 @@
 //
 // component.vin
 //
-// Simulation of the DLX
-// Written by Edsko de Vries, Summer 2003
-//
-// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
-//
-// This program is free software; you can redistribute it and/or modify it under
-// the terms of the GNU General Public License as published by the Free Software Foundation;
-// either version 2 of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation Inc.,
-// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-//
+// Simulation of the ARM
+// Written by Rónán Dowling-Cullen, Final Year Computer Science 2018/19DLX
+// Building on the simulation of the DLX written by Edsko de Vries, Summer 2003
 
 Brush componentBrush = SolidBrush(LIGHT_BLUE);
-Font componentFont = Font("Calibri", 24);          // joj
+Font componentFont = Font("Calibri", 24);          
 
 class Component(num _x, num _y, num _w, num _h, string caption) {
 
@@ -30,17 +16,17 @@ class Component(num _x, num _y, num _w, num _h, string caption) {
 	num h = _h;
 
     Rectangle bg = Rectangle2(activePipesLayer, 0, blackPen, componentBrush, x, y, w, h);
-	bg.setRounded(2, 2);	// {joj 16/10/16}
+	bg.setRounded(2, 2);	
     Rectangle label;
 
     if (w >= h) {
         label = Rectangle2(activePipesLayer, 0, 0, 0, x, y, w, h, 0, componentFont, caption);
     } else {
-        label = Rectangle(activePipesLayer, 0, 0, 0, x + w/2 - 3, y + h/2, -w/2, -h/2, w, h, 0, componentFont, caption);   // {joj 7/10/16}
-		label.rotate(-90);			// {joj 7/10/16}
+        label = Rectangle(activePipesLayer, 0, 0, 0, x + w/2 - 3, y + h/2, -w/2, -h/2, w, h, 0, componentFont, caption);   
+		label.rotate(-90);			
     }
 
-    function setOpacity(num opacity) { // {joj 20/08/10}
+    function setOpacity(num opacity) { 
         bg.setOpacity(opacity);
         label.setOpacity(opacity);
     }

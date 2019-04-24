@@ -1,6 +1,9 @@
 //
-// sample .vin file
+// cpsr.vin
 //
+// Simulation of the ARM
+// Written by Rónán Dowling-Cullen, Final Year Computer Science 2018/19DLX
+// Building on the simulation of the DLX written by Edsko de Vries, Summer 2003
 
 Brush cpsrBrush = SolidBrush(PURPLE);
 Brush cpsrValueBrush = SolidBrush(WHITE);
@@ -102,29 +105,26 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
 
 	}
 
-    //
-    // setOpacity
-    // May need this
 
 	//
     // update Values
     //
-    num function updateNValue() {								// {joj 24/9/17}
+    num function updateNValue() {								
         nValue.setTxt("%01X", n);
 		return 0;
     }
 
-    num function updateZValue() {								// {joj 24/9/17}
+    num function updateZValue() {								
         zValue.setTxt("%01X", z);
 		return 0;
     }
 
-    num function updateCValue() {								// {joj 24/9/17}
+    num function updateCValue() {								
         cValue.setTxt("%01X", c);
 		return 0;
     }
 
-    num function updateVValue() {								// {joj 24/9/17}
+    num function updateVValue() {								
         vValue.setTxt("%01X", v);
 		return 0;
     }
@@ -142,30 +142,30 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
 	//
     // mouse enter exit event handlers for each n,z,c and v
     //
-    when nValue ~> eventEE(num enter, num x, num y) {			// {joj 24/10/17}
-        nValue.setBrush(enter ? whiteBrush : yellowBrush);	// {joj 7/10/16}
+    when nValue ~> eventEE(num enter, num x, num y) {			
+        nValue.setBrush(enter ? whiteBrush : yellowBrush);	
 		return 0;
     }
 
-    when zValue ~> eventEE(num enter, num x, num y) {			// {joj 24/10/17}
-        zValue.setBrush(enter ? whiteBrush : yellowBrush);	// {joj 7/10/16}
+    when zValue ~> eventEE(num enter, num x, num y) {			
+        zValue.setBrush(enter ? whiteBrush : yellowBrush);	
 		return 0;
     }
 
-    when cValue ~> eventEE(num enter, num x, num y) {			// {joj 24/10/17}
-        cValue.setBrush(enter ? whiteBrush : yellowBrush);	// {joj 7/10/16}
+    when cValue ~> eventEE(num enter, num x, num y) {			
+        cValue.setBrush(enter ? whiteBrush : yellowBrush);
 		return 0;
     }
 
-    when vValue ~> eventEE(num enter, num x, num y) {			// {joj 24/10/17}
-        vValue.setBrush(enter ? whiteBrush : yellowBrush);	// {joj 7/10/16}
+    when vValue ~> eventEE(num enter, num x, num y) {			
+        vValue.setBrush(enter ? whiteBrush : yellowBrush);	
 		return 0;
     }
 
     //
     // mouse left button event handler
     //
-    when nValue ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/10/17}
+    when nValue ~> eventMB(num down, num flags, num x, num y) {	
         if (down) {
 			if (flags) {
             	n = (n + 1) % 2;
@@ -175,7 +175,7 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
 		return 0;
     }
 
-    when zValue ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/10/17}
+    when zValue ~> eventMB(num down, num flags, num x, num y) {	
         if (down) {
 			if (flags) {
             	z = (z + 1) % 2;
@@ -185,7 +185,7 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
 		return 0;
     }
 
-    when cValue ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/10/17}
+    when cValue ~> eventMB(num down, num flags, num x, num y) {	
         if (down) {
 			if (flags) {
             	c = (c + 1) % 2;
@@ -195,7 +195,7 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
 		return 0;
     }
 
-    when vValue ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/10/17}
+    when vValue ~> eventMB(num down, num flags, num x, num y) {	
         if (down) {
 			if (flags) {
             	v = (v + 1) % 2;
@@ -286,20 +286,6 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
     num hmode = 0;
 
     //
-    // highlight
-    //
-    function highlight(Brush brush) {
-        //Might need
-    }
-
-    //
-    // unHighlight
-    //
-    function unHighlight() {
-		//Might need
-    }
-
-    //
     // reset
     //
     function reset() {
@@ -307,7 +293,6 @@ class CPSR(num x, num y, num w, num h, num forwarding) {
 		z = 0;
 		c = 0;
 		v = 0;
-        unHighlight();
         updateValues();
 		setInvalid(1);
     }

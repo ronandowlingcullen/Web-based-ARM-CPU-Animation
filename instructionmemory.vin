@@ -1,23 +1,9 @@
 //
 // instructionmemory.vin
 //
-// Simulation of the DLX
-// Written by Edsko de Vries, Summer 2003
-//
-// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
-//
-// This program is free software; you can redistribute it and/or modify it under
-// the terms of the GNU General Public License as published by the Free Software Foundation;
-// either version 2 of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation Inc.,
-// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-//
+// Simulation of the ARM
+// Written by Rónán Dowling-Cullen, Final Year Computer Science 2018/19DLX
+// Building on the simulation of the DLX written by Edsko de Vries, Summer 2003
 
 Brush instrMemBrush = SolidBrush(BORDEAU);
 Brush instrMemValueBrush = SolidBrush(WHITE);
@@ -43,39 +29,39 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
     num fw = w / 11;
 
     // Brushes for the individual boxes so we can highlight them one by one
-    Pen insPen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
-    Pen sBitPen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
-    Pen condPen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
-    Pen rdtPen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
-    Pen rs1Pen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
-    Pen rs2Pen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
-    Pen ins2Pen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
-    Pen rs3Pen = SolidPen(0, 0, BLACK); // {joj 25/7/10}
+    Pen insPen = SolidPen(0, 0, BLACK); 
+    Pen sBitPen = SolidPen(0, 0, BLACK);
+    Pen condPen = SolidPen(0, 0, BLACK); 
+    Pen rdtPen = SolidPen(0, 0, BLACK);
+    Pen rs1Pen = SolidPen(0, 0, BLACK);
+    Pen rs2Pen = SolidPen(0, 0, BLACK);
+    Pen ins2Pen = SolidPen(0, 0, BLACK);
+    Pen rs3Pen = SolidPen(0, 0, BLACK);
 
     Brush brush = SolidBrush(WHITE);
     Rectangle adr = Rectangle2(valuesLayer, 0, 0, brush, x, y, fw, h, 0, font, "%02X", addr);
-    Rectangle ins = Rectangle2(valuesLayer, HLEFT, 0, brush, x + fw, y, 2 * fw, h, insPen, font, " NOP"); // {joj 25/7/10}
-    Rectangle sBit = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 3 * fw, y, 0.5 * fw, h, sBitPen, font, "S"); // {joj 25/7/10}
-    Rectangle cond = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 3.5 * fw, y, fw, h, condPen, font, "AL"); // {joj 25/7/10}
+    Rectangle ins = Rectangle2(valuesLayer, HLEFT, 0, brush, x + fw, y, 2 * fw, h, insPen, font, " NOP");
+    Rectangle sBit = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 3 * fw, y, 0.5 * fw, h, sBitPen, font, "S");
+    Rectangle cond = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 3.5 * fw, y, fw, h, condPen, font, "AL");
     Rectangle rdt = Rectangle2(valuesLayer, 0, 0, brush, x + 5 * fw, y, fw, h, rdtPen, font, "-");
     Rectangle rs1 = Rectangle2(valuesLayer, 0, 0, brush, x + 6 * fw, y, fw, h, rs1Pen, font, "-");
     Rectangle rs2 = Rectangle2(valuesLayer, 0, 0, brush, x + 7.2 * fw, y, fw, h, rs2Pen, font, "-");
     Rectangle ins2 = Rectangle2(valuesLayer, HLEFT, 0, brush, x + 8.2 * fw, y, 2 * fw, h, ins2Pen, font, " NOP");
     Rectangle rs3 = Rectangle2(valuesLayer, 0, 0, brush, x + 10 * fw, y, fw, h, rs2Pen, font, "-");
 
-    Rectangle dot = Rectangle2(valuesLayer, 0, 0, redBrush, x+fw*0.8, y+2, h/2, h/2);	// {joj 30/10/06}
-    dot.setOpacity(0);                                                                  // {joj 30/10/06}
+    Rectangle dot = Rectangle2(valuesLayer, 0, 0, redBrush, x+fw*0.8, y+2, h/2, h/2);	
+    dot.setOpacity(0);                                                                  
 
-    Line arrowDown = Line(valuesLayer, 0, redArrow,		// {joj 17/10/16}
-        0, 0,											// {joj 17/10/16}
+    Line arrowDown = Line(valuesLayer, 0, redArrow,		
+        0, 0,											
 		x + w + 2, y + h * 0.5,
         5, 0,
         0, 0,
         0, 0
     );
 
-    Line arrowUp = Line(valuesLayer, 0, redArrow,       // {joj 17/10/16}
-        0, 0,											// {joj 17/10/16}
+    Line arrowUp = Line(valuesLayer, 0, redArrow,       
+        0, 0,											
 		x - 2, y + h * 0.5,
 		-5, 0,
         0, 0,
@@ -85,80 +71,80 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
     arrowDown.setOpacity(0);
     arrowUp.setOpacity(0);
 
-    when adr ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+    when adr ~> eventEE(num enter, num, num) {					
         brush.setSolid(enter ? MARINE : WHITE);
 		return 0;
     }
 
-    when ins ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+    when ins ~> eventEE(num enter, num, num) {					
         brush.setSolid(enter ? MARINE : WHITE);
-        insPen.setRGBA(enter ? RED : BLACK);					// {joj 24/9/17}
+        insPen.setRGBA(enter ? RED : BLACK);					
 		return 0;
     }
 
-	when sBit ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+	when sBit ~> eventEE(num enter, num, num) {					
         brush.setSolid(enter ? MARINE : WHITE);
-        sBitPen.setRGBA(enter ? RED : BLACK);					// {joj 24/9/17}
+        sBitPen.setRGBA(enter ? RED : BLACK);					
 		return 0;
     }
 
-	when cond ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+	when cond ~> eventEE(num enter, num, num) {					
         brush.setSolid(enter ? MARINE : WHITE);
-        condPen.setRGBA(enter ? RED : BLACK);					// {joj 24/9/17}
+        condPen.setRGBA(enter ? RED : BLACK);					
 		return 0;
     }
 
-    when ins2 ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+    when ins2 ~> eventEE(num enter, num, num) {					
         brush.setSolid(enter ? MARINE : WHITE);
-        ins2Pen.setRGBA(enter ? RED : BLACK);					// {joj 24/9/17}
+        ins2Pen.setRGBA(enter ? RED : BLACK);					
 		return 0;
     }
 
-    when rdt ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+    when rdt ~> eventEE(num enter, num, num) {					
         brush.setSolid(enter ? MARINE : WHITE);
         if (opTypeRdt != OP_TYPE_UNUSED) {
-            rdtPen.setRGBA(enter ? RED : BLACK);				// {joj 24/9/17}
+            rdtPen.setRGBA(enter ? RED : BLACK);				
         } else {
-            rdtPen.setRGBA(BLACK);								// {joj 24/9/17}
+            rdtPen.setRGBA(BLACK);								
 		}
 		return 0;
     }
 
-    when rs1 ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+    when rs1 ~> eventEE(num enter, num, num) {					
         brush.setSolid(enter ? MARINE : WHITE);
         if (opTypeRs1 != OP_TYPE_UNUSED) {
-            rs1Pen.setRGBA(enter ? RED : BLACK);				// {joj 24/9/17}
+            rs1Pen.setRGBA(enter ? RED : BLACK);				
         } else {
-            rs1Pen.setRGBA(BLACK);								// {joj 24/9/17}
+            rs1Pen.setRGBA(BLACK);								
 		}
 		return 0;
     }
 
-    when rs2 ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+    when rs2 ~> eventEE(num enter, num, num) {					
         brush.setSolid(enter ? MARINE : WHITE);
         if (opTypeRs2 != OP_TYPE_UNUSED) {
-            rs2Pen.setRGBA(enter ? RED : BLACK);				// {joj 24/9/17}
+            rs2Pen.setRGBA(enter ? RED : BLACK);				
         } else {
-            rs2Pen.setRGBA(BLACK);								// {joj 14/9/17}
+            rs2Pen.setRGBA(BLACK);								
 		}
 		return 0;
     }
 
-    when rs3 ~> eventEE(num enter, num, num) {					// {joj 24/9/17}
+    when rs3 ~> eventEE(num enter, num, num) {					
         brush.setSolid(enter ? MARINE : WHITE);
         if (opTypeRs3 != OP_TYPE_UNUSED) {
-            rs3Pen.setRGBA(enter ? RED : BLACK);				// {joj 24/9/17}
+            rs3Pen.setRGBA(enter ? RED : BLACK);				
         } else {
-            rs3Pen.setRGBA(BLACK);								// {joj 14/9/17}
+            rs3Pen.setRGBA(BLACK);								
 		}
 		return 0;
     }
 
-    num function getOpcode() {                                  // {joj 27/10/06}
-        return vIns << 24 | vRdt << 16 | vRs1 << 8 | vRs2;      // {joj 27/10/06}
-    }                                                           // {joj 27/10/06}
+    num function getOpcode() {                                  
+        return vIns << 24 | vRdt << 16 | vRs1 << 8 | vRs2;      
+    }                                                           
 
-    function initRegs(num remember) {                           // {joj 27/10/06}
+    function initRegs(num remember) {                           
 
         num offset;
 
@@ -242,19 +228,19 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 			}
 		}
 
-        if (instrIsBranch(vIns) ) { //|| isJorJAL(vIns)) { //-------------------May need to fix--------------------------
+        if (instrIsBranch(vIns) ) { 
             if (vRs2 & 0x80) {
                 // Jump up
                 offset = (se8(vRs2)/4)*h + h/2;					// relative
-                arrowUp.setPt(2, x - 7, y + offset);			// {joj 5/10/16}
-                arrowUp.setPt(3, x - 2, y + offset);			// {joj 5/10/16}
+                arrowUp.setPt(2, x - 7, y + offset);			
+                arrowUp.setPt(3, x - 2, y + offset);			
                 arrowUp.setOpacity(1);
                 arrowDown.setOpacity(0);
             } else {
                 // Jump down
                 offset = (vRs2/4)*h + h/2;						// relative jump
-                arrowDown.setPt(2, x + w + 7, y + offset);		// {joj 5/10/16}
-                arrowDown.setPt(3, x + w + 2, y + offset);		// {joj 5/10/16}
+                arrowDown.setPt(2, x + w + 7, y + offset);		
+                arrowDown.setPt(3, x + w + 2, y + offset);		
                 arrowDown.setOpacity(1);
                 arrowUp.setOpacity(0);
             }
@@ -263,11 +249,11 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
             arrowDown.setOpacity(0);
         }
 
-        if (remember) {                                                 // {joj 27/10/06}
-            string s = sprintf("i%d", addr / 4);						// {joj 31/01/01}
-			setArg(s, getOpcode().toString());							// {joj 6/11/16}
-            example = 0;                                                // {joj 27/10/06}
-			setArg("example", example.toString());						// {joj 6/11/16}
+        if (remember) {                                                
+            string s = sprintf("i%d", addr / 4);						
+			setArg(s, getOpcode().toString());							
+            example = 0;                                                
+			setArg("example", example.toString());						
         }
 
     }
@@ -289,10 +275,10 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         vRdt = (opcode & 0x00FF0000) >> 16;
         vRs1 = (opcode & 0x0000FF00) >> 8;
         vRs2 = (opcode & 0x000000FF);
-        initRegs(0);                                                    // {joj 27/10/06}
+        initRegs(0);                                                    
     }
 
-    when ins ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/9/17}
+    when ins ~> eventMB(num down, num flags, num x, num y) {			
         if (!lockCircuit) {
             if (down) {
                 clk = timeMS();
@@ -312,7 +298,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
     }
 
 
-	when sBit ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/9/17}
+	when sBit ~> eventMB(num down, num flags, num x, num y) {			
         if (!lockCircuit && sOk) {
             if (down) {
                 clk = timeMS();
@@ -332,7 +318,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
     }
 
 
-    when cond ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/9/17}
+    when cond ~> eventMB(num down, num flags, num x, num y) {			
         if (!lockCircuit) {
             if (down) {
                 clk = timeMS();
@@ -351,7 +337,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 		return 0;
     }
 
-    when ins2 ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/9/17}
+    when ins2 ~> eventMB(num down, num flags, num x, num y) {			
         if (!lockCircuit && shiftOk) {
             if (down) {
                 clk = timeMS();
@@ -387,7 +373,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 		return 0;
     }
 
-    when rdt ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/10/17}
+    when rdt ~> eventMB(num down, num flags, num x, num y) {			
         if (!lockCircuit && down && opTypeRdt != OP_TYPE_UNUSED) {
             if (flags & MB_LEFT) {
  				vRdt = (vRdt == 15) ? 0 : vRdt + 1;
@@ -398,7 +384,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 		return 0;
     }
 
-	when rs1 ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/10/17}
+	when rs1 ~> eventMB(num down, num flags, num x, num y) {			
         if (!lockCircuit && down) {
             if (flags & MB_LEFT) {
                 if (opTypeRs1 == OP_TYPE_REG) {
@@ -430,7 +416,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
 		return 0;
     }
 
-	when rs2 ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/10/17}
+	when rs2 ~> eventMB(num down, num flags, num x, num y) {			
         if (!lockCircuit && down) {
             if (flags & MB_LEFT) {
                 if (opTypeRs2 == OP_TYPE_REG) {
@@ -461,7 +447,7 @@ class Instruction(num _x, num _y, num _w, num _h, num _addr) {
         }
     }
 
-	when rs3 ~> eventMB(num down, num flags, num x, num y) {			// {joj 24/10/17}
+	when rs3 ~> eventMB(num down, num flags, num x, num y) {			
         if (!lockCircuit && down) {
             if (flags & MB_LEFT) {
                 if (opTypeRs3 == OP_TYPE_REG) {
@@ -519,7 +505,7 @@ class InstructionMemory(num x, num y, num w, num h) {
     num active = 31;
 
     Rectangle r = Rectangle2(0, 0, blackPen, instrMemBrush, x, y+12, w, h-12);
-	r.setRounded(2, 2);	// {joj 16/10/16}
+	r.setRounded(2, 2);
     Rectangle2(0, 0, blackPen, instrMemValueBrush, x + 2, y+12 + 2, w - 4, h-12 - 4);
 
     for (num lp1 = 0; lp1 < 32; lp1++)
@@ -529,18 +515,18 @@ class InstructionMemory(num x, num y, num w, num h) {
         instruction[addr / 4].setValue(instr, sBit, cond, rdt, rs1, rs2imm, instr2, rs3imm);
     }
 
-    num function getOpcode(num addr) {                                  // {joj 27/10/06}
-        return instruction[addr / 4].getOpcode();                       // {joj 27/10/06}
-    }                                                                   // {joj 27/10/06}
+    num function getOpcode(num addr) {                                  
+        return instruction[addr / 4].getOpcode();                       
+    }                                                                   
 
     function setOpcode(num addr, num opcode) {
         instruction[addr / 4].setOpcode(opcode);
     }
 
     function setActive(num addr) {
-        instruction[active].dot.setOpacity(0);                          // {joj 30/10/06}
+        instruction[active].dot.setOpacity(0);                          
         active = addr / 4;
-        instruction[active].dot.setOpacity(1);                        	// {joj 30/10/06}
+        instruction[active].dot.setOpacity(1);                        	
     }
 
 }

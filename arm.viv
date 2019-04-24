@@ -1,0 +1,26 @@
+//
+// arm.viv
+//
+// Simulation of the ARM
+// Written by Rónán Dowling-Cullen, Final Year Computer Science 2018/19DLX
+// Building on the simulation of the DLX written by Edsko de Vries, Summer 2003
+
+
+#include "defaults.vin"
+#include "config.vin"
+#include "instructions.vin"
+#include "instructionmemory.vin"
+#include "instructionregister.vin"
+#include "register.vin"
+#include "component.vin"
+#include "alu.vin"
+#include "animatedpipe.vin"
+#include "animatedclock.vin"
+#include "button.vin"
+#include "cpsr.vin"
+#include "stackpointer.vin"
+#include "schematic.vin"
+#include "execution.vin"
+#include "buttonhandlers.vin"
+
+// eof

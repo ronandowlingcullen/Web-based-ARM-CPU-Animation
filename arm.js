@@ -1,6 +1,6 @@
 "use strict"
 
-function dlx(vplayer) {
+function arm(vplayer) {
 
 	const ABSOLUTE = vplayer.ABSOLUTE
 	const ARROW60_END = vplayer.ARROW60_END
@@ -1772,18 +1772,11 @@ function dlx(vplayer) {
 		this.vValue.setOpacity(opacity)
 	}
 
-	CPSR.prototype.highlight = function(brush) {
-	}
-
-	CPSR.prototype.unHighlight = function() {
-	}
-
 	CPSR.prototype.reset = function() {
 		this.n=0
 		this.z=0
 		this.c=0
 		this.v=0
-		this.unHighlight()
 		this.updateValues()
 		this.setInvalid(1)
 	}

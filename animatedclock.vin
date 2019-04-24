@@ -1,23 +1,9 @@
 //
 // animatedclock.vin
 //
-// Simulation of the DLX
-// Written by Edsko de Vries, Summer 2003
-//
-// Copyright (C) 2003 - 2018 Edsko de Vries and jones@scss.tcd.ie
-//
-// This program is free software; you can redistribute it and/or modify it under
-// the terms of the GNU General Public License as published by the Free Software Foundation;
-// either version 2 of the License, or (at your option) any later version.
-//
-// This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY;
-// without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-// See the GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with this program; if not, write to the Free Software Foundation Inc.,
-// 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
-//
+// Simulation of the ARM
+// Written by Rónán Dowling-Cullen, Final Year Computer Science 2018/19DLX
+// Building on the simulation of the DLX written by Edsko de Vries, Summer 2003
 
 Pen redClockPen = SolidPen(SOLID, 1, RED, ROUND_START | ROUND_JOIN | ROUND_END);
 Pen greenClockPen = SolidPen(SOLID, 1, GREEN, ROUND_START | ROUND_JOIN | ROUND_END);
@@ -26,7 +12,7 @@ Pen orangeClockPen = SolidPen(SOLID, 1, ORANGE, ROUND_START | ROUND_JOIN | ROUND
 //
 // AnimatedClock
 //
-class AnimatedClock(num x, num y, num w, num h) extends Group(0, 0, x, y, 0, 0, w, h) {								// {joj 15/7/17}
+class AnimatedClock(num x, num y, num w, num h) extends Group(0, 0, x, y, 0, 0, w, h) {	
 
     num cw = w;
     num chw = cw / 2;
@@ -34,19 +20,19 @@ class AnimatedClock(num x, num y, num w, num h) extends Group(0, 0, x, y, 0, 0, 
 
     num stall = 0, type = 0;
 
-	setClipPath(R$(0, 0, w, h));																					// {joj 15/7/17}
+	setClipPath(R$(0, 0, w, h));																					
 
-    Rectangle clkDisplay = Rectangle2(0, 0, blackPen, whiteBrush, 0, 0, w, h);										// {joj 15/7/17}
-	clkDisplay.setRounded(2, 2);																					// {joj 16/10/16}
+    Rectangle clkDisplay = Rectangle2(0, 0, blackPen, whiteBrush, 0, 0, w, h);										
+	clkDisplay.setRounded(2, 2);																					
 
-    Line prev_clock = Line(activePipesLayer, 0, redClockPen, -chw+chw/5,3+ch, 0,0, 0,-ch, chw,0, 0,ch, chw,0);		// {joj 15/7/17}
-    Line next_clock = Line(activePipesLayer, 0, greenClockPen, chw+chw/5,3+ch, 0,0, 0,-ch, chw,0, 0,ch, chw,0);		// {joj 15/7/17}
+    Line prev_clock = Line(activePipesLayer, 0, redClockPen, -chw+chw/5,3+ch, 0,0, 0,-ch, chw,0, 0,ch, chw,0);		
+    Line next_clock = Line(activePipesLayer, 0, greenClockPen, chw+chw/5,3+ch, 0,0, 0,-ch, chw,0, 0,ch, chw,0);		
 
-    Rectangle dot = Rectangle2(activePipesLayer, 0, 0, blackBrush, w/2-3, h-6, 6, 6);    							// {joj 15/7/17}
+    Rectangle dot = Rectangle2(activePipesLayer, 0, 0, blackBrush, w/2-3, h-6, 6, 6);    							
 
     num canUpdate;
 
-    function clockCycle(num length) {																				// {joj 14/11/17}
+    function clockCycle(num length) {																				
 
         num l2 = length / 2;
         num l5 = length / 5;
@@ -67,7 +53,7 @@ class AnimatedClock(num x, num y, num w, num h) extends Group(0, 0, x, y, 0, 0, 
         wait(l10);
         canUpdate = 1;
         prev_clock.translate(2*cw, 0);
-        prev_clock.setPen(stall ? (type ? orangeClockPen : redClockPen) : greenClockPen)							// {joj 15/7/17}
+        prev_clock.setPen(stall ? (type ? orangeClockPen : redClockPen) : greenClockPen)							
         wait(l5*2);
 
         Line t = next_clock;
@@ -86,7 +72,7 @@ class AnimatedClock(num x, num y, num w, num h) extends Group(0, 0, x, y, 0, 0, 
         stall = s;
         type = t;
         if (canUpdate)
-            prev_clock.setPen(stall ? (type ? orangeClockPen : redClockPen) : greenClockPen);						// {joj 15/7/17}
+            prev_clock.setPen(stall ? (type ? orangeClockPen : redClockPen) : greenClockPen);						
    }
 
 }
