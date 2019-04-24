@@ -850,8 +850,8 @@ function showSMDRForwarding(num opacity) { // {joj 20/8/10}
 
     if (opacity == 0) {
 
-        apB_MUX8.setPoint(1, 1159.0, 727);
-        apB_MUX8.setPoint(2, 1348.0, 727);
+        apB_MUX8.setPoint(1, 1159.0, 712);
+        apB_MUX8.setPoint(2, 1328.0, 712);
         apB_MUX8.setHead(0);
 
     } else {
@@ -868,34 +868,10 @@ function showSMDRForwarding(num opacity) { // {joj 20/8/10}
 
 }
 
-//
-// showZeroForwarding
-//
-function showZeroForwarding(num opacity) { // {joj 20/8/10}
 
-//    if (opacity == 0) {
-//        //clA.setPt(1, -41, 0);				// {joj 41/3/41}
-//        //clA.setPt(2, -41, 55);			// {joj 41/3/41}
-//        clA.setPt(1, 1060.0, 298);				// {joj 5/10/16}
-//        clA.setPt(2, 1060.0, 353);				// {joj 5/10/16}
-//    } else {
-//		//clA.setPt(1, -68, 0);				// {joj 15/3/15}
-//        //clA.setPt(2, -68, 68);			// {joj 15/3/15}
-//		clA.setPt(1, 1033.0, 298);				// {joj 5/10/16}
-//        clA.setPt(2, 1033.0, 353);				// {joj 5/10/16}
-//
-//   }
-
-//    cZeroMux.setOpacity(opacity);
-//    cZeroTxt.setOpacity(opacity);
-//    clALU.setOpacity(opacity);
-//    clOUT0.setOpacity(opacity);
-//    clOUT1.setOpacity(opacity);
-
-}
 
 //
-// showZeroForwarding
+// showCPSRForwarding
 //
 function showCPSRForwarding(num opacity) { // {joj 20/8/10}
 
@@ -1126,19 +1102,19 @@ function setSFMode(num mode) {
 }
 
 //
-// setZFMode
+// setCPSRMode
 //
-function setZFMode(num mode) {
+function setCPSRMode(num mode) {
     zfMode = mode;
     if (zfMode == 0) {
         buttonZF.setCaption("CPSR Forwarding");
-        showZeroForwarding(1);
+        showCPSRForwarding(1);
     } else if (zfMode == 1) {
         buttonZF.setCaption("CPSR Interlock");
-        showZeroForwarding(0);
+        showCPSRForwarding(0);
     } else if (zfMode == 2) {
         buttonZF.setCaption("No CPSR Interlock");
-        showZeroForwarding(0);
+        showCPSRForwarding(0);
     }
     setArg("zfMode", zfMode.toString()); // {joj 6/11/16}
 }
@@ -1385,7 +1361,7 @@ bpMode = getArgAsNum("bpMode", 0); setBPMode(bpMode);	// {joj 27/11/16}
 liMode = getArgAsNum("liMode", 0); setLIMode(liMode);	// {joj 27/11/16}
 afMode = getArgAsNum("afMode", 0); setAFMode(afMode);	// {joj 27/11/16}
 sfMode = getArgAsNum("sfMode", 0); setSFMode(sfMode);	// {joj 27/11/16}
-zfMode = getArgAsNum("zfMode", 0); setZFMode(zfMode);	// {joj 27/11/16}
+zfMode = getArgAsNum("zfMode", 0); setCPSRMode(zfMode);	// {joj 27/11/16}
 peMode = getArgAsNum("peMode", 0); setPEMode(peMode);	// {joj 27/11/16}
 lockCircuit = getArgAsNum("locked", 0);					// {joj 27/11/16}
 

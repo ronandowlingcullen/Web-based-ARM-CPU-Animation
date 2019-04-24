@@ -259,7 +259,7 @@ num function instrIsBranch(num instr) {
 
 num function instrIsLoadOrStore(num instr) {
     return ((instr == LDR) || (instr == STR) || (instr == LDRi) || (instr == STRi)) ? 1 : 0; 
-
+}
 
 // Shift immediate
 

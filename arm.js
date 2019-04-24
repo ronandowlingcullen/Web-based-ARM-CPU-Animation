@@ -1998,8 +1998,8 @@ function arm(vplayer) {
 
 	function showSMDRForwarding(opacity) {
 		if (opacity==0) {
-			$g[156].setPoint(1, 1159, 727)
-			$g[156].setPoint(2, 1348, 727)
+			$g[156].setPoint(1, 1159, 712)
+			$g[156].setPoint(2, 1328, 712)
 			$g[156].setHead(0)
 		} else {
 			$g[156].setPoint(1, 1159, 734)
@@ -2009,9 +2009,6 @@ function arm(vplayer) {
 		$g[139].setOpacity(opacity)
 		$g[154].setOpacity(opacity)
 		$g[155].setOpacity(opacity)
-	}
-
-	function showZeroForwarding(opacity) {
 	}
 
 	function showCPSRForwarding(opacity) {
@@ -2194,19 +2191,19 @@ function arm(vplayer) {
 		setArg("sfMode", $g[31].toString())
 	}
 
-	function setZFMode(mode) {
+	function setCPSRMode(mode) {
 		$g[32]=mode
 		if ($g[32]==0) {
 			$g[71].setCaption("CPSR Forwarding")
-			showZeroForwarding(1)
+			showCPSRForwarding(1)
 		} else
 		if ($g[32]==1) {
 			$g[71].setCaption("CPSR Interlock")
-			showZeroForwarding(0)
+			showCPSRForwarding(0)
 		} else
 		if ($g[32]==2) {
 			$g[71].setCaption("No CPSR Interlock")
-			showZeroForwarding(0)
+			showCPSRForwarding(0)
 		}
 		setArg("zfMode", $g[32].toString())
 	}
@@ -2384,10 +2381,6 @@ function arm(vplayer) {
 	}
 
 	function $eh35(down, flags, $2, $3) {
-		if (down && (flags&MB_LEFT) && (!$g[33]) && (!$g[23])) {
-			setZFMode(($g[32]+1)%3)
-			resetCircuit()
-		}
 		return 0
 	}
 
@@ -3247,7 +3240,7 @@ function arm(vplayer) {
 				$g[31]=getArgAsNum("sfMode", 0)
 				setSFMode($g[31])
 				$g[32]=getArgAsNum("zfMode", 0)
-				setZFMode($g[32])
+				setCPSRMode($g[32])
 				$g[27]=getArgAsNum("peMode", 0)
 				setPEMode($g[27])
 				$g[23]=getArgAsNum("locked", 0)

@@ -94,13 +94,9 @@ when buttonSF.label ~> eventMB(num down, num flags, num, num) {
 }
 
 //
-// zero forwarding
+// handle CPSR button press
 //
 when buttonZF.label ~> eventMB(num down, num flags, num, num) {			
-	if (down && (flags & MB_LEFT) && (!locked) && (!lockCircuit)) {
-		setZFMode((zfMode + 1) % 3);
-		resetCircuit();
-	}
 	return 0;
 }
 
