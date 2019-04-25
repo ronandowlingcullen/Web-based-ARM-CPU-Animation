@@ -8,8 +8,8 @@
 class StackPointer(num _x1, num _y1, num _x2, num _y2, num w, num _regWidth) {
 
 	num x1 = _x1, y1 = _y1, x2 = _x2, y2 = _y2, regWidth = _regWidth;
-    Pen fgPen0 = SolidPen(SOLID, w, RED, BEVEL_JOIN | BUTT_END);			// could be static / global
-    Pen fgPen1 = SolidPen(SOLID, w, RED, BEVEL_JOIN | ARROW60_END);			// could be static / global
+    Pen fgPen0 = SolidPen(SOLID, w, RED, BEVEL_JOIN | BUTT_END);			
+    Pen fgPen1 = SolidPen(SOLID, w, RED, BEVEL_JOIN | ARROW60_END);			
 
 	Line bodies[8];
 	Line heads[8];

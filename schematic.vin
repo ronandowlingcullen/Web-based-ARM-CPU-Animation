@@ -11,7 +11,7 @@ if (name != "")
 
 Font fTitle = Font("Calibri", 54, SMALLCAPS | ITALIC);
 
-Rectangle title = Rectangle2(0, HLEFT, 0, SolidBrush(DARK_BLUE), 27, 27, 911.0, 66, whitePen, fTitle, sprintf(" ARM9 TDMI Animation %s", name));	// {joj 2/27/16}
+Rectangle title = Rectangle2(0, HLEFT, 0, SolidBrush(DARK_BLUE), 27, 27, 911.0, 66, whitePen, fTitle, sprintf(" ARM9 TDMI Animation %s", name));	
 
 Pen borderPen = SolidPen(DASH, 3, DARK_BLUE, ROUND_START | ROUND_JOIN | ROUND_END);
 
@@ -41,34 +41,32 @@ Line2(0, ABSOLUTE, delimeter, 27, 1008, 2190.0, 1008);
 
 Font arialBold27 = Font("Calibri", 27, BOLD);
 
-Button buttonSP = Button(134, 1014, 216, 54, "Save Configuration", BUTTON_SP);            // {joj}
-Button buttonPE = Button(505.0, 1014, 216, 44, "Pipelining Enabled", BUTTON_PE);           // {joj}
-Button buttonBP = Button(748.0, 1014, 216, 44, "Branch Prediction", BUTTON_BP);            // {joj}
-Button buttonLI = Button(991.0, 1014, 216, 44, "Load Interlock", BUTTON_LI);               // {joj}
-Button buttonAF = Button(1235.0, 1014, 216, 44, "ALU Forwarding", BUTTON_AF);               // {joj}
-Button buttonSF = Button(1478.0, 1014, 216, 44, "Store Operand\nForwarding", BUTTON_SF);    // {joj}
-Button buttonZF = Button(1721.0, 1014, 216, 44, "CPSR Forwarding", BUTTON_ZF);              // {joj}
+Button buttonSP = Button(134, 1014, 216, 54, "Save Configuration", BUTTON_SP);            
+Button buttonPE = Button(505.0, 1014, 216, 44, "Pipelining Enabled", BUTTON_PE);           
+Button buttonBP = Button(748.0, 1014, 216, 44, "Branch Prediction", BUTTON_BP);           
+Button buttonLI = Button(991.0, 1014, 216, 44, "Load Interlock", BUTTON_LI);              
+Button buttonAF = Button(1235.0, 1014, 216, 44, "ALU Forwarding", BUTTON_AF);              
+Button buttonSF = Button(1478.0, 1014, 216, 44, "Store Operand\nForwarding", BUTTON_SF);   
+Button buttonZF = Button(1721.0, 1014, 216, 44, "CPSR Forwarding", BUTTON_ZF);             
 
 
 //
 // Vivio logo
 //
-// TODO: {joj 2/10.16}
-//
 const num LOGOW = 44;																	// 64 x 64 image
 const num LOGOH = 44;
-Image logo = Image(0, 0, 0, "vivio.png", 2146.0,1014, 0,0, LOGOW, LOGOH);					// {joj 24/9/17}
+Image logo = Image(0, 0, 0, "vivio.png", 2146.0,1014, 0,0, LOGOW, LOGOH);					
 
 // Statistics
 
-Txt(0, HLEFT | VTOP, 27, 101, darkGrayPen, font, "instructions executed:");		// {joj 25/7/27}
-Rectangle et = Txt(0, HLEFT | VTOP, 27, 123, darkGrayPen, font, "ticks:");		// {joj}
+Txt(0, HLEFT | VTOP, 27, 101, darkGrayPen, font, "instructions executed:");		
+Rectangle et = Txt(0, HLEFT | VTOP, 27, 123, darkGrayPen, font, "ticks:");		
 
-Rectangle statIC = Txt(0, HLEFT | VTOP, 243, 101, redPen, font, "0");				// {joj}
-Rectangle statTE = Txt(0, HLEFT | VTOP, 243, 123, redPen, font, "0");				// {joj}
+Rectangle statIC = Txt(0, HLEFT | VTOP, 243, 101, redPen, font, "0");				
+Rectangle statTE = Txt(0, HLEFT | VTOP, 243, 123, redPen, font, "0");				
 
 // Instruction memory and clock
-Rectangle imLabel = Rectangle2(0, 0, 0, 0, 27, 150, 270, 27, 0, font, "Instruction Cache"); // {joj}
+Rectangle imLabel = Rectangle2(0, 0, 0, 0, 27, 150, 270, 27, 0, font, "Instruction Cache"); 
 InstructionMemory im = InstructionMemory(27, 190, 390, 715);
 AnimatedClock animClock = AnimatedClock(54, 914, 216, 66);
 
@@ -76,25 +74,25 @@ AnimatedClock animClock = AnimatedClock(54, 914, 216, 66);
 Register regPC = Register(641.0, 463, 54, 88, TOP, "PC");
 
 // branch target buffer
-Rectangle btbLabel  = Rectangle2(0, 0, 0, 0, 506.0, 187, 216, 22, 0, font, "Branch Target Buffer");    // {joj}
-Register btbPC[2];										// {joj 2/10/16}
-btbPC[0]  = Register(506.0, 220, 108, 44, LEFT, "PC");     // {joj 1/2/06}
-btbPC[1]  = Register(506.0, 264, 108, 44, LEFT, "PC");     // {joj 1/2/06}
-Register btbPPC[2];										// {joj 2/10/16}
-btbPPC[0] = Register(614.0, 220, 108, 44, RIGHT, "PPC");   // {joj 1/2/06}
-btbPPC[1] = Register(614.0, 264, 108, 44, RIGHT, "PPC");   // {joj 1/2/06}
+Rectangle btbLabel  = Rectangle2(0, 0, 0, 0, 506.0, 187, 216, 22, 0, font, "Branch Target Buffer");    
+Register btbPC[2];										
+btbPC[0]  = Register(506.0, 220, 108, 44, LEFT, "PC");     
+btbPC[1]  = Register(506.0, 264, 108, 44, LEFT, "PC");     
+Register btbPPC[2];										
+btbPPC[0] = Register(614.0, 220, 108, 44, RIGHT, "PPC");  
+btbPPC[1] = Register(614.0, 264, 108, 44, RIGHT, "PPC");  
 
 // Other components
-Component cMUX2 = Component(641.0, 375, 81, 22, "mux 2");       // {joj}
-Component cMUX1 = Component(560.0, 452, 27, 110, "mux 1");       // {joj}
+Component cMUX2 = Component(641.0, 375, 81, 22, "mux 2");       
+Component cMUX1 = Component(560.0, 452, 27, 110, "mux 1");      
 Component cPLUS4 = Component(533.0, 595, 54, 22, "+4");
 
 // connections from and to instruction memory
 AnimPipe apIM_ID = AnimPipe();
 apIM_ID.addPoint(415.0, 860);
 apIM_ID.addPoint(776.0, 860);
-Rectangle txtIM_ID = Rectangle(activePipesLayer, 0, 0, redBrush, 587.0,8130, -81,-13, 130,26, whitePen, font);	// {joj 1/4/013, 17/10/113}
-txtIM_ID.setRounded(2, 2);	// {joj 17/10/16}
+Rectangle txtIM_ID = Rectangle(activePipesLayer, 0, 0, redBrush, 587.0,8130, -81,-13, 130,26, whitePen, font);	
+txtIM_ID.setRounded(2, 2);
 
 AnimPipe apPC_IM = AnimPipe();
 apPC_IM.addPoint(668.0, 551);
@@ -165,9 +163,9 @@ InstructionRegister regID = InstructionRegister(776.0, 745, 54, 250, "ID");
 Register regPC1 = Register(776.0, 463, 54, 88, TOP, "PC1");
 
 // Register file
-Txt(0, HLEFT | VTOP, 1182.0, 88, 0, font, "Register\nFile");		// {joj}
+Txt(0, HLEFT | VTOP, 1182.0, 88, 0, font, "Register\nFile");		
 Register regFile[16];
-regFile[0] = Register(952.0, 66, 32, 88, TOP, "R0"); //regFile[0].setFixed();                  // {joj 29/10/06}
+regFile[0] = Register(952.0, 66, 32, 88, TOP, "R0");
 regFile[1] = Register(984.0, 66, 32, 88, TOP, "R1");
 regFile[2] = Register(1016.0, 66, 32, 88, TOP, "R2");
 regFile[3] = Register(1048.0, 66, 32, 88, TOP, "R3");
@@ -195,11 +193,11 @@ regFile[15].setValue(0x7C);
 CPSR cpsr = CPSR(1490, 66, 140, 88, 0);
 
 // Other components
-Component cMUX3 = Component(844.0, 375, 135, 22, "mux 3");                                               // {joj}
-Component cADD4 = Component(830.0, 595, 81, 22, "ADD4");                                                // {joj}
-Component cADDi = Component(911.0, 595, 81, 22, "ADDi");                                                //
-Component cMUX4 = Component(776.0, 220, 27, 88, "mux 4");                                               // {joj}
-Component cMUX5 = Component(1051.0, 518, 27, 66, "mux 5");                                               // {joj}
+Component cMUX3 = Component(844.0, 375, 135, 22, "mux 3");                                              
+Component cADD4 = Component(830.0, 595, 81, 22, "ADD4");                                            
+Component cADDi = Component(911.0, 595, 81, 22, "ADDi");                                             
+Component cMUX4 = Component(776.0, 220, 27, 88, "mux 4");                                               
+Component cMUX5 = Component(1051.0, 518, 27, 66, "mux 5");                                               
 
 Rectangle2(0, 0, 0, 0, 857.0, 661, 54, 22, 0, font, "4");
 
@@ -208,19 +206,7 @@ Pen controlPen = SolidPen(SOLID, 2, PURPLE, ARROW60_END);
 Pen controlHLPen = SolidPen(SOLID, 5, RED, ARROW60_END);
 Pen controlMuxPen = SolidPen(SOLID, 8, GRAY192);
 Pen controlMuxHLPen = SolidPen(SOLID, 8, RED);
-Pen muxPen = SolidPen(SOLID, THICK, BLACK);															// {joj}
-
-// inputs to cZeroMux
-//Line clALU = Line2(valuesLayer, ABSOLUTE, controlPen, 1582.0,507, 1582.0,331, 1087.0,331, 1087.0,353);		// {joj 8/12/16}
-//Line clOUT0 = Line2(valuesLayer, ABSOLUTE, controlPen, 1847.0,507, 1847.0,320, 1074.0,320, 1074.0,353);		// {joj 8/12/16}
-//Line clOUT1 = Line2(valuesLayer, ABSOLUTE, controlPen, 1966.0,309, 1060.0,309, 1060.0,353);				// {joj 8/12/16}
-//Line clA = Line(valuesLayer, ABSOLUTE, controlPen, 0,0, 1101.0,298, 1033.0,298, 1033.0,353);
-//Line clMUX = Line2(valuesLayer, ABSOLUTE, controlPen, 1060.0,353, 1060.0,386, 979.0,386);
-
-//Line cZeroMux = Line2(valuesLayer, ABSOLUTE, muxPen, 1030.0, 353, 1090.0, 353);
-//Rectangle cZeroTxt = Txt(valuesLayer,HLEFT | VTOP, 1036.0, 357, 0, font, "zero");			// {joj}
-
-
+Pen muxPen = SolidPen(SOLID, THICK, BLACK);	
 
 // Connections from PC1
 AnimPipe apPC1_MUX2 = AnimPipe();
@@ -228,11 +214,6 @@ apPC1_MUX2.addPoint(803.0, 463);
 apPC1_MUX2.addPoint(803.0, 441);
 apPC1_MUX2.addPoint(695.0, 441);
 apPC1_MUX2.addPoint(695.0, 397);
-
-//AnimPipe apADD4_MUX5 = AnimPipe();
-//apADD4_MUX5.addPoint(871.0, 595);
-//apADD4_MUX5.addPoint(871.0, 562);
-//apADD4_MUX5.addPoint(1051.0, 562);
 
 AnimPipe apPC1_MUX5 = AnimPipe();
 apPC1_MUX5.addPoint(803.0, 551);
@@ -260,28 +241,28 @@ AnimPipe apID_ADDi = AnimPipe();
 apID_ADDi.addPoint(830.0, 860);
 apID_ADDi.addPoint(965.0, 860);
 apID_ADDi.addPoint(965.0, 617);
-Rectangle txtID_ADDi = Rectangle(activePipesLayer, 0, 0, redBrush, 8235.0,829, -32,-13, 65,32, whitePen, font);		// {joj 29/10/013, 17/10/113}
-txtID_ADDi.setRounded(2, 2);	// {joj 17/10/16}
+Rectangle txtID_ADDi = Rectangle(activePipesLayer, 0, 0, redBrush, 8235.0,829, -32,-13, 65,32, whitePen, font);	
+txtID_ADDi.setRounded(2, 2);	
 
 AnimPipe apADD4_MUX3 = AnimPipe();
 apADD4_MUX3.addPoint(871.0, 595);
 apADD4_MUX3.addPoint(871.0, 397);
-Rectangle txtADD4_MUX3 = Rectangle(activePipesLayer, 0, 0, redBrush, 871.0,441, -32,-13, 65,32, whitePen, font);	// {joj 29/10/013, 15/3/15}
-txtADD4_MUX3.setRounded(2, 2); // {joj 17/10/16}
+Rectangle txtADD4_MUX3 = Rectangle(activePipesLayer, 0, 0, redBrush, 871.0,441, -32,-13, 65,32, whitePen, font);
+txtADD4_MUX3.setRounded(2, 2);
 
 AnimPipe apADDi_MUX3 = AnimPipe();
 apADDi_MUX3.addPoint(952.0, 595);
 apADDi_MUX3.addPoint(952.0, 397);
-Rectangle txtADDi_MUX3 = Rectangle(activePipesLayer, 0, 0, redBrush, 952.0,441, -32,-13, 65,32, whitePen, font);	// {joj 29/10/013, 15/3/15}
-txtADDi_MUX3.setRounded(2, 2); // {joj 17/10/16}
+Rectangle txtADDi_MUX3 = Rectangle(activePipesLayer, 0, 0, redBrush, 952.0,441, -32,-13, 65,32, whitePen, font);
+txtADDi_MUX3.setRounded(2, 2); 
 
 // Connection to BTB
 AnimPipe apMUX3_MUX4 = AnimPipe();
 apMUX3_MUX4.addPoint(911.0, 375);
 apMUX3_MUX4.addPoint(911.0, 287);
 apMUX3_MUX4.addPoint(803.0, 287);
-Rectangle txtMUX3_MUX4 = Rectangle(activePipesLayer, 0, 0, redBrush, 860.0,320, -32,-13, 65,32, whitePen, font);	// {joj 29/10/013, 15/3/15}
-txtMUX3_MUX4.setRounded(2, 2); // {joj 17/10/16}
+Rectangle txtMUX3_MUX4 = Rectangle(activePipesLayer, 0, 0, redBrush, 860.0,320, -32,-13, 65,32, whitePen, font);
+txtMUX3_MUX4.setRounded(2, 2); 
 
 AnimPipe apMUX4_BTB = AnimPipe();
 apMUX4_BTB.addPoint(776.0, 264);
@@ -292,7 +273,7 @@ apRF_MUX4.addPoint(952.0, 110);
 apRF_MUX4.addPoint(911.0, 110);
 apRF_MUX4.addPoint(911.0, 242);
 apRF_MUX4.addPoint(803.0, 242);
-Rectangle txtRF_MUX1 = Rectangle(activePipesLayer, 0, 0, redBrush, 911.0,97, -32,0, 65,32, whitePen, font);   // {joj 4/11/32}
+Rectangle txtRF_MUX1 = Rectangle(activePipesLayer, 0, 0, redBrush, 911.0,97, -32,0, 65,32, whitePen, font);
 
 // MUX5 to A
 AnimPipe apMUX5_B = AnimPipe();
@@ -304,15 +285,15 @@ AnimPipe apRF_MUX5 = AnimPipe();
 apRF_MUX5.addPoint(1000.0, 154);
 apRF_MUX5.addPoint(1000.0, 540);
 apRF_MUX5.addPoint(1051.0, 540);
-Rectangle txtRF_MUX5 = Rectangle(activePipesLayer, 0, 0, redBrush, 990.0,181, -32,0, 65,32, whitePen, font, "R0:0");   // {joj 1/4/06, 17/10/16}
-txtRF_MUX5.setRounded(2, 2);	// {joj 17/10/16}
+Rectangle txtRF_MUX5 = Rectangle(activePipesLayer, 0, 0, redBrush, 990.0,181, -32,0, 65,32, whitePen, font, "R0:0");  
+txtRF_MUX5.setRounded(2, 2);
 
 AnimPipe apRF_A = AnimPipe();
 apRF_A.addPoint(1051.0, 154);
 apRF_A.addPoint(1051.0, 463);
 apRF_A.addPoint(1082.0, 463);
-Rectangle txtRF_A = Rectangle(activePipesLayer, 0, 0, redBrush, 1065.0,181, -32,0, 65,32, whitePen, font, "R0:0");      // {joj 1/4/06, 17/10/16}
-txtRF_A.setRounded(2, 2);	// {joj 17/10/16}
+Rectangle txtRF_A = Rectangle(activePipesLayer, 0, 0, redBrush, 1065.0,181, -32,0, 65,32, whitePen, font, "R0:0");      
+txtRF_A.setRounded(2, 2);	
 
 //
 // Execution
@@ -324,9 +305,9 @@ Register regA = Register(1132.0, 419, 54, 88, TOP, "A");
 Register regB = Register(1132.0, 507, 54, 88, BOTTOM, "B");
 
 // Other components
-Component cMUX6 = Component(1301.0, 397, 27, 110, "mux 6");   // {joj}
-Component cMUX7 = Component(1301.0, 507, 27, 110, "mux 7");   // {joj}
-Component cMUX8 = Component(1301.0, 675, 27, 74, "mux 8");   // {joj}
+Component cMUX6 = Component(1301.0, 397, 27, 110, "mux 6");   
+Component cMUX7 = Component(1301.0, 507, 27, 110, "mux 7");   
+Component cMUX8 = Component(1301.0, 675, 27, 74, "mux 8");   
 ALU alu = ALU(1445.0, 419, 69, 176);
 
 // EX to MA
@@ -363,22 +344,22 @@ apEX_MUX7.addPoint(1186.0, 860);
 apEX_MUX7.addPoint(1213.0, 860);
 apEX_MUX7.addPoint(1213.0, 551);
 apEX_MUX7.addPoint(1371.0, 551);
-Rectangle txtEX_MUX7 = Rectangle(activePipesLayer, 0, 0, redBrush, 1268.0,816, -27,0, 54,26, whitePen, font, "IMM");	// {joj 1/4/06, 17/27/16}
-txtEX_MUX7.setRounded(2, 2);	// {joj 17/10/16}
+Rectangle txtEX_MUX7 = Rectangle(activePipesLayer, 0, 0, redBrush, 1268.0,816, -27,0, 54,26, whitePen, font, "IMM");	
+txtEX_MUX7.setRounded(2, 2);	
 
 //Animations to Barrel Shifter
 AnimPipe apEX_BS = AnimPipe();
 apEX_BS.addPoint(1186.0, 860);
 apEX_BS.addPoint(1388.0, 860);
 apEX_BS.addPoint(1388.0, 607);
-Rectangle txtEX_BS = Rectangle(activePipesLayer, 0, 0, redBrush, 1388.0,816, -27,0, 54,26, whitePen, font, "IMM");	// {joj 1/4/06, 17/27/16}
+Rectangle txtEX_BS = Rectangle(activePipesLayer, 0, 0, redBrush, 1388.0,816, -27,0, 54,26, whitePen, font, "IMM");	
 txtEX_BS.setRounded(2, 2);
 
 AnimPipe apRF_BS = AnimPipe();
 apRF_BS.addPoint(1388.0, 154);
 apRF_BS.addPoint(1388.0, 517);
-Rectangle txtRF_BS = Rectangle(activePipesLayer, 0, 0, redBrush, 1388.0,181, -32,0, 65,32, whitePen, font, "R0:0");      // {joj 1/4/06, 17/10/16}
-txtRF_BS.setRounded(2, 2);	// {joj 17/10/16}
+Rectangle txtRF_BS = Rectangle(activePipesLayer, 0, 0, redBrush, 1388.0,181, -32,0, 65,32, whitePen, font, "R0:0");    
+txtRF_BS.setRounded(2, 2);
 
 AnimPipe apOUT1_MUX7 = AnimPipe();
 apOUT1_MUX7.addPoint(1896.0, 534);
@@ -458,7 +439,7 @@ Line cpsrEX = Line2(activePipesLayer, ABSOLUTE, controlPen, 1186,820, 1545.0,820
 Line conditionMux = Line2(activePipesLayer, ABSOLUTE, controlPen, 1545.0, 480, 1545.0, 533);
 Rectangle conditionMuxTxt = Txt(valuesLayer,HLEFT | VTOP, 1550.0, 620, 0, sFont, "Condition\nCheck");
 conditionMuxTxt.rotate(-90);
-//Component cMUX3 = Component(844.0, 375, 135, 22, "mux 3");  
+
 Line cpsrOUT0B = Line2(activePipesLayer, ABSOLUTE, controlPen, 1680.0,477, 1680.0,300, 929.0,300, 929.0,365);	
 Line cpsrOUT1B = Line2(activePipesLayer, ABSOLUTE, controlPen, 1958.0,477, 1958.0,310, 935.0,310, 935,365);	
 Line cpsrCPSRB = Line2(activePipesLayer, ABSOLUTE, controlPen, 1545.0,154, 1545.0,290, 923.0,290, 923.0,365);	
@@ -471,10 +452,10 @@ conditionMuxBTxt.rotate(-90);
 InstructionRegister regMA = InstructionRegister(1614.0, 745, 54, 250, "MA");
 Register regOUT0 = Register(1570.0, 480, 88, 54, LEFT, "O0");
 Register regSMDR = Register(1587.0, 690, 108, 44, RIGHT, "SMR");
-Rectangle memAddrTxt = Txt(valuesLayer, HLEFT | VTOP, 1660.0, 290, 0, sFont, "memory\naddress");        // {joj}
+Rectangle memAddrTxt = Txt(valuesLayer, HLEFT | VTOP, 1660.0, 290, 0, sFont, "memory\naddress"); 
 memAddrTxt.rotate(-90);
-Txt(valuesLayer, HLEFT | VTOP, 1750.0, 705, 0, sFont, "memory\ndata-in");        // {joj}
-Rectangle memDataOut = Txt(valuesLayer, HLEFT | VTOP, 1810.0, 220, 0, sFont, "memory\ndata-out");       // {joj}
+Txt(valuesLayer, HLEFT | VTOP, 1750.0, 705, 0, sFont, "memory\ndata-in");   
+Rectangle memDataOut = Txt(valuesLayer, HLEFT | VTOP, 1810.0, 220, 0, sFont, "memory\ndata-out");     
 memDataOut.rotate(90);
 
 // Memory
@@ -519,7 +500,7 @@ memory[15].rotateText(90);
 
 //Stack
 Rectangle outer = Rectangle2(0, 0, blackPen, 0, 2010, 500, 180, 500);
-outer.setRounded(2, 2);	// {joj 16/10/16}
+outer.setRounded(2, 2);	
 
 Txt(0, HLEFT | VTOP, 2015.0, 517, 0, font, "Stack Visualisation");
 Register stack[8];
@@ -547,7 +528,7 @@ StackPointer sp = StackPointer(2020,615,2050,615,12,50);
 //
 // Other components
 //
-Component cMUX9 = Component(1782.0, 463, 27, 88, "mux 9");                                                   // {joj}
+Component cMUX9 = Component(1782.0, 463, 27, 88, "mux 9");                                           
 
 // MA to WB
 AnimPipe apMA_WB = AnimPipe();
@@ -608,7 +589,7 @@ apCPSR1_RF.addPoint(1987.0, 22);
 apCPSR1_RF.addPoint(1560.0, 22);
 apCPSR1_RF.addPoint(1560.0, 66);
 
-alu.txtResult.moveToFront();                            // {joj 29/10/06}
+alu.txtResult.moveToFront();                          
 
 //
 // ResetWires
@@ -620,8 +601,7 @@ function resetWires() {
 	//
     apPC_IM.reset();
     apIM_ID.reset();
-    txtIM_ID.setOpacity(0);                             // {joj 29/10/06}
-    //apIF_ID.reset();
+    txtIM_ID.setOpacity(0);  
     apMUX3_MUX1.reset();
     apBTB_MUX1.reset();
     apRF_MUX1.reset();
@@ -637,28 +617,20 @@ function resetWires() {
 	//
     apID_EX.reset();
     apPC1_MUX2.reset();
-    //apPC1_MUX5.reset();
-    //apADD4_MUX5.reset();
 	apPC1_MUX5.reset()
     apPC1_ADD4.reset();
     apPC1_ADDi.reset();
     ap4_ADD4.reset();
-    apID_ADDi.reset(); txtID_ADDi.setOpacity(0);            // {joj 29/10/06}
-    apADD4_MUX3.reset(); txtADD4_MUX3.setOpacity(0);        // {joj 29/10/06}
-    apADDi_MUX3.reset(); txtADDi_MUX3.setOpacity(0);        // {joj 29/10/06}
-    apMUX3_MUX4.reset(); txtMUX3_MUX4.setOpacity(0);        // {joj 29/10/06}
+    apID_ADDi.reset(); txtID_ADDi.setOpacity(0);          
+    apADD4_MUX3.reset(); txtADD4_MUX3.setOpacity(0);        
+    apADDi_MUX3.reset(); txtADDi_MUX3.setOpacity(0);       
+    apMUX3_MUX4.reset(); txtMUX3_MUX4.setOpacity(0);       
     apRF_MUX4.reset();
     apMUX4_BTB.reset();
     apMUX5_B.reset();
-    apRF_MUX5.reset(); txtRF_MUX5.setOpacity(0);            // {joj}
-    apRF_A.reset(); txtRF_A.setOpacity(0);                  // {joj}
-    txtRF_MUX1.setOpacity(0);								// {joj 4/11/12}
-//	clALU.setPen(controlPen);
-//    clOUT0.setPen(controlPen);
-//    clOUT1.setPen(controlPen);
-//    clA.setPen(controlPen);
-//    clMUX.setPen(controlPen);
-
+    apRF_MUX5.reset(); txtRF_MUX5.setOpacity(0);            
+    apRF_A.reset(); txtRF_A.setOpacity(0);                  
+    txtRF_MUX1.setOpacity(0);	
     //
     // EX
     //
@@ -667,9 +639,9 @@ function resetWires() {
     apOUT1_MUX6.reset();
     apA_MUX6.reset();
     apB_MUX7.reset();
-    apEX_MUX7.reset(); txtEX_MUX7.setOpacity(0);        // {joj 29/10/06}
+    apEX_MUX7.reset(); txtEX_MUX7.setOpacity(0);        
 	apEX_BS.reset(); txtEX_BS.setOpacity(0);
-    apRF_BS.reset(); txtRF_BS.setOpacity(0);                  // {joj}
+    apRF_BS.reset(); txtRF_BS.setOpacity(0);                
     apOUT1_MUX7.reset();
     apOUT0_MUX7.reset();
     apOUT0_MUX8.reset();
@@ -678,8 +650,8 @@ function resetWires() {
     apMUX8_SMDR.reset();
     apMUX6_OUT0.reset();
     apMUX7_OUT0.reset();
-    alu.txtOp.setOpacity(0);                            // hide ALU txtOp {joj 29/10/06}
-    alu.txtResult.setOpacity(0);                        // hide ALU txtResult {joj 29/10/06}
+    alu.txtOp.setOpacity(0);          
+    alu.txtResult.setOpacity(0);                        
 
     //
     // MA
@@ -725,20 +697,11 @@ function resetRegisters() {
 	cpsr0.reset();
 	cpsr1.reset();
 
-    btbPC[0].reset();               // {joj 1/2/06}
-    btbPC[1].reset();               // {joj 1/2/06}
-    btbPPC[0].reset();              // {joj 1/2/06}
-    btbPPC[1].reset();              // {joj 1/2/06}
+    btbPC[0].reset();               
+    btbPC[1].reset();               
+    btbPPC[0].reset();              
+    btbPPC[1].reset();             
 
-//  regFile[0].reset();
-//  regFile[1].reset();
-//  regFile[2].reset();
-//  regFile[3].reset();
-
-//  memory[0].reset();
-//  memory[1].reset();
-//  memory[2].reset();
-//  memory[3].reset();
 
     regID.reset();
     regEX.reset();
@@ -751,20 +714,20 @@ function resetRegisters() {
     regOUT0.updateLabel();
     regOUT1.setInvalid(1);
     regOUT1.updateLabel();
-    btbPC[0].setValue(-1);          // {joj 1/2/06} - was (-1) & 0xFF
-    btbPC[0].setInvalid(1);         // {joj 1/2/06}
-    btbPC[0].updateLabel();         // {joj 1/2/06}
-    btbPC[1].setValue(-1);          // {joj 1/2/06} - was (-1) & 0xFF
-    btbPC[1].setInvalid(1);         // {joj 1/2/06}
-    btbPC[1].updateLabel();         // {joj 1/2/06}
+    btbPC[0].setValue(-1);          
+    btbPC[0].setInvalid(1);         
+    btbPC[0].updateLabel();        
+    btbPC[1].setValue(-1);          
+    btbPC[1].setInvalid(1);         
+    btbPC[1].updateLabel();         
 	cpsr0.setInvalid(1);
 	cpsr1.setInvalid(1);
     
 	instrCount = 0;
     tickCount = 0;
 
-    statIC.setTxt("%4d", 0);        // {joj}
-    statTE.setTxt("%4d", 0);        // {joj}
+    statIC.setTxt("%4d", 0);        
+    statTE.setTxt("%4d", 0);        
 
 }
 
@@ -779,10 +742,10 @@ function resetCircuit() {
 function showBTB(num opacity) {
 
     btbLabel.setOpacity(opacity);
-    btbPC[0].setOpacity(opacity);   // {joj 1/2/06}
-    btbPC[1].setOpacity(opacity);   // {joj 1/2/06}
-    btbPPC[0].setOpacity(opacity);  // {joj 1/2/06}
-    btbPPC[1].setOpacity(opacity);  // {joj 1/2/06}
+    btbPC[0].setOpacity(opacity);  
+    btbPC[1].setOpacity(opacity);   
+    btbPPC[0].setOpacity(opacity);  
+    btbPPC[1].setOpacity(opacity);  
 
     apPC_MUX2.setOpacity(opacity);
     apPC1_MUX2.setOpacity(opacity);
@@ -801,7 +764,7 @@ function showBTB(num opacity) {
 //
 // showALUForwarding
 //
-function showALUForwarding(num opacity) {  // {joj 20/8/10}
+function showALUForwarding(num opacity) { 
 
     if (opacity == 0) {
 
@@ -811,7 +774,7 @@ function showALUForwarding(num opacity) {  // {joj 20/8/10}
         apA_MUX6.setPoint(0, 1186.0, 452);
         apA_MUX6.setPoint(1, 1351.0, 452);
 
-        apB_MUX7.setPoint(0, (afMode) ? 1186 : 1209.0, 551);    // {joj 28/10/06}
+        apB_MUX7.setPoint(0, (afMode) ? 1186 : 1209.0, 551);    
         apB_MUX7.setPoint(1, 1301.0, 551);
 
         apEX_MUX7.setPoint(2, 1213.0, 573);
@@ -846,7 +809,7 @@ function showALUForwarding(num opacity) {  // {joj 20/8/10}
 //
 // showSMDRForwarding
 //
-function showSMDRForwarding(num opacity) { // {joj 20/8/10}
+function showSMDRForwarding(num opacity) { 
 
     if (opacity == 0) {
 
@@ -873,7 +836,7 @@ function showSMDRForwarding(num opacity) { // {joj 20/8/10}
 //
 // showCPSRForwarding
 //
-function showCPSRForwarding(num opacity) { // {joj 20/8/10}
+function showCPSRForwarding(num opacity) { 
 
 	// CPSR Forwarding
 	cpsr0.setOpacity(opacity);
@@ -900,7 +863,7 @@ function showCPSRForwarding(num opacity) { // {joj 20/8/10}
 //
 // showPipeline
 //
-function showPipeline(num opacity) {   // {joj 20/8/10}
+function showPipeline(num opacity) {   
 
     if (opacity == 0) {
 
@@ -917,7 +880,7 @@ function showPipeline(num opacity) {   // {joj 20/8/10}
 
         apRF_A.setPoint(1, 1051.0, 452);
         apRF_A.setPoint(2, 1186.0, 452);
-        apMUX5_B.setPoint(1, 1209.0, 551);             // {joj 28/10/06}
+        apMUX5_B.setPoint(1, 1209.0, 551);             
         apB_MUX8.setPoint(0, 1159.0, 551);
 
         apMUX6_OUT0.setPoint(3, 1570.0, 507);
@@ -1031,7 +994,7 @@ function setPEMode(num mode) {
         buttonPE.setCaption("Pipelining Disabled");
         showPipeline(0);
     }
-    setArg("peMode", peMode.toString()); // {joj 6/11/16}
+    setArg("peMode", peMode.toString()); 
 }
 
 //
@@ -1049,7 +1012,7 @@ function setBPMode(num mode) {
         buttonBP.setCaption("Delayed Branches");
         showBTB(0);
     }
-    setArg("bpMode", bpMode.toString()); // {joj 6/11/16}
+    setArg("bpMode", bpMode.toString()); 
 }
 
 //
@@ -1062,7 +1025,7 @@ function setLIMode(num mode) {
     } else if (liMode == 1) {
         buttonLI.setCaption("No Load Interlock");
     }
-    setArg("liMode", liMode.toString()); // {joj 6/11/16}
+    setArg("liMode", liMode.toString()); 
 }
 
 //
@@ -1080,7 +1043,7 @@ function setAFMode(num mode) {
         buttonAF.setCaption("No ALU Interlock");
         showALUForwarding(0);
     }
-    setArg("afMode", afMode.toString()); // {joj 6/11/16}
+    setArg("afMode", afMode.toString()); 
 }
 
 //
@@ -1098,7 +1061,7 @@ function setSFMode(num mode) {
         buttonSF.setCaption("No Store Interlock");
         showSMDRForwarding(0);
     }
-    setArg("sfMode", sfMode.toString()); // {joj 6/11/16}
+    setArg("sfMode", sfMode.toString()); 
 }
 
 //
@@ -1116,7 +1079,7 @@ function setCPSRMode(num mode) {
         buttonZF.setCaption("No CPSR Interlock");
         showCPSRForwarding(0);
     }
-    setArg("zfMode", zfMode.toString()); // {joj 6/11/16}
+    setArg("zfMode", zfMode.toString()); 
 }
 
 // initialisation
@@ -1129,39 +1092,39 @@ string s;
 //
 // clear instruction memory
 //
-for (i = 0; i < 32; i++)			// {joj 27/10/06}
-    im.setOpcode(4*i, 0);			// {joj 27/10/06}
+for (i = 0; i < 32; i++)		
+    im.setOpcode(4*i, 0);		
 
 //
 // initialise registers
 //
-for (i = 0; i < 4; i++) {                           // {joj 31/10/10}
-    s = sprintf("r%d", i);							// {joj 2/10/16}
-    regFile[i].setValue(getArgAsNum(s, 0));			// {joj 4/10/16}
-}                                                   // {joj}
+for (i = 0; i < 4; i++) {                           
+    s = sprintf("r%d", i);							
+    regFile[i].setValue(getArgAsNum(s, 0));			
+}                                                   
 
 //
 // initialise memory
 //
-for (i = 0; i < 4; i++) {                           // {joj}
-    s = sprintf("m%d", i);                          // {joj 31/10/10}
-    memory[i].setValue(getArgAsNum(s, 0));			// {joj 7/10/16}
+for (i = 0; i < 4; i++) {                        
+    s = sprintf("m%d", i);                         
+    memory[i].setValue(getArgAsNum(s, 0));			
 }
 
-setTPS(20);                                         // {joj}
-example = getArgAsNum("example", 0);				// {joj 4/10/16}
+setTPS(20);                                        
+example = getArgAsNum("example", 0);				
 
 if (example == 0) {
 
     //
     // user defined
     //
-    for (i = 0; i < 32; i++)  {                     // {joj}
-        s = sprintf("i%d", i);						// {joj 31/10/10}
-        im.setOpcode(4*i, getArgAsNum(s, 0));       // {joj 20/10/16}
+    for (i = 0; i < 32; i++)  {                     
+        s = sprintf("i%d", i);						
+        im.setOpcode(4*i, getArgAsNum(s, 0));       
     }
 
-} else if (example == 1) {                          // {joj}
+} else if (example == 1) {                          
 
     //
     // Demonstrating SBit Functionality
@@ -1173,7 +1136,7 @@ if (example == 0) {
     regFile[2].setValue(4);                         
     regFile[3].setValue(4);                        
 
-} else if (example == 2) {                          // {joj}
+} else if (example == 2) {                          
 
     //
     // Demonstrating Condition Functionality
@@ -1194,7 +1157,7 @@ if (example == 0) {
     regFile[2].setValue(0xFF);                         
     regFile[3].setValue(0xFF);  
 
-} else if (example == 3) {                          // {joj}
+} else if (example == 3) {                         
 
     //
     // Demonstrating Condition Functionality
@@ -1247,7 +1210,7 @@ if (example == 0) {
 	im.setValue(12, B,    " ", 0, 0, 0, 0xF0, 0, 0);
 	im.setValue(16, HALT, " ", 0, 0, 1, 1, 0, 0);
 
-} else if (example == 6) {                          // {joj}
+} else if (example == 6) {                          
 
     //
     // Data Hazard Showing Pipeline Forwarding and Two Stage
@@ -1267,7 +1230,7 @@ if (example == 0) {
     regFile[6].setValue(6);                         
     regFile[9].setValue(9);                         
 
-} else if (example == 7) {                          // {joj}
+} else if (example == 7) {                          
 
     //
     // Load Hazard with Poor Scheduling Showing Stall
@@ -1285,7 +1248,7 @@ if (example == 0) {
     regFile[6].setValue(6);                         
     regFile[9].setValue(9);  
 
-} else if (example == 8) {                          // {joj}
+} else if (example == 8) {                          
 
     //
     // Load Hazard with Good Scheduling Showing No Stall
@@ -1344,34 +1307,34 @@ if (example == 0) {
 //
 // save args
 //
-if (example > 0) {										// {joj 27/10/06}
+if (example > 0) {										
 
-    for (i = 0; i < 32; i++) { 							// {joj 27/10/06}
-        s = sprintf("i%d", i);							// {joj 31/10/10}
-        setArg(s, im.getOpcode(i * 4).toString());		// {joj 6/11/16}
+    for (i = 0; i < 32; i++) { 							
+        s = sprintf("i%d", i);							
+        setArg(s, im.getOpcode(i * 4).toString());		
     }
 
-    example = (example > maxexample) ? 0 : example		// {joj 28/11/16}
+    example = (example > maxexample) ? 0 : example		
 
 }
 
-num haltOnHalt = getArgAsNum("haltOnHalt", 1);			// {joj 29/7/08}
+num haltOnHalt = getArgAsNum("haltOnHalt", 1);			
 
-bpMode = getArgAsNum("bpMode", 0); setBPMode(bpMode);	// {joj 27/11/16}
-liMode = getArgAsNum("liMode", 0); setLIMode(liMode);	// {joj 27/11/16}
-afMode = getArgAsNum("afMode", 0); setAFMode(afMode);	// {joj 27/11/16}
-sfMode = getArgAsNum("sfMode", 0); setSFMode(sfMode);	// {joj 27/11/16}
-zfMode = getArgAsNum("zfMode", 0); setCPSRMode(zfMode);	// {joj 27/11/16}
-peMode = getArgAsNum("peMode", 0); setPEMode(peMode);	// {joj 27/11/16}
-lockCircuit = getArgAsNum("locked", 0);					// {joj 27/11/16}
+bpMode = getArgAsNum("bpMode", 0); setBPMode(bpMode);	
+liMode = getArgAsNum("liMode", 0); setLIMode(liMode);	
+afMode = getArgAsNum("afMode", 0); setAFMode(afMode);	
+sfMode = getArgAsNum("sfMode", 0); setSFMode(sfMode);	
+zfMode = getArgAsNum("zfMode", 0); setCPSRMode(zfMode);	
+peMode = getArgAsNum("peMode", 0); setPEMode(peMode);	
+lockCircuit = getArgAsNum("locked", 0);					
 
 //
 // Help
 //
-num showHelp = getArgAsNum("help", 1);				// {joj 4/10/16}
+num showHelp = getArgAsNum("help", 1);				
 
 Rectangle r = Rectangle2(helpLayer, 0, 0, whiteBrush, 0, 0, WIDTH, HEIGHT);
-r.setOpacity(0.5);                                  // {joj 20/8/10}
+r.setOpacity(0.5);                                 
 r.setRounded(10, 10);
 
 Pen helpPen = SolidPen(SOLID, 5, RED, ROUND_START | ROUND_JOIN | ROUND_END);
@@ -1403,13 +1366,13 @@ if (!lockCircuit) {
 Rectangle closeHelp = Rectangle2(helpLayer, 0, helpPen, yellowBrush, 925.0, 507, 270, 66, helpPen, helpFont, "CLOSE HELP");
 closeHelp.setRounded(5, 5);
 
-when closeHelp ~> eventEE(num enter, num x, num y) {			// {joj 24/9/17}
+when closeHelp ~> eventEE(num enter, num x, num y) {			
     closeHelp.setBrush(enter ? gray224Brush : yellowBrush);	
 }
 
-when closeHelp ~> eventMB(num down, num flags, num x, num y) {	// {joj 24/9/17}
+when closeHelp ~> eventMB(num down, num flags, num x, num y) {	
 	if (down && (flags & MB_LEFT)) {
-		setArg("help", "0");   									// {joj 6/11/16}
+		setArg("help", "0");   									
 		helpLayer.setOpacity(0);
 	}
 	return 0;
